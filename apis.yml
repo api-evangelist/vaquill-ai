@@ -1,23 +1,1879 @@
 aid: vaquill-ai
-name: Vaquill
-description: 'Vaquill is a company surfaced via the API Evangelist harvest backlog (source: monid-connectors)
-  and added to the network as a stub for full-pipeline profiling.'
+name: Vaquill AI
+description: 'Vaquill AI is US primary law data infrastructure: a credit-metered Legal Data API over the US Code, the CFR, every state and territory statutory code, regulations, constitutions, court rules, session laws, agency guidance and executive orders (5M+ sections, 54 jurisdictions), a sibling India API over central and state legislation, a Legal Workspace API for driving matters, documents, drafting, review and compliance checks from your own backend, and a hosted MCP server (OAuth or API key) with a local uvx package and a Claude Code plugin. Three OpenAPI 3.1 documents are published on api.vaquill.ai, and the Open US Law corpus is released on GitHub under CC BY-NC 4.0.'
 url: https://raw.githubusercontent.com/api-evangelist/vaquill-ai/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:monid-connectors
-x-tier: stub
-x-tier-reason: harvest
+x-tier: profiled
+x-tier-reason: enrichment pass 2026-10-07 (local-v5; was harvest)
 specificationVersion: '0.20'
 created: '2026-10-07'
 modified: '2026-10-07'
 tags:
-- Company
-apis: []
+- Legal
+- Statutes
+- Regulations
+- Legal Research
+- Law
+- Compliance
+- Legal Technology
+- Government Data
+- MCP
+- India
+- Contracts
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+image: https://www.vaquill.ai/opengraph-image?e9fbcdc281d37e49
 common:
+- type: Webhooks
+  url: asyncapi/vaquill-ai-webhooks.yml
+- type: AgenticAccess
+  url: agentic-access/vaquill-ai-agentic-access.yml
+- type: RateLimits
+  url: rate-limits/vaquill-ai-workspace-rate-limits.yml
+- type: RateLimits
+  url: rate-limits/vaquill-ai-rate-limits.yml
+- type: Plans
+  url: plans/vaquill-ai-plans-pricing.yml
+- type: Spectral
+  url: rules/vaquill-ai-rules.yml
+- type: JSONLD
+  url: json-ld/vaquill-ai-context.jsonld
+- type: Vocabulary
+  url: vocabulary/vaquill-ai-vocabulary.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: DataModel
+  url: data-model/vaquill-ai-data-model.yml
+- type: ChangeLog
+  url: changelog/vaquill-ai-changelog.yml
+- type: Idempotency
+  url: conventions/vaquill-ai-conventions.yml
+- type: Conventions
+  url: conventions/vaquill-ai-conventions.yml
+- type: Sandbox
+  url: sandbox/vaquill-ai-sandbox.yml
+- type: Authentication
+  url: authentication/vaquill-ai-authentication.yml
+- type: OAuthScopes
+  url: scopes/vaquill-ai-scopes.yml
+- type: Deprecation
+  url: lifecycle/vaquill-ai-lifecycle.yml
+- type: Lifecycle
+  url: lifecycle/vaquill-ai-lifecycle.yml
+- type: ErrorCatalog
+  url: errors/vaquill-ai-error-codes.yml
+- type: ErrorCatalog
+  url: errors/vaquill-ai-problem-types.yml
+- type: Conformance
+  url: conformance/vaquill-ai-conformance.yml
+- type: Overlay
+  url: overlays/vaquill-ai-india-overlay.yaml
+- type: LLMsTxt
+  url: llms/vaquill-ai-llms.txt
+- type: LLMsTxt
+  url: llms/vaquill-ai-docs-llms.txt
+- type: ToolCrosswalk
+  url: mcp/vaquill-ai-tool-crosswalk.yml
+- type: MCPServer
+  url: mcp/vaquill-ai-mcp.yml
+- type: WellKnown
+  url: well-known/vaquill-ai-well-known.yml
+- type: Hosts
+  url: hosts/vaquill-ai-hosts.yml
+- type: Vendors
+  url: vendors/vaquill-ai-vendors.yml
+- type: SDKs
+  url: packages/vaquill-ai-packages.yml
+- type: Packages
+  url: packages/vaquill-ai-packages.yml
 - type: Website
   url: https://www.vaquill.ai
+- type: DeveloperPortal
+  url: https://app.vaquill.ai
+- type: Documentation
+  url: https://www.vaquill.ai/docs/introduction
+- type: APIReference
+  url: https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+- type: GettingStarted
+  url: https://www.vaquill.ai/docs/api-guide/quickstart
+- type: ChangeLog
+  url: https://www.vaquill.ai/docs/api-guide/changelog
+- type: Pricing
+  url: https://www.vaquill.ai/pricing
+- type: Blog
+  url: https://www.vaquill.ai/blog
+- type: GitHubOrganization
+  url: https://github.com/Vaquill-AI
+- type: Support
+  url: https://www.vaquill.ai/support
+- type: SignUp
+  url: https://app.vaquill.ai/auth/signup
+- type: Login
+  url: https://app.vaquill.ai/auth/login
+- type: Sandbox
+  url: https://www.vaquill.ai/playground
+- type: Security
+  url: https://www.vaquill.ai/security
+- type: TermsOfService
+  url: https://www.vaquill.ai/terms
+- type: PrivacyPolicy
+  url: https://www.vaquill.ai/privacy
+- type: TrustCenter
+  url: security/vaquill-ai-trust-center.yml
+- type: VulnerabilityDisclosure
+  url: security/vaquill-ai-vulnerability-disclosure.yml
+- type: DomainSecurity
+  url: security/vaquill-ai-domain-security.yml
+apis:
+- aid: vaquill-ai:vaquill-ai-board-watches-api
+  name: Vaquill AI Board Watches API
+  description: >-
+    Law-change alerts. Subscribe to a **board** (a tracked corpus source, identified by `corpusType` plus
+    an optional `state`) and get a webhook or email whenever it refreshes with real changes, naming the
+    exact sections that changed. Fetch old-vs-new text for any amended section via the change diff.
+
+
+    Boards refresh on their own existing cadence; watching one does not change how often it refreshes.
+    Every endpoint here is **free**: authenticated by API key and rate-limited, but not credit-metered.
+
+
+    See the [Law Change Alerts guide](https://www.vaquill.ai/docs/api-guide/alerts) for the full walkthrough.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Board Watches
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-board-watches-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-chronology-api
+  name: Vaquill AI Chronology API
+  description: >-
+    The dated events across a matter's documents, as one timeline, with duplicate and date-conflict flags.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Chronology
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-chronology-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-clients-api
+  name: Vaquill AI Clients API
+  description: The people and companies matters are filed under. Synchronous CRUD.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Clients
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-clients-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-comparisons-api
+  name: Vaquill AI Comparisons API
+  description: >-
+    Diffing two documents in a matter into structural changes, with a substantive-versus-cosmetic judgment
+    and a downloadable redline.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Comparisons
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-comparisons-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-compliance-api
+  name: Vaquill AI Compliance API
+  description: >-
+    Checking one document against one regulation's requirement checklist: a verdict per requirement with
+    the article it comes from, the gaps, and what to do about them. Only regulations with a real checklist
+    behind them are accepted.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Compliance
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-compliance-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-credits-api
+  name: Vaquill AI Credits API
+  description: >-
+    Your own credit balance: what is spendable right now, where it came from, and what is about to expire.
+
+
+    Free and never charged, so it is safe to poll for low-balance alerting or to pre-flight a batch job.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Credits
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-credits-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-documents-api
+  name: Vaquill AI Documents API
+  description: >-
+    Files in a matter: their metadata, their ingested text, and the original bytes. A document is only
+    usable by retrieval, drafting and review once its status is `succeeded`.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Documents
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-documents-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-drafting-api
+  name: Vaquill AI Drafting API
+  description: >-
+    Generating, revising and exporting draft documents. Bodies come out as sections and go in as markdown;
+    the editor's own format is never on the wire. Rendered files come from the export route.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Drafting
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-drafting-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-facts-api
+  name: Vaquill AI Facts API
+  description: >-
+    The cross-document fact ledger for a matter: what every document in it asserts, coalesced and cited
+    back to its source passages.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Facts
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-facts-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-folders-api
+  name: Vaquill AI Folders API
+  description: >-
+    Organization inside and across matters. The same folders the web app shows, so one created here appears
+    in the customer's browser.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Folders
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-folders-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-india-credits-api
+  name: Vaquill AI India Credits API
+  description: The India Credits API from Vaquill AI — 1 operation(s) for india credits.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - India Credits
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-india-credits-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-india-pricing-api
+  name: Vaquill AI India Pricing API
+  description: The India Pricing API from Vaquill AI — 1 operation(s) for india pricing.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - India Pricing
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-india-pricing-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-indian-acts-and-legislation-api
+  name: Vaquill AI Indian Acts and Legislation API
+  description: >-
+    The Indian Acts and Legislation API from Vaquill AI — 17 operation(s) for indian acts and legislation.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Indian Acts and Legislation
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-indian-acts-and-legislation-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-matrices-api
+  name: Vaquill AI Matrices API
+  description: >-
+    Spreadsheet-style extraction across many documents: rows are documents, columns are questions, cells
+    are answers with verified citations. Building a grid is free; running it is what costs.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Matrices
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-matrices-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-matter-summary-api
+  name: Vaquill AI Matter summary API
+  description: >-
+    A citation-backed summary of everything filed to a matter, generated on demand and readable claim
+    by claim.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Matter summary
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-matter-summary-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-matters-api
+  name: Vaquill AI Matters API
+  description: >-
+    The unit of work everything else hangs off. A matter scopes documents, drafts, reviews, comparisons
+    and matrices, and it is what a credential's access is checked against.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Matters
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-matters-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-nda-triage-api
+  name: Vaquill AI NDA triage API
+  description: >-
+    Screening one inbound NDA against ten standard criteria and, where you name one, your own NDA playbook.
+    Answers `green`, `yellow` or `red` with the reasoning per criterion, plus a report you can forward.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - NDA triage
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-nda-triage-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-operations-api
+  name: Vaquill AI Operations API
+  description: >-
+    The one job envelope. Every long-running call answers `202` with an operation, and polling this resource
+    is the only way to learn it finished: there are no webhooks. Five statuses, no synonyms.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Operations
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-operations-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-playbooks-api
+  name: Vaquill AI Playbooks API
+  description: >-
+    The organization's negotiating positions, per contract type, and the starter templates to build them
+    from. A playbook is the input a contract review is measured against.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Playbooks
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-playbooks-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-pricing-api
+  name: Vaquill AI Pricing API
+  description: Credit pricing and conversion rates. No authentication required. 1 credit = $0.01 USD.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Pricing
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-pricing-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-research-api
+  name: Vaquill AI Research API
+  description: >-
+    Asking legal questions and getting grounded, cited answers. This API does NOT stream: an ask answers
+    `202` and you poll the operation, then read the answer off the message it points at. Conversation
+    state is kept here, so you hold a chat id rather than replaying a transcript. Also covers the matter
+    settings behind an answer, the skills you can ask through, and the standalone web-research tools.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Research
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-research-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-reviews-api
+  name: Vaquill AI Reviews API
+  description: >-
+    Reviewing one contract against a playbook: clause analysis, redlines, flags, liability exposure and
+    a reported sign-off gate. Export applies the redlines as native Word tracked changes.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Reviews
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-reviews-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-uploads-api
+  name: Vaquill AI Uploads API
+  description: >-
+    Getting files in. One presigned multipart flow at every size, with the bytes going straight to storage
+    and never through this API. Initiate, PUT each part, then complete.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Uploads
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-uploads-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-us-session-laws-api
+  name: Vaquill AI US Session Laws API
+  description: >-
+    State session laws: the acts of each legislature as they were enacted, chapter by chapter, before
+    they are folded into a code. A session law is what the governor signs. It carries the act's own text,
+    including the language it strikes and inserts, its approval and effective dates, and, where the publisher
+    prints one, the code sections it changes. That makes it the source for "which act changed this section,
+    and when did it take effect".
+
+
+    Every act has a permanent `sessionLawId` (for example `SSL_MN_2025R_G_Y2025_C1`, Minnesota Laws 2025,
+    regular session, chapter 1) whether or not we hold its text, and a citation or bill number such as
+    `S.F.No. 1552` is accepted where an id goes. v1 serves STATE acts only. Federal session laws (the
+    Statutes at Large, `SAL_` ids) are served by `/us/statutes/section`, and `/us/statutes/resolve` points
+    a session-law citation here.
+
+
+    **Start here**: check `/us/statutes/coverage` (free) for what we hold per state: each jurisdiction's
+    `sessionLaws` block lists its sessions, which are complete or only partly collected, and the `series`
+    and `instrumentTypes` that exist. Then **List** a session or a date range to get ids, **Get** one
+    act for its record, then **Body** for its text. A law missing from a partly collected session is a
+    free 404 (`session_not_fully_collected`), not proof it does not exist.
+
+
+    - **List**: everything enacted in a state's session, approved in a window, or taking effect on a date
+
+    - **Get**: one act by id or by citation; dates (`effectiveDates` is always a list), sources and the
+    code sections it affects
+
+    - **Body**: the act's text as printed, paged by cursor, with amendatory markup preserved where the
+    publisher printed it
+
+    - **Batch**: up to 50 ids or citations in one call, the same record as Get, billed per law served,
+    with every miss listed and its reason
+
+    - **Changes**: a sync feed of the registry over an integer cursor (`sinceId`): what began to be served,
+    was corrected, withdrawn or merged
+
+
+    The reverse link, from a code section to the acts a publisher's own tables list against it, is `GET
+    /us/statutes/section/{actId}/enactments`.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - US Session Laws
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-us-session-laws-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-us-statutes-api
+  name: Vaquill AI US Statutes API
+  description: >-
+    Search and retrieve US primary law. Covers the United States Code and the Statutes at Large, the Code
+    of Federal Regulations and its annual editions, state statutory codes and administrative regulations,
+    federal and state constitutions, court rules, Federal Register rules and Presidential documents, federal
+    and state agency guidance, agency adjudications, state Attorney General opinions, the Sentencing Guidelines
+    and US tax treaties. Scope a search with the `corpusType` filter, and call `/us/statutes/coverage`
+    for the live jurisdiction-by-corpusType list.
+
+
+    - **Search**: Search across all USC, CFR, state, and regulatory sections
+
+    - **Section**: Get metadata, citation, hierarchy, and source links for a specific section
+
+    - **Body**: Get the full text of a section
+
+    - **Enactments**: Which state session laws a publisher's own tables list against a section (supported
+    jurisdictions only, never a complete history)
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - US Statutes
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-us-statutes-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+- aid: vaquill-ai:vaquill-ai-workflows-api
+  name: Vaquill AI Workflows API
+  description: >-
+    Multi-step analyses from a fixed catalogue. Read a definition to learn what documents and inputs it
+    takes, launch a run inside a matter, then download the artifacts it produces.
+  humanURL: https://www.vaquill.ai/legal-api
+  baseURL: https://api.vaquill.ai/api/v1
+  tags:
+  - Workflows
+  properties:
+  - type: OpenAPI
+    url: openapi/vaquill-ai-workflows-api-openapi.yml
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/api-guide/coverage
+  - type: APIReference
+    url: >-
+      https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/api-guide/quickstart
+  - type: ChangeLog
+    url: https://www.vaquill.ai/docs/api-guide/changelog
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-session-law-body-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-create-watch-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-statute-count-request-schema.json
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/india-pricing/get-india-api-credit-pricing
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-status-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-external-credit-balance-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-cited-by-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-text-response-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-act-subordinate-response-schema.json
+  - type: Documentation
+    url: https://www.vaquill.ai/docs/workspace-api/overview
+  - type: APIReference
+    url: https://www.vaquill.ai/docs/api-reference/chronology/list-chronology-events
+  - type: GettingStarted
+    url: https://www.vaquill.ai/docs/workspace-api/quickstart
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-create-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-review-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-nda-triage-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-ask-request-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-matter-schema.json
+  - type: JSONSchema
+    url: json-schema/vaquill-ai-compliance-check-schema.json
+x-enrichment:
+  date: '2026-10-07'
+  status: enriched
+  artifacts_added: 68
+  pass: local-v5

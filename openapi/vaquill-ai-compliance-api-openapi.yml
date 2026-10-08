@@ -1,0 +1,1313 @@
+openapi: 3.2.0
+info:
+  title: Vaquill Ai Compliance API
+  version: 1.0.0
+  description: 'Operations tagged Compliance across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.vaquill.ai/workspace
+  description: Vaquill Legal Workspace API (production)
+- url: /workspace
+  description: Vaquill Legal Workspace API (relative to the mount)
+security:
+- WorkspaceAuth: []
+tags:
+- name: Compliance
+  description: 'Checking one document against one regulation''s requirement checklist: a verdict per requirement with the article it comes from, the gaps, and what to do about them. Only regulations with a real checklist behind them are accepted.'
+paths:
+  /v1/matters/{matterId}/compliance-checks:
+    post:
+      tags:
+      - Compliance
+      summary: Check a document against a regulation
+      description: 'Check a document against one regulation. 202 with an operation to poll.
+
+
+        A retry carrying the same `Idempotency-Key` returns the original operation
+
+        and starts nothing.'
+      operationId: complianceChecks.create
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: Idempotency-Key
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency-Key
+        description: A unique value of your choosing, so a retried launch returns the FIRST operation instead of starting a second billable job. Reusing one with a different body is refused. Retrying with the same key and the same body is free and is the intended way to recover from a timeout.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComplianceCheckCreateRequest'
+            example:
+              documentText: 'MASTER SERVICES AGREEMENT
+
+
+                This Master Services Agreement is entered into as of 1 September 2026 between Acme Corporation, a Delaware corporation, and the Supplier identified on the signature page.
+
+
+                8. LIMITATION OF LIABILITY. Supplier''s total liability shall be unlimited for any claim arising out of this Agreement.
+
+
+                12. GOVERNING LAW. This Agreement is governed by the laws of the State of Delaware.'
+              regulationType: ccpa
+              documentCategory: business_continuity_plan
+              context: value
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operation'
+              example:
+                id: op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                type: matrix.run
+                status: succeeded
+                createdAt: '2026-08-19T14:32:10Z'
+                completedAt: '2026-08-19T14:32:10Z'
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                resource:
+                  kind: matrix
+                  id: mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  url: https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+                progress:
+                  done: 24
+                  total: 128
+                  unit: cells
+                requestId: req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/compliance-checks/{complianceCheckId}:
+    get:
+      tags:
+      - Compliance
+      summary: Get a compliance check
+      description: 'One compliance check: its findings, or its progress toward them.
+
+
+        404 covers every reason it is not readable, including a job of a different
+
+        kind that happens to share the table.'
+      operationId: complianceChecks.get
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: complianceCheckId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Compliancecheckid
+        description: '`cck_` identifier of the compliance check. Returned on the operation that launched it.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplianceCheck'
+              example:
+                id: cck_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                status: queued
+                regulationType: value
+                documentCategory: value
+                overallStatus: value
+                complianceScore: 1
+                summary: Twelve substantive changes, seven of them in the liability and indemnity sections.
+                requirements:
+                - requirementId: REQ-006
+                  requirementName: Business Associate Agreement (BAA)
+                  regulationReference: 45 CFR 164.504(e)
+                  status: compliant
+                  findings: The agreement names Acme Corporation as a business associate and requires appropriate safeguards, but it is silent on subcontractor flow-down and on return or destruction of protected health information at termination.
+                  gapDescription: value
+                  recommendation: value
+                  priority: high
+                compliantCount: 0
+                partiallyCompliantCount: 0
+                nonCompliantCount: 0
+                notApplicableCount: 0
+                gaps:
+                - gapName: No subcontractor flow-down
+                  description: Master services agreement with Acme for the 2026 platform rollout.
+                  regulationReference: 45 CFR 164.504(e)(2)(ii)(D)
+                  riskLevel: value
+                  remediation: Add a clause requiring Acme Corporation to bind every subcontractor that receives protected health information to the same restrictions and conditions.
+                remediationActions:
+                - action: Add a subcontractor flow-down clause binding every subcontractor to the same restrictions.
+                  priority: high
+                  effort: value
+                  deadlineGuidance: value
+                responseTimeline: value
+                deterministicCoverage: 1.0
+                preCheckFlags:
+                - value
+                parseWarning: Two clauses could not be parsed and are omitted from the findings.
+                createdAt: '2026-08-19T14:32:10Z'
+                completedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/compliance-checks/{complianceCheckId}/exports:
+    post:
+      tags:
+      - Compliance
+      summary: Export a compliance check as a report
+      description: 'Mint a short-lived URL to the check as a PDF or DOCX report.
+
+
+        A POST rather than a GET because it creates something: a bearer URL over an
+
+        analysis of a client document, and a rendering that did not exist before.'
+      operationId: complianceChecks.export
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: complianceCheckId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Compliancecheckid
+        description: '`cck_` identifier of the compliance check. Returned on the operation that launched it.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ToolReportExportRequest'
+            example:
+              format: pdf
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolReportExport'
+              example:
+                format: pdf
+                filename: msa-acme-v3.docx
+                url: https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+                expiresAt: '2026-08-19T14:32:10Z'
+                sizeBytes: 248193
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+components:
+  schemas:
+    ToolReportExportRequest:
+      properties:
+        format:
+          type: string
+          enum:
+          - pdf
+          - docx
+          title: Format
+          description: Format to render. `pdf` for something a person reads and forwards, `docx` for something an editor opens.
+          default: pdf
+          examples:
+          - pdf
+      additionalProperties: false
+      type: object
+      title: ToolReportExportRequest
+      description: Which format to render the finished analysis in.
+    OperationStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: OperationStatus
+      description: 'The public five. There is no sixth, and there are no synonyms.
+
+
+        Internal vocabularies spell terminal success `completed`, `ready`,
+
+        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+
+        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+
+        `app.workspace_api.adapters.status_map`, which refuses to guess.'
+    ToolReportExport:
+      properties:
+        format:
+          type: string
+          enum:
+          - pdf
+          - docx
+          title: Format
+          description: Format of the exported file.
+          examples:
+          - pdf
+        filename:
+          type: string
+          title: Filename
+          description: Suggested filename for the download.
+          examples:
+          - msa-acme-v3.docx
+        url:
+          type: string
+          title: Url
+          description: Short-lived signed URL to download the report. Fetch it promptly and do not store it.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+        expiresAt:
+          type: string
+          format: date-time
+          title: Expiresat
+          description: When the URL stops working (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        sizeBytes:
+          type: integer
+          title: Sizebytes
+          description: Size of the exported file in bytes.
+          examples:
+          - 248193
+      additionalProperties: false
+      type: object
+      required:
+      - format
+      - filename
+      - url
+      - expiresAt
+      - sizeBytes
+      title: ToolReportExport
+      description: 'A short-lived URL to the rendered report.
+
+
+        The route declares a response model and a PDF is not one, so the bytes live
+
+        in object storage and the customer fetches them directly.'
+    OperationProgress:
+      properties:
+        done:
+          type: integer
+          minimum: 0.0
+          title: Done
+          description: How many units are finished.
+          examples:
+          - 24
+        total:
+          type: integer
+          minimum: 0.0
+          title: Total
+          description: How many units there are in total. Can legitimately be zero for an empty run.
+          examples:
+          - 128
+        unit:
+          type: string
+          enum:
+          - cells
+          - steps
+          - documents
+          - files
+          - rows
+          - percent
+          title: Unit
+          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
+          examples:
+          - cells
+      additionalProperties: false
+      type: object
+      required:
+      - done
+      - total
+      - unit
+      title: OperationProgress
+      description: 'How far along, and in what units.
+
+
+        The unit is not decoration. A workflow run stores only a percentage while a
+
+        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
+
+        as 43 of 100 documents and a client builds a wrong estimate from it.'
+    Operation:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `op_` followed by 32 hex characters. Poll `GET /v1/operations/{operationId}` with it.
+          examples:
+          - op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        type:
+          type: string
+          title: Type
+          description: What kind of work this is, for example `matrix.run` or `draft.generate`.
+          examples:
+          - matrix.run
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: 'One of five values: `queued`, `running`, `succeeded`, `failed`, `cancelled`. There is no sixth and there are no synonyms. Stop polling once it is `succeeded`, `failed` or `cancelled`.'
+          examples:
+          - succeeded
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the operation was accepted (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        completedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Completedat
+          description: When the operation reached a terminal status (RFC 3339). Present if and only if the status is terminal.
+          examples:
+          - '2026-08-19T14:32:10Z'
+        matterId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matterid
+          description: '`mat_` identifier of the matter this work belongs to, when it belongs to one.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        resource:
+          anyOf:
+          - $ref: '#/components/schemas/OperationResource'
+          - type: 'null'
+          description: What the operation produced. Absent until the underlying job row exists, which an idempotent replay can briefly observe, so treat absence as 'not yet' rather than 'never'.
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/OperationError'
+          - type: 'null'
+          description: Why the work failed. Present only when `status` is `failed`. Partial success is `succeeded` with `progress.done < progress.total`, never an error.
+        progress:
+          anyOf:
+          - $ref: '#/components/schemas/OperationProgress'
+          - type: 'null'
+          description: How far along the work is, when the underlying job reports it. Absent does not mean no progress.
+        requestId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Requestid
+          description: The `X-Request-ID` of the request that created this operation. Quote it in a support ticket.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - type
+      - status
+      - createdAt
+      title: Operation
+      description: 'One long-running operation, whatever kind of work it is.
+
+
+        Readable for `OPERATION_RETENTION_DAYS` after creation, per AIP-151.'
+    ComplianceGap:
+      properties:
+        gapName:
+          type: string
+          title: Gapname
+          description: Short name for the gap.
+          examples:
+          - No subcontractor flow-down
+        description:
+          type: string
+          title: Description
+          description: What is missing, and why it matters.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        regulationReference:
+          type: string
+          title: Regulationreference
+          description: The provision the gap is measured against.
+          examples:
+          - 45 CFR 164.504(e)(2)(ii)(D)
+        riskLevel:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Risklevel
+          description: 'How risky the gap is: `critical`, `high`, `medium` or `low`.'
+          examples:
+          - high
+        remediation:
+          type: string
+          title: Remediation
+          description: Suggested language or action to close it.
+          examples:
+          - Add a clause requiring Acme Corporation to bind every subcontractor that receives protected health information to the same restrictions and conditions.
+      additionalProperties: false
+      type: object
+      required:
+      - gapName
+      - description
+      - regulationReference
+      - remediation
+      title: ComplianceGap
+      description: One compliance gap, named so it can be tracked.
+    ComplianceRequirement:
+      properties:
+        requirementId:
+          type: string
+          title: Requirementid
+          description: Stable identifier of this requirement.
+          examples:
+          - REQ-006
+        requirementName:
+          type: string
+          title: Requirementname
+          description: What the requirement is.
+          examples:
+          - Business Associate Agreement (BAA)
+        regulationReference:
+          type: string
+          title: Regulationreference
+          description: Where it comes from, for example `GDPR Article 28(3)(a)`.
+          examples:
+          - 45 CFR 164.504(e)
+        status:
+          type: string
+          title: Status
+          description: 'Whether the document meets it: `compliant`, `partially_compliant`, `non_compliant`, or `not_applicable`.'
+          examples:
+          - compliant
+        findings:
+          type: string
+          title: Findings
+          description: What the document actually says.
+          examples:
+          - The agreement names Acme Corporation as a business associate and requires appropriate safeguards, but it is silent on subcontractor flow-down and on return or destruction of protected health information at termination.
+        gapDescription:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Gapdescription
+          description: What is missing, where the document does not meet it.
+          examples:
+          - No obligation to bind subcontractors to the same restrictions, and no return or destruction of protected health information on termination.
+        recommendation:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Recommendation
+          description: What to change to meet it.
+          examples:
+          - Add a subcontractor flow-down clause and a termination clause requiring return or destruction of all protected health information.
+        priority:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Priority
+          description: 'How urgent the remediation is: `critical`, `high`, `medium` or `low`.'
+          examples:
+          - high
+      additionalProperties: false
+      type: object
+      required:
+      - requirementId
+      - requirementName
+      - regulationReference
+      - status
+      - findings
+      title: ComplianceRequirement
+      description: One requirement of the regulation, and whether the document meets it.
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
+    OperationResource:
+      properties:
+        kind:
+          type: string
+          title: Kind
+          description: What sort of thing was produced, for example `matrix` or `document`.
+          examples:
+          - matrix
+        id:
+          type: string
+          title: Id
+          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
+          examples:
+          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+      additionalProperties: false
+      type: object
+      required:
+      - kind
+      - id
+      title: OperationResource
+      description: 'What the operation produced, or is producing.
+
+
+        `url` is a path on this API rather than an absolute URL, because the service
+
+        is mounted today and gets its own hostname later (docs 07.5). A relative
+
+        path survives that move; a baked-in host does not.'
+    ComplianceRemediationAction:
+      properties:
+        action:
+          type: string
+          title: Action
+          description: What needs to be done.
+          examples:
+          - Add a subcontractor flow-down clause binding every subcontractor to the same restrictions.
+        priority:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Priority
+          description: '`critical`, `high`, `medium` or `low`.'
+          examples:
+          - high
+        effort:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Effort
+          description: '`high`, `medium` or `low`.'
+          examples:
+          - low
+        deadlineGuidance:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Deadlineguidance
+          description: Suggested timeline, for example `Within 30 days`.
+          examples:
+          - Within 30 days
+      additionalProperties: false
+      type: object
+      required:
+      - action
+      title: ComplianceRemediationAction
+      description: One thing to do, in priority order.
+    OperationError:
+      properties:
+        code:
+          type: string
+          title: Code
+          description: Stable, machine-readable failure code. Branch on this, never on `message`.
+          examples:
+          - EXTRACTION_FAILED
+        message:
+          type: string
+          title: Message
+          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
+          examples:
+          - The upstream extraction did not finish.
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - message
+      title: OperationError
+      description: 'Why a failed operation failed, in terms a customer can act on.
+
+
+        `code` is stable and machine-readable. `message` is sanitized: the internal
+
+        job tables store stack traces and file paths in their `error_message`
+
+        columns, and forwarding those verbatim leaks our internals into a customer''s
+
+        logs.'
+    ComplianceCheckCreateRequest:
+      properties:
+        documentText:
+          type: string
+          maxLength: 200000
+          minLength: 100
+          title: Documenttext
+          description: The full document text to check, 100 to 200,000 characters.
+          examples:
+          - 'MASTER SERVICES AGREEMENT
+
+
+            This Master Services Agreement is entered into as of 1 September 2026 between Acme Corporation, a Delaware corporation, and the Supplier identified on the signature page.
+
+
+            8. LIMITATION OF LIABILITY. Supplier''s total liability shall be unlimited for any claim arising out of this Agreement.
+
+
+            12. GOVERNING LAW. This Agreement is governed by the laws of the State of Delaware.'
+        regulationType:
+          type: string
+          enum:
+          - ccpa
+          - dora
+          - dpdp
+          - ferpa
+          - gdpr
+          - glba
+          - hipaa
+          - lgpd
+          - nis2
+          - pci_dss
+          - sox
+          - soc2
+          - tcpa
+          - uk_gdpr
+          title: Regulationtype
+          description: Which regulation to check against. Only regulations with a full requirement checklist are accepted; anything else would produce a generic answer that reads like a real one.
+          examples:
+          - ccpa
+        documentCategory:
+          type: string
+          enum:
+          - business_continuity_plan
+          - consent_form
+          - data_breach_plan
+          - dpa
+          - dsr_process
+          - financial_report
+          - ict_risk_policy
+          - incident_response_plan
+          - information_security_policy
+          - other
+          - privacy_policy
+          - terms_of_service
+          - vendor_agreement
+          title: Documentcategory
+          description: What kind of document this is. Sharpens which requirements apply; `other` is a real answer rather than a degraded one.
+          default: other
+          examples:
+          - business_continuity_plan
+        context:
+          anyOf:
+          - type: string
+            maxLength: 2000
+          - type: 'null'
+          title: Context
+          description: 'Anything else that changes which requirements bite: the industry, the data types processed, the jurisdictions involved.'
+          examples:
+          - Cloud vendor processing electronic protected health information for a covered entity in California.
+      additionalProperties: false
+      type: object
+      required:
+      - documentText
+      - regulationType
+      title: ComplianceCheckCreateRequest
+      description: Check one document against one regulation.
+    Problem:
+      type: object
+      title: Problem
+      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: true
+    ComplianceCheck:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `cck_` followed by 32 hex characters.
+          examples:
+          - cck_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        matterId:
+          type: string
+          title: Matterid
+          description: '`mat_` identifier of the matter this check belongs to.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: Check status, using the same five public values as an operation. While `queued` or `running`, `requirements` is empty and the scalar fields are absent. That is the truthful shape of a check that has not happened yet, not an error.
+          examples:
+          - queued
+        regulationType:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Regulationtype
+          description: Regulation checked against, echoed from the request.
+          examples:
+          - hipaa
+        documentCategory:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Documentcategory
+          description: Document category, echoed from the request.
+          examples:
+          - vendor_agreement
+        overallStatus:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Overallstatus
+          description: 'Overall verdict: `compliant`, `partially_compliant`, `non_compliant`, or `not_applicable`.'
+          examples:
+          - partially_compliant
+        complianceScore:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Compliancescore
+          description: Compliance as a percentage, 0 to 100.
+          examples:
+          - 1
+        summary:
+          type: string
+          title: Summary
+          description: Overall assessment, in prose.
+          default: ''
+          examples:
+          - Twelve substantive changes, seven of them in the liability and indemnity sections.
+        requirements:
+          items:
+            $ref: '#/components/schemas/ComplianceRequirement'
+          type: array
+          title: Requirements
+          description: Every requirement checked, and the verdict on each.
+        compliantCount:
+          type: integer
+          title: Compliantcount
+          description: Requirements fully met.
+          default: 0
+          examples:
+          - 0
+        partiallyCompliantCount:
+          type: integer
+          title: Partiallycompliantcount
+          description: Requirements partly met.
+          default: 0
+          examples:
+          - 0
+        nonCompliantCount:
+          type: integer
+          title: Noncompliantcount
+          description: Requirements not met.
+          default: 0
+          examples:
+          - 0
+        notApplicableCount:
+          type: integer
+          title: Notapplicablecount
+          description: Requirements that do not apply to this document.
+          default: 0
+          examples:
+          - 0
+        gaps:
+          items:
+            $ref: '#/components/schemas/ComplianceGap'
+          type: array
+          title: Gaps
+          description: The gaps found.
+        remediationActions:
+          items:
+            $ref: '#/components/schemas/ComplianceRemediationAction'
+          type: array
+          title: Remediationactions
+          description: What to do about them, in priority order.
+        responseTimeline:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Responsetimeline
+          description: A regulatory deadline that applies, where one does.
+          examples:
+          - 60 calendar days for access requests, with one 30-day extension.
+        deterministicCoverage:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Deterministiccoverage
+          description: Fraction of requirements with keyword evidence in the document, 0 to 1. Low coverage means more of the verdict rests on the model than on the text.
+          examples:
+          - 1.0
+        preCheckFlags:
+          items:
+            type: string
+          type: array
+          title: Precheckflags
+          description: Where the model and a deterministic keyword scan disagreed. Each one is worth a human glance.
+          examples:
+          - - value
+        parseWarning:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Parsewarning
+          description: Set when the model's output only partly parsed, which means the findings may be incomplete.
+          examples:
+          - Two clauses could not be parsed and are omitted from the findings.
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the check was created (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        completedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Completedat
+          description: When the check reached a terminal status (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - matterId
+      - status
+      - createdAt
+      title: ComplianceCheck
+      description: 'One compliance check: its findings, or its progress toward them.'
+  securitySchemes:
+    WorkspaceAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: vq_ws_*
+      description: 'Workspace credential issued from the automation console at `/automation`. Send it as `Authorization: Bearer vq_ws_...`. This is NOT a Data API key: a `vq_key_` credential is refused here and names the other product in the error.'
+externalDocs:
+  description: Getting started guide and error reference
+  url: https://vaquill.ai/docs/workspace-api
+x-refined-from:
+- vaquill-ai-workspace-openapi.json
+- vaquill-ai-workspace-openapi.yml

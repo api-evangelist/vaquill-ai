@@ -1,0 +1,264 @@
+generated: '2026-10-07'
+method: probed
+source: https://api.vaquill.ai/api/v1/api-credits/pricing
+name: Vaquill Developer API pricing
+audience: developer-api
+pricing_basis: per-call
+published: true
+currency: USD
+plan_count: 1
+delivery:
+  delivery: open-core
+  evidence: Scripts are Apache-2.0; the compiled data is CC BY-NC 4.0, free for non-commercial use. Clone it to self-host, or use the hosted API
+    below to skip the pipeline entirely.
+  free_edition: Open US Law (github.com/Vaquill-AI/open-us-law, CC BY-NC 4.0 data)
+  managed_tier: Vaquill Developer API credits
+  open_source_license: Apache-2.0 (scripts); CC BY-NC 4.0 (compiled data)
+plans:
+- name: API credits (pay as you go)
+  description: Prepaid credits metered per call; each endpoint lists its credit cost and the pricing endpoint is free and unauthenticated. Prepaid
+    credits are non-refundable once purchased and do not expire for at least 12 months (refund policy).
+  price: 0.01
+  price_text: '0.01'
+  price_unit: USD per credit (dollarPerCredit)
+  billing: prepaid, usage-metered
+  limits:
+  - name: minimum purchase
+    value: 500
+    limit_text: '500'
+    unit: credits (minCredits)
+  - name: maximum purchase
+    value: 1000000
+    limit_text: '1000000'
+    unit: credits (maxCredits)
+  features:
+  - US statutes, regulations, constitutions, court rules, session laws, agency guidance
+  - Board watches and email delivery on every plan
+  - MCP server access on every plan
+  usage_prices_us:
+  - endpoint: /us/statutes/search
+    operation: US Statutes Search
+    credits: 4.0
+    usd: 0.04
+    region: US
+  - endpoint: /us/statutes/section
+    operation: US Statute Section (Metadata)
+    credits: 2.0
+    usd: 0.02
+    region: US
+  - endpoint: /us/statutes/sections
+    operation: US Statute Sections (Batch Metadata)
+    credits: 2.0
+    usd: 0.02
+    region: US
+  - endpoint: /us/statutes/section/related
+    operation: US Statute Section (Neighbours)
+    credits: 2.0
+    usd: 0.02
+    region: US
+  - endpoint: /us/statutes/section/body
+    operation: US Statute Section (Full Text)
+    credits: 6.0
+    usd: 0.06
+    region: US
+  - endpoint: /us/statutes/section/cited-by
+    operation: US Statute Section (Cited By)
+    credits: 2.0
+    usd: 0.02
+    region: US
+  - endpoint: /us/statutes/section/definitions
+    operation: US Statute Section (Defined Terms)
+    credits: 4.0
+    usd: 0.04
+    region: US
+  - endpoint: /us/statutes/section/cross-state
+    operation: US Statute Section (Cross-State Equivalents)
+    credits: 6.0
+    usd: 0.06
+    region: US
+  - endpoint: /us/statutes/resolve
+    operation: US Statute Citation Resolver
+    credits: 2.0
+    usd: 0.02
+    region: US
+  - endpoint: /us/statutes/section/enactments
+    operation: US Statute Section (Enactments)
+    credits: 1.0
+    usd: 0.01
+    region: US
+  - endpoint: /us/statutes/section/changes
+    operation: US Statute Section (Change History)
+    credits: 1.0
+    usd: 0.01
+    region: US
+  - endpoint: /us/statutes/divisions
+    operation: US Statute Hierarchy Browse
+    credits: 1.0
+    usd: 0.01
+    region: US
+  - endpoint: /us/statutes/count
+    operation: US Statute Scope Count
+    credits: 1.0
+    usd: 0.01
+    region: US
+  - endpoint: /us/statutes/states
+    operation: US Statutes Coverage by Jurisdiction
+    credits: 0.0
+    usd: 0.0
+    region: US
+  - endpoint: /us/statutes/coverage
+    operation: US Statutes Coverage Matrix
+    credits: 0.0
+    usd: 0.0
+    region: US
+  - endpoint: /us/statutes/codes
+    operation: US State Codes
+    credits: 0.0
+    usd: 0.0
+    region: US
+  - endpoint: /us/statutes/laws
+    operation: US Bodies of Law Catalog
+    credits: 0.0
+    usd: 0.0
+    region: US
+  - endpoint: /boards
+    operation: Law Change Boards (List)
+    credits: 0.0
+    usd: 0.0
+    region: US
+  - endpoint: /watches
+    operation: Law Change Watch Management
+    credits: 0.0
+    usd: 0.0
+    region: US
+  - endpoint: /watches/test
+    operation: Law Change Watch (Test Delivery)
+    credits: 0.0
+    usd: 0.0
+    region: US
+  - endpoint: /watches/changes
+    operation: Law Change List
+    credits: 0.0
+    usd: 0.0
+    region: US
+  - endpoint: /watches/deliveries
+    operation: Law Change Delivery History
+    credits: 0.0
+    usd: 0.0
+    region: US
+  - endpoint: /watches/changes/diff
+    operation: Law Change Diff (Old vs New Text)
+    credits: 4.0
+    usd: 0.04
+    region: US
+  - endpoint: /us/session-laws
+    operation: US Session Law (Metadata)
+    credits: 2.0
+    usd: 0.02
+    region: US
+  - endpoint: /us/session-laws/body
+    operation: US Session Law (Full Text)
+    credits: 6.0
+    usd: 0.06
+    region: US
+  - endpoint: /us/session-laws/list
+    operation: US Session Laws (List)
+    credits: 1.0
+    usd: 0.01
+    region: US
+  - endpoint: /us/session-laws/batch
+    operation: US Session Laws (Batch)
+    credits: 2.0
+    usd: 0.02
+    region: US
+  - endpoint: /us/session-laws/changes
+    operation: US Session Laws (Change Feed)
+    credits: 1.0
+    usd: 0.01
+    region: US
+  - endpoint: /us/session-laws/search
+    operation: US Session Laws (Search)
+    credits: 4.0
+    usd: 0.04
+    region: US
+  - endpoint: /credits/balance
+    operation: Credit Balance
+    credits: 0.0
+    usd: 0.0
+    region: US
+  usage_prices_india:
+  - endpoint: /in/credits/balance
+    operation: India Credit Balance
+    credits: 0.0
+    usd: 0.0
+  - endpoint: /in/acts/search
+    operation: Indian Legislation Search
+    credits: 2.0
+    usd: 0.02
+  - endpoint: /in/acts/list
+    operation: Indian Legislation Browse
+    credits: 1.0
+    usd: 0.01
+  - endpoint: /in/acts/text
+    operation: Indian Act Text
+    credits: 3.0
+    usd: 0.03
+  - endpoint: /in/acts/amendments
+    operation: Indian Act Amendment History
+    credits: 5.0
+    usd: 0.05
+  - endpoint: /in/acts/coverage
+    operation: Indian Corpus Coverage
+    credits: 0.0
+    usd: 0.0
+  - endpoint: /in/acts/resolve
+    operation: Indian Citation Resolution
+    credits: 2.0
+    usd: 0.02
+  - endpoint: /in/acts/sections/references
+    operation: Indian Provision References
+    credits: 2.0
+    usd: 0.02
+  - endpoint: /in/acts/cited-by
+    operation: Indian Inbound Citations
+    credits: 2.0
+    usd: 0.02
+  - endpoint: /in/acts/subordinate
+    operation: Indian Subordinate Instruments
+    credits: 2.0
+    usd: 0.02
+  - endpoint: /in/acts/definitions
+    operation: Indian Act Definitions
+    credits: 2.0
+    usd: 0.02
+  - endpoint: /in/acts/structure
+    operation: Indian Act Structure
+    credits: 2.0
+    usd: 0.02
+  - endpoint: /in/acts/sections
+    operation: Indian Provision Lookup
+    credits: 2.0
+    usd: 0.02
+  - endpoint: /in/acts/sections/body
+    operation: Indian Provision Text
+    credits: 3.0
+    usd: 0.03
+  - endpoint: /in/acts/sections/history
+    operation: Indian Provision Amendment History
+    credits: 2.0
+    usd: 0.02
+  - endpoint: /in/acts/status
+    operation: Indian Act Status
+    credits: 1.0
+    usd: 0.01
+  - endpoint: /in/acts/corresponding-provisions
+    operation: Indian Recodification Mapping
+    credits: 1.0
+    usd: 0.01
+notes:
+- The India pricing endpoint https://api.vaquill.ai/api/v1/in/api-credits/pricing returns the same dollarPerCredit, minCredits and maxCredits.
+- Webhook delivery on board watches and the 100-watch cap require the Business plan (https://www.vaquill.ai/docs/api-guide/errors); no price for
+  Business is published on the site.
+- The Vaquill AI workspace product is priced per seat (Plus, Power, Enterprise; 7-day free trial) at https://www.vaquill.ai/docs/guides/plans-and-limits
+  with no numeric prices on that page; /pricing redirects to /legal-api.
+- Legal aid and civil-justice organisations can apply for free access (https://www.vaquill.ai/legal-api).

@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/vaquill-ai/main/json-schema/vaquill-ai-create-watch-request-schema.json",
+  "title": "CreateWatchRequest",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/vaquill-ai-openapi.yml#/components/schemas/CreateWatchRequest",
+  "properties": {
+    "corpusType": {
+      "type": "string",
+      "title": "Corpustype",
+      "description": "Board's corpus_type (e.g. `state`, `state_regulation`, `federal_register`, `agency_guidance`). Matched case-insensitively, so the uppercase spelling the statutes endpoints use for the same body of law (`USC`, `CFR`) works here too. Call GET /boards for the authoritative, current list -- corpus_type is a growing set as new corpora are added, not a fixed enum, and not every corpus we serve is a watchable board."
+    },
+    "state": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "federal",
+            "al",
+            "ak",
+            "az",
+            "ar",
+            "ca",
+            "co",
+            "ct",
+            "de",
+            "dc",
+            "fl",
+            "ga",
+            "gu",
+            "hi",
+            "id",
+            "il",
+            "in",
+            "ia",
+            "ks",
+            "ky",
+            "la",
+            "me",
+            "md",
+            "ma",
+            "mi",
+            "mn",
+            "ms",
+            "mo",
+            "mt",
+            "ne",
+            "nv",
+            "nh",
+            "nj",
+            "nm",
+            "ny",
+            "nc",
+            "nd",
+            "mp",
+            "oh",
+            "ok",
+            "or",
+            "pa",
+            "pr",
+            "ri",
+            "sc",
+            "sd",
+            "tn",
+            "tx",
+            "ut",
+            "vt",
+            "va",
+            "wa",
+            "wv",
+            "wi",
+            "wy"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "State",
+      "description": "Board's state (2-letter, case-insensitive). For a federal board (USC, eCFR, the Federal Register) pass `federal` or omit this entirely; the two are equivalent. Must otherwise match the `state` GET /boards returned for this corpusType -- `GET /boards?corpusType=<type>` lists exactly those."
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "webhook",
+        "email",
+        "both"
+      ],
+      "title": "Channel",
+      "default": "webhook"
+    },
+    "webhookUrl": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Webhookurl",
+      "description": "Required when channel is webhook or both."
+    },
+    "webhookSecret": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Webhooksecret",
+      "description": "Optional signing secret, stored encrypted and never returned. When set, every delivery carries an `X-Vaquill-Signature: sha256=<hex>` header: HMAC-SHA256 of the raw request body bytes, keyed with this secret. To verify, compute the same HMAC over the raw body you received (before parsing JSON) and compare it, constant-time, to the hex digest after `sha256=`."
+    },
+    "emailAddress": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Emailaddress",
+      "description": "Required when channel is email or both."
+    },
+    "scope": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Scope",
+      "description": "Optional narrowing so this alert covers one citation instead of an entire source. Four mutually exclusive forms.\n\n**Hierarchy prefix** -- keys `title`, `chapter`, `part`, `section`, e.g. `{\"title\": \"21\", \"part\": \"314\"}` for 21 CFR part 314. Every level you set must match, so each one narrows further. `title` is required whenever any narrower level is set, and `section` also needs `chapter` or `part`: a bare part number matches across unrelated titles. Only sources whose documents carry a title/chapter/part hierarchy accept this form; the rest return 400.\n\n**Exact section** -- `{\"actId\": \"CFR_T21_P314_S314_50\"}`, using the `actId` returned by search results and change events. Case-sensitive, and validated at create time against the corpus: an act_id we do not hold, or one belonging to a different source, is a 400 rather than a watch that could never fire. This form works on EVERY source, including flat ones with no hierarchy, so it is the only way to follow a single Federal Register document.\n\n**Named source** -- `{\"source\": \"fdic_fil\"}`, for the corpora that fold several independent bodies of law behind one `corpusType`. The `agency_guidance` board alone carries 47 named sources across 24 agencies, so an unscoped watch on it delivers FDIC letters, IRS notices, OFAC FAQs and DOE appliance standards together. Accepted on `agency_adjudication`, `agency_guidance`, `agency_manuals`, `cfr`, `federal_rules`; anything else returns 400. The pickable values for a given board are on that board's `sources` array in `GET /boards` -- deliberately narrower than the `source` filter published on `POST /us/statutes/search`, because `agency_guidance` and `agency_manuals` are two boards reading one `corpusType` and each emits only its own half.\n\n**Publishing agency** -- `{\"agency\": \"irs\"}`, covering every source that agency issues on the board. `source` is the unit we ingest and it is finer than the unit most callers think in: the IRS alone publishes 5 named series, so following it by source means one watch per series and a gap if you miss one. An agency scope is expanded WHEN AN EVENT IS MATCHED rather than when the watch is created, so a source registered after your watch is covered by it automatically, with no action from you. Accepted on `agency_adjudication`, `agency_guidance`, `agency_manuals`; the pickable values are on that board's `agencies` array in `GET /boards`.\n\nOmit entirely to watch the whole source, which is the default and the pre-existing behavior."
+    },
+    "webhookAuth": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/WebhookAuthRequest"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Optional outbound credential sent on every delivery, so your gateway can authenticate us with the header it already reads. Independent of `webhookSecret`: set neither, either, or both. Only valid on a webhook or both channel watch."
+    }
+  },
+  "type": "object",
+  "required": [
+    "corpusType"
+  ],
+  "$defs": {
+    "WebhookAuthRequest": {
+      "properties": {
+        "scheme": {
+          "type": "string",
+          "enum": [
+            "none",
+            "bearer",
+            "basic",
+            "header"
+          ],
+          "title": "Scheme",
+          "description": "`bearer` sends `Authorization: Bearer <secret>`. `basic` sends `Authorization: Basic <secret>` with the secret already base64-encoded by you. `header` sends `<headerName>: <secret>`, for gateways that read something like `X-Api-Key`. `none` removes any credential currently stored.",
+          "default": "none"
+        },
+        "secret": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Secret",
+          "description": "The credential value. Stored encrypted and never returned. Required when setting a scheme for the first time or changing scheme; on PATCH you may omit it to keep the stored one while changing only `headerName`."
+        },
+        "headerName": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Headername",
+          "description": "Header to send the credential on. Required for `header`, and rejected for every other scheme. Cannot be `Authorization` (use `bearer`/`basic`), a transport header, or one of ours."
+        }
+      },
+      "type": "object",
+      "title": "WebhookAuthRequest",
+      "description": "How a delivery should authenticate itself to your endpoint.\n\nSEPARATE FROM `webhookSecret`, and the distinction is the point.\n`webhookSecret` signs the body so you can prove it is intact and ours.\nThis sends a credential so your gateway can reject anything else before\nit reaches your handler. Most integrations want the second, many want\nboth, and the two are set independently."
+    }
+  }
+}

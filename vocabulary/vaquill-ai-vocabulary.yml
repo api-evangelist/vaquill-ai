@@ -1,0 +1,465 @@
+generated: '2026-10-07'
+method: derived
+generator: derive-vocabulary.py
+source:
+- openapi/vaquill-ai-india-openapi.yml
+- openapi/vaquill-ai-openapi.yml
+- openapi/vaquill-ai-workspace-openapi.yml
+vocabulary:
+  name: Vaquill AI Domain Vocabulary
+  description: 'Terms declared by Vaquill AI''s own API contract: its resource groups, objects and enumerations, with the contract''s definitions.
+    Derived, not authored.'
+  version: '2026-10-07'
+  terms:
+  - term: US Statutes
+    definition: Search and retrieve US primary law. Covers the United States Code and the Statutes at Large, the Code of Federal Regulations and
+      its annual editions, state statutory codes and administrative regulations, federal and state constitutions, court rules, Federal Register
+      rules and Presidential documents, federal and state agency guidance, agency adjudications, state Attorney General opinions, the Sente
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-openapi.yml
+  - term: US Session Laws
+    definition: 'State session laws: the acts of each legislature as they were enacted, chapter by chapter, before they are folded into a code.
+      A session law is what the governor signs. It carries the act''s own text, including the language it strikes and inserts, its approval and
+      effective dates, and, where the publisher prints one, the code sections it changes. That makes it the source for "which act changed this'
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-openapi.yml
+  - term: Board Watches
+    definition: Law-change alerts. Subscribe to a **board** (a tracked corpus source, identified by `corpusType` plus an optional `state`) and
+      get a webhook or email whenever it refreshes with real changes, naming the exact sections that changed. Fetch old-vs-new text for any amended
+      section via the change diff. Boards refresh on their own existing cadence; watching one does not change how often it refreshes. Eve
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-openapi.yml
+  - term: Pricing
+    definition: Credit pricing and conversion rates. No authentication required. 1 credit = $0.01 USD.
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-openapi.yml
+  - term: Credits
+    definition: 'Your own credit balance: what is spendable right now, where it came from, and what is about to expire. Free and never charged,
+      so it is safe to poll for low-balance alerting or to pre-flight a batch job.'
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-openapi.yml
+  - term: Operations
+    definition: 'The one job envelope. Every long-running call answers `202` with an operation, and polling this resource is the only way to learn
+      it finished: there are no webhooks. Five statuses, no synonyms.'
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: Clients
+    definition: The people and companies matters are filed under. Synchronous CRUD.
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: Matters
+    definition: The unit of work everything else hangs off. A matter scopes documents, drafts, reviews, comparisons and matrices, and it is what
+      a credential's access is checked against.
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: Folders
+    definition: Organization inside and across matters. The same folders the web app shows, so one created here appears in the customer's browser.
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: Documents
+    definition: 'Files in a matter: their metadata, their ingested text, and the original bytes. A document is only usable by retrieval, drafting
+      and review once its status is `succeeded`.'
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: Uploads
+    definition: Getting files in. One presigned multipart flow at every size, with the bytes going straight to storage and never through this
+      API. Initiate, PUT each part, then complete.
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: Research
+    definition: 'Asking legal questions and getting grounded, cited answers. This API does NOT stream: an ask answers `202` and you poll the operation,
+      then read the answer off the message it points at. Conversation state is kept here, so you hold a chat id rather than replaying a transcript.
+      Also covers the matter settings behind an answer, the skills you can ask through, and the standalone web-research tools.'
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: Drafting
+    definition: Generating, revising and exporting draft documents. Bodies come out as sections and go in as markdown; the editor's own format
+      is never on the wire. Rendered files come from the export route.
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: Playbooks
+    definition: The organization's negotiating positions, per contract type, and the starter templates to build them from. A playbook is the input
+      a contract review is measured against.
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: Reviews
+    definition: 'Reviewing one contract against a playbook: clause analysis, redlines, flags, liability exposure and a reported sign-off gate.
+      Export applies the redlines as native Word tracked changes.'
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: Facts
+    definition: 'The cross-document fact ledger for a matter: what every document in it asserts, coalesced and cited back to its source passages.'
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: Matter summary
+    definition: A citation-backed summary of everything filed to a matter, generated on demand and readable claim by claim.
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: Chronology
+    definition: The dated events across a matter's documents, as one timeline, with duplicate and date-conflict flags.
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: NDA triage
+    definition: Screening one inbound NDA against ten standard criteria and, where you name one, your own NDA playbook. Answers `green`, `yellow`
+      or `red` with the reasoning per criterion, plus a report you can forward.
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: Compliance
+    definition: 'Checking one document against one regulation''s requirement checklist: a verdict per requirement with the article it comes from,
+      the gaps, and what to do about them. Only regulations with a real checklist behind them are accepted.'
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: Comparisons
+    definition: Diffing two documents in a matter into structural changes, with a substantive-versus-cosmetic judgment and a downloadable redline.
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: Matrices
+    definition: 'Spreadsheet-style extraction across many documents: rows are documents, columns are questions, cells are answers with verified
+      citations. Building a grid is free; running it is what costs.'
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: Workflows
+    definition: Multi-step analyses from a fixed catalogue. Read a definition to learn what documents and inputs it takes, launch a run inside
+      a matter, then download the artifacts it produces.
+    tags:
+    - Resource Group
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - term: ActAmendmentsResponse
+    definition: 'Object declared by the contract with fields: actId, resolvedFrom, title, totalFootnotes, footnotes, typeCounts, page, pageSize,
+      hasMore, meta.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActAmendmentsResponse
+  - term: ActCitedByResponse
+    definition: 'Object declared by the contract with fields: actId, title, citation, citers, total, totalIsExact, returned, page, pageSize, hasMore,
+      truncated, matchBasis. (3 more)'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActCitedByResponse
+  - term: ActDefinitionsResponse
+    definition: 'Object declared by the contract with fields: actId, citation, terms, total, returned, page, pageSize, hasMore, definitionSections,
+      totalDefinitionSections, note, resolvedFrom. (1 more)'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActDefinitionsResponse
+  - term: ActFilterValue
+    definition: 'Object declared by the contract with fields: value, count.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActFilterValue
+  - term: ActFiltersData
+    definition: 'Object declared by the contract with fields: categories, states, departments, truncated.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActFiltersData
+  - term: ActFiltersResponse
+    definition: 'Object declared by the contract with fields: data, meta.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActFiltersResponse
+  - term: ActListItem
+    definition: Lightweight act summary for browsing and discovery.
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActListItem
+  - term: ActListResponse
+    definition: 'Object declared by the contract with fields: results, total, page, pageSize, hasMore, meta, note.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActListResponse
+  - term: ActMeta
+    definition: 'What this call cost and how long it took. 🔴 Added 2026-09-06. Five of the six original routes returned NO statement of what they
+      billed: `/text` (3 credits), `/amendments` (5), `/list` (1), `/filters` (0) and `/corresponding-provisions` (1). The house rule on the US
+      surface is that `creditsConsumed` is the CONTRACT and the list price is not, and it matters most exactly where refunds happen -- `/te'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActMeta
+  - term: ActReferencesResponse
+    definition: 'Object declared by the contract with fields: actId, sectionNumber, citation, acts, sections, totalActs, totalSections, truncated,
+      matchBasis, note, resolvedFrom, meta.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActReferencesResponse
+  - term: ActSearchData
+    definition: 'Object declared by the contract with fields: results, totalReturned.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActSearchData
+  - term: ActSearchMeta
+    definition: 'Object declared by the contract with fields: processingTimeMs, creditsConsumed, creditsRemaining, page, pageSize, total, totalPages.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActSearchMeta
+  - term: ActSearchRequest
+    definition: Search Indian legislation by semantic query.
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActSearchRequest
+  - term: ActSearchResponse
+    definition: 'Object declared by the contract with fields: data, meta.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActSearchResponse
+  - term: ActSearchResult
+    definition: A single legislation search result with full metadata.
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActSearchResult
+  - term: ActSection
+    definition: 'Object declared by the contract with fields: actId, title, sectionNumber, sectionTitle, subSection, titleRegional, chapter, chapterTitle,
+      part, partTitle, year, category. (24 more)'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActSection
+  - term: ActSectionBodyResponse
+    definition: 'Object declared by the contract with fields: actId, sectionNumber, citation, text, available, note, wordCount, currency, bodyProvenance,
+      provenance, resolvedFrom, meta.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActSectionBodyResponse
+  - term: ActSectionHistoryResponse
+    definition: 'Object declared by the contract with fields: actId, sectionNumber, citation, events, total, hasMore, offset, coverage, asOf,
+      resolvedFrom, meta.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActSectionHistoryResponse
+  - term: ActSectionResponse
+    definition: 'Object declared by the contract with fields: section, resolvedFrom, meta.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActSectionResponse
+  - term: ActStatusResponse
+    definition: 'Object declared by the contract with fields: actId, title, citation, goodLawStatus, goodLawReason, publisherStatus, servedStatus,
+      isSubordinate, delegationType, parentActName, commencementInfo, territorialExtent. (14 more)'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActStatusResponse
+  - term: ActStructureResponse
+    definition: 'Object declared by the contract with fields: actId, title, citation, nodes, sectionCount, hasHierarchy, truncated, resolvedFrom,
+      meta.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActStructureResponse
+  - term: ActSubordinateResponse
+    definition: 'Object declared by the contract with fields: actId, title, citation, children, total, totalIsExact, returned, page, pageSize,
+      hasMore, truncated, matchBasis. (3 more)'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActSubordinateResponse
+  - term: ActTextResponse
+    definition: 'Object declared by the contract with fields: actId, resolvedFrom, title, year, category, textUrl, pdfUrl, htmlUrl, chunksCount,
+      isSubordinate, issuedDate, meta. (1 more)'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActTextResponse
+  - term: AmendmentEvent
+    definition: 'Object declared by the contract with fields: effectId, action, amendingAct, amendingActKind, amendingActYear, amendingSection,
+      effectiveDate, effectiveDateSource, originalText, publisherNote, appliedStatus, appliedNote.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/AmendmentEvent
+  - term: ApiCreditCostResponse
+    definition: Single endpoint credit cost for the pricing matrix.
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ApiCreditCostResponse
+  - term: ApiCreditPricingResponse
+    definition: Full pricing information for the API credit system. USD only.
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ApiCreditPricingResponse
+  - term: ApiDetailError
+    definition: 'Error envelope the API actually returns. Every error (400/401/402/403/404/405/422/429/5xx) carries a `detail` string, e.g. `{"detail":
+      "Insufficient API credits."}`, on every mount of the API. A 422 adds `errors`, one entry per rejected field. Some 404s add endpoint-specific
+      diagnosis beside `detail` (the statutes section routes add `actId`, `reason` and `didYouMean`); treat unknown keys as option'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ApiDetailError
+  - term: ApiFieldError
+    definition: One rejected field in a 422 response.
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ApiFieldError
+  - term: AsOfAnswer
+    definition: A dated question answered with a TIMELINE, never with reconstructed text. We hold amendment EVENTS and no versioned text, so there
+      is no honest way to render this provision as it stood on a date. Returning current text under a date parameter would be a wrong answer shaped
+      like a right one.
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/AsOfAnswer
+  - term: CategoryLegend
+    definition: 'Object declared by the contract with fields: value, meaning.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/CategoryLegend
+  - term: Citation
+    definition: 'How to cite the thing this response is about. Built from the publisher''s own title, so where that title carries a defect so
+      does the citation: some titles end in a period, which reads as `... Act., s. 3`, and some carry no year at all. Those are recorded defects
+      rather than reasons to withhold the field. `GET /acts/coverage` publishes how many served acts carry a citation, as `depth.actsWithCitati'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/Citation
+  - term: CitedByRow
+    definition: 'Object declared by the contract with fields: actId, title, citation, sectionNumber, sectionTitle.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/CitedByRow
+  - term: CorrespondingProvisionItem
+    definition: 'Object declared by the contract with fields: oldAct, oldSection, newAct, newSection, subject, effectiveDate.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/CorrespondingProvisionItem
+  - term: CorrespondingProvisionsResponse
+    definition: 'Object declared by the contract with fields: oldAct, newAct, effectiveDate, provisions, total, coverage, meta.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/CorrespondingProvisionsResponse
+  - term: CoverageCount
+    definition: 'A live facet hit. `passages` is what a Qdrant facet can actually count. It is NOT an act count and must not be read as one: a
+      section spans several passages and an act many sections. Act-level figures live in `totals` and carry their own measurement date.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/CoverageCount
+  - term: CoverageData
+    definition: 'Object declared by the contract with fields: totals, depth, byCategory, byJurisdiction, categoryLegend, byRegulator, byStatus,
+      caveats.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/CoverageData
+  - term: CoverageDepth
+    definition: The corpus against the four questions worth asking of it. Text held, structure held, amendments recorded and repeals recorded
+      are INDEPENDENT columns. A single "we have it" number would hide which of them is true for a given act.
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/CoverageDepth
+  - term: CoverageResponse
+    definition: 'Object declared by the contract with fields: data, meta.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/CoverageResponse
+  - term: CoverageTotals
+    definition: 'Object declared by the contract with fields: acts, actsRetired, sections, passages, measuredOn.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/CoverageTotals
+  - term: CreditExpiry
+    definition: The soonest expiry, and what dies with it.
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/CreditExpiry
+  - term: CreditRateLimit
+    definition: 'Request-rate ceilings in force for the calling key. A SECOND, independent ceiling alongside credits, and the two are unrelated:
+      you can hold credits and still be throttled, or sit far under these limits and be refused for an empty balance.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/CreditRateLimit
+  - term: CreditSourceBreakdown
+    definition: Live credits held under one funding source.
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/CreditSourceBreakdown
+  - term: DefinedTerm
+    definition: 'Object declared by the contract with fields: term, sectionNumber.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/DefinedTerm
+  - term: ExternalCreditBalanceResponse
+    definition: Spendable credit balance for the calling API key's account.
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ExternalCreditBalanceResponse
+  - term: FootnoteItem
+    definition: 'Object declared by the contract with fields: sectionNumber, sectionTitle, footnoteId, footnoteText, footnoteType, byAct, originalText,
+      effectiveDate, effectiveDateRaw.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/FootnoteItem
+  - term: HTTPValidationError
+    definition: 'Object declared by the contract with fields: detail.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/HTTPValidationError
+  - term: HistoryCoverage
+    definition: 'Object declared by the contract with fields: publisherClaimsAmendments, structuredEventsHeld, eventsWithDate, note.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/HistoryCoverage
+  - term: IdentifierResolution
+    definition: How the act_id or section number you sent was matched, when not as sent. Present only when the input did NOT match exactly. Absent
+      (null) means the response is about exactly the act_id and section number in your request. Same idea, and the same field name, as `resolvedFrom`
+      on the US surface.
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/IdentifierResolution
+  - term: JurisdictionCoverage
+    definition: Acts and sections held for one jurisdiction, in the unit a lawyer thinks in. Passage counts answer "how big is the index"; act
+      and section counts answer "how much law do you hold". Only the second is a question anyone asks.
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/JurisdictionCoverage
+  - term: Meta
+    definition: 'Object declared by the contract with fields: processingTimeMs, creditsConsumed.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/Meta
+  - term: ParentAct
+    definition: The act a subordinate instrument was made under, and how to fetch it. 🔴 Resolved by TITLE, not by `parent_act_id`. The stored
+      `parent_act_id` values are India Code's own opaque ids and none of them is an `act_id` in this corpus, so the obvious join resolves nothing.
+      The link is made by matching `parent_act_name` against a served act title, which misses where the publisher spelled the title differe
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ParentAct
+  - term: ParsedPinpoint
+    definition: What we read out of the citation, so a caller can see our reading.
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ParsedPinpoint
+  - term: Provenance
+    definition: 'Object declared by the contract with fields: sourceUrl, sourceUrlNote, textUrl, pdfUrl.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/Provenance
+  - term: ReferencedAct
+    definition: 'Object declared by the contract with fields: title, actId, resolved.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ReferencedAct
+  - term: ReferencedSection
+    definition: 'Object declared by the contract with fields: sectionNumber, sectionTitle.'
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ReferencedSection
+  - term: RepealClaim
+    definition: The publisher's claim about repeal, with our caveat attached. Never flattened into a verdict. India Code lists the Industrial
+      Disputes Act, 1947 as repealed by Act 37 of 2020, the Industrial Relations Code, which has never been brought into force. Serving that as
+      flatly "repealed" would be wrong.
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/RepealClaim
+  - term: ResolveBatchRequest
+    definition: Up to 50 citations, priced per citation.
+    tags:
+    - Object
+    source: openapi/vaquill-ai-india-openapi.yml#/components/schemas/ResolveBatchRequest

@@ -1,0 +1,2593 @@
+openapi: 3.2.0
+info:
+  title: Vaquill Ai Reviews API
+  version: 1.0.0
+  description: 'Operations tagged Reviews across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.vaquill.ai/workspace
+  description: Vaquill Legal Workspace API (production)
+- url: /workspace
+  description: Vaquill Legal Workspace API (relative to the mount)
+security:
+- WorkspaceAuth: []
+tags:
+- name: Reviews
+  description: 'Reviewing one contract against a playbook: clause analysis, redlines, flags, liability exposure and a reported sign-off gate. Export applies the redlines as native Word tracked changes.'
+paths:
+  /v1/matters/{matterId}/reviews:
+    post:
+      tags:
+      - Reviews
+      summary: Review a contract against a playbook
+      description: 'Queue a contract review. 202 with an operation to poll.
+
+
+        A retry carrying the same `Idempotency-Key` returns the original operation
+
+        and starts nothing, which is what makes a client timeout free rather than a
+
+        second billed review of the same contract.'
+      operationId: reviews.create
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: Idempotency-Key
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency-Key
+        description: A unique value of your choosing, so a retried launch returns the FIRST operation instead of starting a second billable job. Reusing one with a different body is refused. Retrying with the same key and the same body is free and is the intended way to recover from a timeout.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewCreateRequest'
+            example:
+              documentText: 'MASTER SERVICES AGREEMENT
+
+
+                This Master Services Agreement is entered into as of 1 September 2026 between Acme Corporation, a Delaware corporation, and the Supplier identified on the signature page.
+
+
+                8. LIMITATION OF LIABILITY. Supplier''s total liability shall be unlimited for any claim arising out of this Agreement.
+
+
+                12. GOVERNING LAW. This Agreement is governed by the laws of the State of Delaware.'
+              contractType: saas
+              userSide: vendor
+              playbookId: pbk_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+              jurisdiction: US
+              focusAreas:
+              - value
+              reviewInstructions: Pay particular attention to the indemnity carve-outs.
+              markupLevel: light
+              paperSide: own
+              round: 1
+              priorRoundText: 8. LIMITATION OF LIABILITY. Supplier's total liability shall not exceed the fees paid in the preceding twelve months.
+              counterpartyResponseText: 8. LIMITATION OF LIABILITY. Supplier's total liability shall not exceed three times the fees paid in the preceding twelve months.
+              dealContext:
+                contractValue: 1500000
+                governingLaw: value
+              depth: standard
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operation'
+              example:
+                id: op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                type: matrix.run
+                status: succeeded
+                createdAt: '2026-08-19T14:32:10Z'
+                completedAt: '2026-08-19T14:32:10Z'
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                resource:
+                  kind: matrix
+                  id: mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  url: https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+                progress:
+                  done: 24
+                  total: 128
+                  unit: cells
+                requestId: req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    get:
+      tags:
+      - Reviews
+      summary: List contract reviews in a matter
+      description: 'Every review in this matter, newest first.
+
+
+        A listed review carries its status, its findings summary and its timestamps.
+
+        The fields that describe what was ASKED FOR (`contractType`, `userSide`,
+
+        `playbookId`, `jurisdiction`, `round`) are absent from a list and present on
+
+        a `GET` by id: they live alongside the contract text, and returning them per
+
+        row would mean pulling every contract in the page across the wire.'
+      operationId: reviews.list
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: How many rows to return, 1 to 200. Defaults to 50.
+          default: 50
+          title: Limit
+        description: How many rows to return, 1 to 200. Defaults to 50.
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+          default: 0
+          title: Offset
+        description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_Review_'
+              example:
+                data:
+                - id: rev_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  status: succeeded
+                  contractType: msa
+                  userSide: buyer
+                  playbookId: value
+                  jurisdiction: US
+                  round: 1
+                  summary: Twelve substantive changes, seven of them in the liability and indemnity sections.
+                  overallRisk: yellow
+                  businessImpactSummary: Two changes shift risk toward us; the rest are housekeeping.
+                  approvalGate:
+                    required: false
+                    level: partner
+                    dealBreakerCount: 1
+                    reasons:
+                    - clauseName: Limitation of Liability
+                      approvalLevel: partner
+                      isDealBreaker: false
+                      note: 'Escalated to GC: deal value over $1M.'
+                    summary: Twelve substantive changes, seven of them in the liability and indemnity sections.
+                  liabilityExposure:
+                    exposureLevel: yellow
+                    verdict: Liability is capped at fees paid in the preceding twelve months.
+                    capStatus: capped
+                    capAmount: Fees paid in the preceding twelve months
+                    capQuote: shall not exceed the fees paid in the preceding twelve months
+                    grounding: verified
+                    capScope: aggregate
+                    capAdequate: false
+                    mutualCap: false
+                    consequentialDamagesExcluded: false
+                    uncappedCarveouts:
+                    - Indemnity for IP infringement
+                    - Confidentiality breach
+                    supercap: Two times fees for data-security breaches
+                    indemnityExposure: Uncapped for third-party IP claims.
+                    insuranceRequired: $5M commercial general liability
+                    claimTimeBar: Claims must be brought within 12 months.
+                  counterpartyMatch:
+                    name: Acme Corporation
+                    vendor: Acme Corporation
+                    flexibility: limited
+                    negotiationStrategyNote: This paper is rarely amended below the enterprise tier; lead with the liability cap.
+                    counterpartyRedlinesCount: 4
+                  clauses:
+                  - clauseName: Limitation of Liability
+                    clauseType: limitation_of_liability
+                    sectionReference: '8.2'
+                    currentLanguage: Supplier's total liability shall be unlimited.
+                    severity: yellow
+                    analysis: The clause is uncapped and departs from the playbook's standard position.
+                    riskDescription: Unlimited liability for a breach we cannot fully control.
+                    playbookPosition: Cap liability at fees paid in the preceding twelve months.
+                    approvalLevel: partner
+                    isDealBreaker: false
+                  redlines:
+                  - clauseName: Limitation of Liability
+                    sectionReference: '8.2'
+                    currentLanguage: Supplier's total liability shall be unlimited.
+                    proposedLanguage: Supplier's total liability shall not exceed the fees paid in the preceding twelve months.
+                    rationale: Our standard position caps liability at fees paid in the preceding 12 months.
+                    priority: must_have
+                    fallbackPosition: Two times fees paid in the preceding twelve months.
+                    grounding: verified
+                    approvalLevel: partner
+                    isDealBreaker: false
+                    nature: substantive
+                  negotiationPriorities:
+                  - tier: 1
+                    tierLabel: Must have
+                    items:
+                    - Cap liability
+                    - Remove uncapped indemnity
+                  missingClauses:
+                  - Force Majeure
+                  flags:
+                  - clauseName: Limitation of Liability
+                    sectionReference: '8.2'
+                    observation: The counterparty entity name differs from the one on the signature block.
+                  parseWarning: Two clauses could not be parsed and are omitted from the findings.
+                  deep:
+                    clausesReviewed: 1
+                    redlinesKept: 1
+                    clearedAsCompliant: 1
+                    clauseLimit: 40
+                    clausesTruncated: false
+                  createdAt: '2026-08-19T14:32:10Z'
+                  completedAt: '2026-08-19T14:32:10Z'
+                pagination:
+                  limit: 50
+                  offset: 0
+                  total: 128
+                  hasMore: false
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/reviews/{reviewId}:
+    get:
+      tags:
+      - Reviews
+      summary: Get a contract review
+      description: 'One review: its findings, or its progress toward them.
+
+
+        404 covers every reason it is not readable, including a job of a different
+
+        kind that happens to share the table.'
+      operationId: reviews.get
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: reviewId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Reviewid
+        description: '`rev_` identifier of the contract review. Returned on the operation that launched it, at either depth.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+              example:
+                id: rev_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                status: succeeded
+                contractType: msa
+                userSide: buyer
+                playbookId: value
+                jurisdiction: US
+                round: 1
+                summary: Twelve substantive changes, seven of them in the liability and indemnity sections.
+                overallRisk: yellow
+                businessImpactSummary: Two changes shift risk toward us; the rest are housekeeping.
+                approvalGate:
+                  required: false
+                  level: partner
+                  dealBreakerCount: 1
+                  reasons:
+                  - clauseName: Limitation of Liability
+                    approvalLevel: partner
+                    isDealBreaker: false
+                    note: 'Escalated to GC: deal value over $1M.'
+                  summary: Twelve substantive changes, seven of them in the liability and indemnity sections.
+                liabilityExposure:
+                  exposureLevel: yellow
+                  verdict: Liability is capped at fees paid in the preceding twelve months.
+                  capStatus: capped
+                  capAmount: Fees paid in the preceding twelve months
+                  capQuote: shall not exceed the fees paid in the preceding twelve months
+                  grounding: verified
+                  capScope: aggregate
+                  capAdequate: false
+                  mutualCap: false
+                  consequentialDamagesExcluded: false
+                  uncappedCarveouts:
+                  - Indemnity for IP infringement
+                  - Confidentiality breach
+                  supercap: Two times fees for data-security breaches
+                  indemnityExposure: Uncapped for third-party IP claims.
+                  insuranceRequired: $5M commercial general liability
+                  claimTimeBar: Claims must be brought within 12 months.
+                counterpartyMatch:
+                  name: Acme Corporation
+                  vendor: Acme Corporation
+                  flexibility: limited
+                  negotiationStrategyNote: This paper is rarely amended below the enterprise tier; lead with the liability cap.
+                  counterpartyRedlinesCount: 4
+                clauses:
+                - clauseName: Limitation of Liability
+                  clauseType: limitation_of_liability
+                  sectionReference: '8.2'
+                  currentLanguage: Supplier's total liability shall be unlimited.
+                  severity: yellow
+                  analysis: The clause is uncapped and departs from the playbook's standard position.
+                  riskDescription: Unlimited liability for a breach we cannot fully control.
+                  playbookPosition: Cap liability at fees paid in the preceding twelve months.
+                  approvalLevel: partner
+                  isDealBreaker: false
+                redlines:
+                - clauseName: Limitation of Liability
+                  sectionReference: '8.2'
+                  currentLanguage: Supplier's total liability shall be unlimited.
+                  proposedLanguage: Supplier's total liability shall not exceed the fees paid in the preceding twelve months.
+                  rationale: Our standard position caps liability at fees paid in the preceding 12 months.
+                  priority: must_have
+                  fallbackPosition: Two times fees paid in the preceding twelve months.
+                  grounding: verified
+                  approvalLevel: partner
+                  isDealBreaker: false
+                  nature: substantive
+                negotiationPriorities:
+                - tier: 1
+                  tierLabel: Must have
+                  items:
+                  - Cap liability
+                  - Remove uncapped indemnity
+                missingClauses:
+                - Force Majeure
+                flags:
+                - clauseName: Limitation of Liability
+                  sectionReference: '8.2'
+                  observation: The counterparty entity name differs from the one on the signature block.
+                parseWarning: Two clauses could not be parsed and are omitted from the findings.
+                deep:
+                  clausesReviewed: 1
+                  redlinesKept: 1
+                  clearedAsCompliant: 1
+                  clauseLimit: 40
+                  clausesTruncated: false
+                createdAt: '2026-08-19T14:32:10Z'
+                completedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      tags:
+      - Reviews
+      summary: Delete a contract review
+      description: 'Delete a review and its findings.
+
+
+        The contract itself is untouched: a review takes contract TEXT rather than a
+
+        document, so nothing in the matter depends on this row.
+
+
+        Refused with `409 operation-in-flight` while the review is still running.
+
+        Poll the operation that started it first.
+
+
+        There is no undo, and a repeated delete answers `404`. If a delete timed
+
+        out, treat a subsequent `404` as success.'
+      operationId: reviews.delete
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: reviewId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Reviewid
+        description: '`rev_` identifier of the contract review. Returned on the operation that launched it, at either depth.'
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/reviews/{reviewId}/exports:
+    post:
+      tags:
+      - Reviews
+      summary: Export a reviewed contract with redlines applied
+      description: 'Mint a short-lived URL to the contract with its redlines applied.
+
+
+        A POST rather than a GET because it creates something: a bearer URL over a
+
+        client document, and a rendering that did not exist before. Recording that as
+
+        a creation is what lets an audit answer who took a copy and when.'
+      operationId: reviews.export
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: reviewId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Reviewid
+        description: '`rev_` identifier of the contract review. Returned on the operation that launched it, at either depth.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewExportRequest'
+            example:
+              redlines:
+              - clauseName: Limitation of Liability
+                currentLanguage: Supplier's total liability shall be unlimited.
+                replacementLanguage: Supplier's total liability shall not exceed the fees paid in the preceding twelve months.
+                sectionReference: '8.2'
+                comment: value
+              trackedChanges: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewExport'
+              example:
+                format: docx
+                filename: msa-acme-v3.docx
+                url: https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+                expiresAt: '2026-08-19T14:32:10Z'
+                sizeBytes: 248193
+                redlineCount: 9
+                trackedChanges: false
+                approvalGate:
+                  required: false
+                  level: partner
+                  dealBreakerCount: 1
+                  reasons:
+                  - clauseName: Limitation of Liability
+                    approvalLevel: partner
+                    isDealBreaker: false
+                    note: 'Escalated to GC: deal value over $1M.'
+                  summary: Twelve substantive changes, seven of them in the liability and indemnity sections.
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+components:
+  schemas:
+    ReviewCreateRequest:
+      properties:
+        documentText:
+          type: string
+          maxLength: 200000
+          minLength: 100
+          title: Documenttext
+          description: 'The full contract text to review, 100 to 200,000 characters. Text rather than a document id: a review reads one contract end to end and the caller usually has it in hand.'
+          examples:
+          - 'MASTER SERVICES AGREEMENT
+
+
+            This Master Services Agreement is entered into as of 1 September 2026 between Acme Corporation, a Delaware corporation, and the Supplier identified on the signature page.
+
+
+            8. LIMITATION OF LIABILITY. Supplier''s total liability shall be unlimited for any claim arising out of this Agreement.
+
+
+            12. GOVERNING LAW. This Agreement is governed by the laws of the State of Delaware.'
+        contractType:
+          $ref: '#/components/schemas/ContractType'
+          description: What kind of contract this is. Determines which playbook and which default positions resolve.
+          examples:
+          - saas
+        userSide:
+          $ref: '#/components/schemas/UserSide'
+          description: Which side of the deal you are on. The review argues for this side.
+          examples:
+          - vendor
+        playbookId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Playbookid
+          description: '`pbk_` identifier of the playbook to review against. Omit to run against the built-in default positions for `jurisdiction`, which is a real answer rather than a degraded one.'
+          examples:
+          - pbk_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        jurisdiction:
+          type: string
+          pattern: ^([A-Z]{2}|INTL)$
+          title: Jurisdiction
+          description: Two-letter uppercase jurisdiction code, or `INTL`. Selects the default positions when no playbook is named.
+          default: US
+          examples:
+          - US
+        focusAreas:
+          anyOf:
+          - items:
+              type: string
+              maxLength: 80
+              minLength: 1
+            type: array
+            maxItems: 50
+          - type: 'null'
+          title: Focusareas
+          description: Narrow the review to these areas of concern. Omit to review the whole contract.
+          examples:
+          - - value
+        reviewInstructions:
+          anyOf:
+          - type: string
+            maxLength: 2000
+          - type: 'null'
+          title: Reviewinstructions
+          description: Extra instructions for this review only, layered on top of the playbook.
+          examples:
+          - Pay particular attention to the indemnity carve-outs.
+        markupLevel:
+          type: string
+          enum:
+          - light
+          - standard
+          - firm
+          title: Markuplevel
+          description: How aggressively to mark up. `light` flags only escalation triggers, `standard` marks up gaps to the preferred position, `firm` hard-lines every deviation.
+          default: standard
+          examples:
+          - light
+        paperSide:
+          anyOf:
+          - type: string
+            enum:
+            - own
+            - counterparty
+          - type: 'null'
+          title: Paperside
+          description: Whose paper this is. `own` defends your drafted positions; `counterparty` marks up their form assertively. Orthogonal to `userSide`. Omit if unknown, which costs only prompt specificity.
+          examples:
+          - own
+        round:
+          type: integer
+          maximum: 10.0
+          minimum: 1.0
+          title: Round
+          description: Negotiation round. 2 and above tells the reviewer the counterparty has already responded, so it proposes minimal edits toward the fallback rather than restating the preferred position.
+          default: 1
+          examples:
+          - 1
+        priorRoundText:
+          anyOf:
+          - type: string
+            maxLength: 200000
+          - type: 'null'
+          title: Priorroundtext
+          description: Your last sent version, at round 2 and above, so the reviewer can compute a real diff instead of guessing what changed and undoing settled language.
+          examples:
+          - 8. LIMITATION OF LIABILITY. Supplier's total liability shall not exceed the fees paid in the preceding twelve months.
+        counterpartyResponseText:
+          anyOf:
+          - type: string
+            maxLength: 200000
+          - type: 'null'
+          title: Counterpartyresponsetext
+          description: The counterparty's response, when it differs from `documentText`. Most callers paste the response straight into `documentText`, in which case leave this out.
+          examples:
+          - 8. LIMITATION OF LIABILITY. Supplier's total liability shall not exceed three times the fees paid in the preceding twelve months.
+        dealContext:
+          anyOf:
+          - $ref: '#/components/schemas/ReviewDealContext'
+          - type: 'null'
+          description: Deal attributes the playbook's conditional escalation rules evaluate.
+        depth:
+          type: string
+          enum:
+          - standard
+          - deep
+          title: Depth
+          description: '`standard` runs the first-pass review. `deep` additionally re-drafts every flagged clause with the deep model, grounds each quote against the contract, drops first-pass false positives and stamps a sign-off level, so each redline''s `grounding` is a fact rather than a default. It takes several times as long and verifies at most 40 flagged clauses. `focusAreas`, `reviewInstructions`, `markupLevel`, `round`, `priorRoundText` and `counterpartyResponseText` are not supported at this depth and are refused rather than ignored.'
+          default: standard
+          examples:
+          - standard
+      additionalProperties: false
+      type: object
+      required:
+      - documentText
+      - contractType
+      - userSide
+      title: ReviewCreateRequest
+      description: 'Start a review of one contract against one playbook.
+
+
+        `contractType` and `userSide` are the internal enums by REFERENCE rather than
+
+        by copy. They are the taxonomy the whole product is built on, guarded in both
+
+        directions by `app/tests/unit/test_contract_type_taxonomy.py`, and a second
+
+        hand-maintained copy here would be a fourth layer for that guard to police.
+
+        Widening the taxonomy widens this API additively, which is correct.'
+    ContractType:
+      type: string
+      enum:
+      - saas
+      - professional_services
+      - msa
+      - sow
+      - consulting
+      - license
+      - sale
+      - partnership
+      - procurement
+      - vendor_agreement
+      - reseller_distribution
+      - supply
+      - lease
+      - loan
+      - eula
+      - terms_of_service
+      - baa
+      - order_form
+      - nda
+      - dpa
+      - ip_assignment
+      - employment
+      - executive_employment
+      - independent_contractor
+      - offer_letter
+      - severance_agreement
+      - non_compete
+      - asset_purchase
+      - stock_purchase
+      - merger_agreement
+      - shareholders_agreement
+      - operating_agreement
+      - safe
+      - term_sheet
+      - settlement_agreement
+      - engagement_letter
+      - protective_order
+      - joint_defense
+      - other
+      title: ContractType
+      description: 'Contract types a playbook can encode negotiation positions for.
+
+
+        A playbook is a set of clause-level negotiation positions, so this list
+
+        covers contracts you negotiate clause-by-clause. Documents you only
+
+        *generate* (litigation pleadings, notices) live in `DraftCategory`
+
+        (`app/models/drafting_schemas.py`), NOT here.
+
+
+        Each value backs a `legal_playbooks.contract_type` row, so adding one
+
+        requires a DB migration to extend the CHECK constraint (see
+
+        `20260502160000_expand_playbook_contract_type_dpa_vendor_ip.sql`,
+
+        `20260612130000_expand_playbook_contract_type_msa_sale_sow_consulting.sql`,
+
+        and `20260702120000_expand_playbook_contract_type_gc_litigation.sql`).
+
+        Kept in sync with the FE `ContractType` union + `CONTRACT_TYPE_LABELS`
+
+        (`frontend/src/types/legal-tools.ts`); the drift-guard in
+
+        `app/tests/unit/test_contract_type_taxonomy.py` asserts all three layers
+
+        both ways and fails fast if they diverge.'
+    Problem:
+      type: object
+      title: Problem
+      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: true
+    Review:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `rev_` followed by 32 hex characters.
+          examples:
+          - rev_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        matterId:
+          type: string
+          title: Matterid
+          description: '`mat_` identifier of the matter this review belongs to.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: Review status, using the same five public values as an operation. While `queued` or `running`, every findings list is empty and the scalar fields are absent. That is the truthful shape of a review that has not happened yet, not an error.
+          examples:
+          - succeeded
+        contractType:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Contracttype
+          description: Contract type the review ran as, echoed from the request.
+          examples:
+          - msa
+        userSide:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Userside
+          description: Which side the review argued for, echoed from the request.
+          examples:
+          - buyer
+        playbookId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Playbookid
+          description: The playbook the review actually ran against. Absent when it ran against the built-in defaults, so the two cases can be told apart after the fact.
+          examples:
+          - pbk_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        jurisdiction:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Jurisdiction
+          description: Jurisdiction the review ran under.
+          examples:
+          - US
+        round:
+          type: integer
+          title: Round
+          description: Negotiation round this review was run for.
+          default: 1
+          examples:
+          - 1
+        summary:
+          type: string
+          title: Summary
+          description: Prose summary of the review's conclusions.
+          default: ''
+          examples:
+          - Twelve substantive changes, seven of them in the liability and indemnity sections.
+        overallRisk:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Overallrisk
+          description: 'Overall risk rating for the contract: `green`, `yellow` or `red`.'
+          examples:
+          - yellow
+        businessImpactSummary:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Businessimpactsummary
+          description: What the findings mean commercially, in plain language.
+          examples:
+          - Two changes shift risk toward us; the rest are housekeeping.
+        approvalGate:
+          anyOf:
+          - $ref: '#/components/schemas/ReviewApprovalGate'
+          - type: 'null'
+          description: Whether a human should sign this off before it goes out. Reported, never enforced.
+        liabilityExposure:
+          anyOf:
+          - $ref: '#/components/schemas/ReviewLiabilityExposure'
+          - type: 'null'
+          description: 'How much you are on the hook for: caps, carve-outs, indemnities and insurance.'
+        counterpartyMatch:
+          anyOf:
+          - $ref: '#/components/schemas/ReviewCounterpartyMatch'
+          - type: 'null'
+          description: Set when a known counterparty paper was recognized, which means the findings include counterparty-specific redlines layered on the general analysis.
+        clauses:
+          items:
+            $ref: '#/components/schemas/ReviewClause'
+          type: array
+          title: Clauses
+          description: Every clause analyzed, with its severity against the playbook position.
+        redlines:
+          items:
+            $ref: '#/components/schemas/ReviewRedline'
+          type: array
+          title: Redlines
+          description: Proposed edits, ready to send to counterparty counsel. Check each one's `grounding` before applying it automatically.
+        negotiationPriorities:
+          items:
+            $ref: '#/components/schemas/ReviewNegotiationPriority'
+          type: array
+          title: Negotiationpriorities
+          description: What to raise first and what to trade, in tiers.
+        missingClauses:
+          items:
+            type: string
+          type: array
+          title: Missingclauses
+          description: Standard clauses ABSENT from the contract. The one finding that cannot be expressed as a clause analysis, because there is no clause to analyze.
+          examples:
+          - - Force Majeure
+        flags:
+          items:
+            $ref: '#/components/schemas/ReviewFlag'
+          type: array
+          title: Flags
+          description: 'Things the reviewer noticed and deliberately did not redline: a wrong entity name, an odd schedule entry, a real ambiguity. Confirm these with a human before signing.'
+        parseWarning:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Parsewarning
+          description: Set when the model's output only partly parsed, which means the findings may be incomplete. Present is the difference between acting on the findings and asking a human first.
+          examples:
+          - Two clauses could not be parsed and are omitted from the findings.
+        deep:
+          anyOf:
+          - $ref: '#/components/schemas/ReviewDeepMeta'
+          - type: 'null'
+          description: What the deep verification pass did. Absent on a standard review, which is the signal that no verification ran rather than that it found nothing.
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the review was created (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        completedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Completedat
+          description: When the review reached a terminal status (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - matterId
+      - status
+      - createdAt
+      title: Review
+      description: 'One contract review: its findings, or its progress toward them.'
+    ReviewDeepMeta:
+      properties:
+        clausesReviewed:
+          type: integer
+          title: Clausesreviewed
+          description: How many first-pass flagged clauses the deep pass verified.
+          examples:
+          - 1
+        redlinesKept:
+          type: integer
+          title: Redlineskept
+          description: How many survived verification and are in `redlines`.
+          examples:
+          - 1
+        clearedAsCompliant:
+          type: integer
+          title: Clearedascompliant
+          description: How many first-pass flags the deep pass cleared as already compliant, and therefore dropped. Fewer false positives is the point of running deep.
+          examples:
+          - 1
+        clauseLimit:
+          type: integer
+          title: Clauselimit
+          description: The ceiling on how many flagged clauses a deep review verifies, currently 40.
+          default: 40
+          examples:
+          - 40
+        clausesTruncated:
+          type: boolean
+          title: Clausestruncated
+          description: True when the deep pass hit its 40-clause ceiling, which means first-pass flags beyond it were NOT verified and are NOT in `redlines`. Treat the review as covering the first 40 findings only. A boolean rather than a count because the number dropped is not recorded anywhere upstream.
+          default: false
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - clausesReviewed
+      - redlinesKept
+      - clearedAsCompliant
+      title: ReviewDeepMeta
+      description: 'What the deep verification pass did, present only when one ran.
+
+
+        Absent on a standard review, which is the honest signal that no verification
+
+        happened rather than a zeroed object implying one found nothing.
+
+
+        `estimatedCostUsd` is dropped on the way through. It is our spend and our
+
+        model choice, and it is on the list of things a published DTO always drops.'
+    OperationProgress:
+      properties:
+        done:
+          type: integer
+          minimum: 0.0
+          title: Done
+          description: How many units are finished.
+          examples:
+          - 24
+        total:
+          type: integer
+          minimum: 0.0
+          title: Total
+          description: How many units there are in total. Can legitimately be zero for an empty run.
+          examples:
+          - 128
+        unit:
+          type: string
+          enum:
+          - cells
+          - steps
+          - documents
+          - files
+          - rows
+          - percent
+          title: Unit
+          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
+          examples:
+          - cells
+      additionalProperties: false
+      type: object
+      required:
+      - done
+      - total
+      - unit
+      title: OperationProgress
+      description: 'How far along, and in what units.
+
+
+        The unit is not decoration. A workflow run stores only a percentage while a
+
+        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
+
+        as 43 of 100 documents and a client builds a wrong estimate from it.'
+    ReviewExportRequest:
+      properties:
+        redlines:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/AcceptedRedline'
+            type: array
+            maxItems: 500
+          - type: 'null'
+          title: Redlines
+          description: Which edits to apply. Omit to apply EVERY redline the review produced, which is the common case for an integration that triaged them elsewhere. Supply them to apply a subset, or edits you wrote yourself.
+        trackedChanges:
+          type: boolean
+          title: Trackedchanges
+          description: True renders native Word tracked changes, so the counterparty accepts or rejects each edit in the Review pane. False renders colored strikethrough and underline, which is viewable anywhere but is not real revisions.
+          default: true
+          examples:
+          - true
+      additionalProperties: false
+      type: object
+      title: ReviewExportRequest
+      description: 'Which of a review''s redlines to apply, and how to mark them up.
+
+
+        Omitting `redlines` applies EVERY redline the review produced, which is the
+
+        common case for an integration that has already triaged them elsewhere.
+
+        Supplying them is how a caller applies a subset, or applies edits it wrote
+
+        itself after reading the review.'
+    OperationResource:
+      properties:
+        kind:
+          type: string
+          title: Kind
+          description: What sort of thing was produced, for example `matrix` or `document`.
+          examples:
+          - matrix
+        id:
+          type: string
+          title: Id
+          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
+          examples:
+          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+      additionalProperties: false
+      type: object
+      required:
+      - kind
+      - id
+      title: OperationResource
+      description: 'What the operation produced, or is producing.
+
+
+        `url` is a path on this API rather than an absolute URL, because the service
+
+        is mounted today and gets its own hostname later (docs 07.5). A relative
+
+        path survives that move; a baked-in host does not.'
+    Page_Review_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Review'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[Review]
+    ReviewClause:
+      properties:
+        clauseName:
+          type: string
+          title: Clausename
+          description: Human-readable name of the clause, for example 'Limitation of Liability'.
+          examples:
+          - Limitation of Liability
+        clauseType:
+          type: string
+          title: Clausetype
+          description: Clause-type slug the analysis matched, the same key a playbook's `positions` map uses.
+          examples:
+          - limitation_of_liability
+        sectionReference:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectionreference
+          description: Where the clause sits in the contract, for example `8.2`.
+          examples:
+          - '8.2'
+        currentLanguage:
+          type: string
+          title: Currentlanguage
+          description: The exact quote from the contract this analysis is about. Empty when the finding is that the clause is ABSENT, which is the one case with nothing to quote.
+          default: ''
+          examples:
+          - Supplier's total liability shall be unlimited.
+        severity:
+          type: string
+          title: Severity
+          description: 'How far the clause deviates from the playbook position: `green`, `yellow` or `red`. Published as a plain string so a new level cannot break your client.'
+          examples:
+          - yellow
+        analysis:
+          type: string
+          title: Analysis
+          description: What the reviewer concluded about this clause.
+          examples:
+          - The clause is uncapped and departs from the playbook's standard position.
+        riskDescription:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Riskdescription
+          description: What could go wrong if the clause stands as written.
+          examples:
+          - Unlimited liability for a breach we cannot fully control.
+        playbookPosition:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Playbookposition
+          description: The playbook position this clause was measured against.
+          examples:
+          - Cap liability at fees paid in the preceding twelve months.
+        approvalLevel:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Approvallevel
+          description: 'Sign-off a deviation on this clause needs: `none`, `manager`, `partner` or `gc`. Computed server-side by matching the clause to its playbook position, never asserted by the model. Only meaningful when `severity` is not green.'
+          examples:
+          - partner
+        isDealBreaker:
+          type: boolean
+          title: Isdealbreaker
+          description: True when the clause is at or below the playbook's walk-away floor.
+          default: false
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - clauseName
+      - clauseType
+      - severity
+      - analysis
+      title: ReviewClause
+      description: One clause, as analyzed against the playbook position for its type.
+    ReviewRedline:
+      properties:
+        clauseName:
+          type: string
+          title: Clausename
+          description: Which clause this edit applies to.
+          examples:
+          - Limitation of Liability
+        sectionReference:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectionreference
+          description: Where the clause sits in the contract, for example `8.2`.
+          examples:
+          - '8.2'
+        currentLanguage:
+          type: string
+          title: Currentlanguage
+          description: The text to be replaced, as it stands in the contract. Empty for an insertion.
+          default: ''
+          examples:
+          - Supplier's total liability shall be unlimited.
+        proposedLanguage:
+          type: string
+          title: Proposedlanguage
+          description: The replacement text to send to the counterparty.
+          examples:
+          - Supplier's total liability shall not exceed the fees paid in the preceding twelve months.
+        rationale:
+          type: string
+          title: Rationale
+          description: Why this edit is being proposed. Suitable to put in a margin comment.
+          examples:
+          - Our standard position caps liability at fees paid in the preceding 12 months.
+        priority:
+          type: string
+          title: Priority
+          description: 'How hard to push for this edit: `must_have`, `should_have` or `nice_to_have`.'
+          examples:
+          - must_have
+        fallbackPosition:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Fallbackposition
+          description: What to retreat to if this edit is rejected, taken from the playbook's fallback ladder.
+          examples:
+          - Two times fees paid in the preceding twelve months.
+        grounding:
+          type: string
+          title: Grounding
+          description: Whether `currentLanguage` was found verbatim in the contract. `verified` means it was. `unverified` means it was NOT, so the edit may be misanchored. `insertion` means there is nothing to anchor because the clause is missing. An integration applying redlines automatically must stop and ask a human on `unverified`.
+          default: verified
+          examples:
+          - verified
+        approvalLevel:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Approvallevel
+          description: 'Sign-off this edit needs before it goes out: `none`, `manager`, `partner` or `gc`.'
+          examples:
+          - partner
+        isDealBreaker:
+          type: boolean
+          title: Isdealbreaker
+          description: True when the clause this edit addresses is at or below the walk-away floor.
+          default: false
+          examples:
+          - false
+        nature:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Nature
+          description: '`substantive` or `housekeeping`. Absent means unclassified, on a review produced before the pipeline classified this. Absent is NOT the same as `housekeeping`.'
+          examples:
+          - substantive
+      additionalProperties: false
+      type: object
+      required:
+      - clauseName
+      - proposedLanguage
+      - rationale
+      - priority
+      title: ReviewRedline
+      description: One proposed edit, ready to send to counterparty counsel.
+    ReviewCounterpartyMatch:
+      properties:
+        name:
+          type: string
+          title: Name
+          description: Name of the recognized counterparty paper.
+          examples:
+          - Acme Corporation
+        vendor:
+          type: string
+          title: Vendor
+          description: The vendor whose standard form this is.
+          examples:
+          - Acme Corporation
+        flexibility:
+          type: string
+          title: Flexibility
+          description: 'How negotiable this paper is in practice: `rigid`, `limited` or `standard`.'
+          examples:
+          - limited
+        negotiationStrategyNote:
+          type: string
+          title: Negotiationstrategynote
+          description: How to approach negotiating against this specific paper.
+          examples:
+          - This paper is rarely amended below the enterprise tier; lead with the liability cap.
+        counterpartyRedlinesCount:
+          type: integer
+          title: Counterpartyredlinescount
+          description: How many redlines the counterparty overlay contributed on top of the general analysis. A non-zero value means the findings are tuned to this specific paper.
+          default: 0
+          examples:
+          - 4
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - vendor
+      - flexibility
+      - negotiationStrategyNote
+      title: ReviewCounterpartyMatch
+      description: 'A known counterparty paper was recognised in the contract text.
+
+
+        Published so a caller knows the findings include counterparty-specific
+
+        redlines layered on top of the general analysis, which changes how the result
+
+        should be read. The catalogue slug and the phrases that matched are NOT
+
+        published: they are our detection internals, and neither is actionable.'
+    ReviewLiabilityExposure:
+      properties:
+        exposureLevel:
+          type: string
+          title: Exposurelevel
+          description: 'Overall liability exposure from your side: `green`, `yellow` or `red`.'
+          examples:
+          - yellow
+        verdict:
+          type: string
+          title: Verdict
+          description: Plain-language summary of the liability position.
+          default: ''
+          examples:
+          - Liability is capped at fees paid in the preceding twelve months.
+        capStatus:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Capstatus
+          description: 'Whether liability is capped: `capped`, `uncapped`, `partial` or `not_addressed`. Null when it could not be determined.'
+          examples:
+          - capped
+        capAmount:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Capamount
+          description: The cap as written, as a string rather than a number since contracts express it in many forms (a figure, a multiple of fees, a formula).
+          examples:
+          - Fees paid in the preceding twelve months
+        capQuote:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Capquote
+          description: The verbatim contract sentence the cap claim is drawn from, so a headline number can be checked against the source rather than trusted.
+          examples:
+          - shall not exceed the fees paid in the preceding twelve months
+        grounding:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Grounding
+          description: '`verified` when `capQuote` is a literal span of the contract, `unverified` when it could not be found. Same meaning as on a redline.'
+          examples:
+          - verified
+        capScope:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Capscope
+          description: 'What the cap applies across: `per_claim`, `aggregate`, `both` or `unclear`.'
+          examples:
+          - aggregate
+        capAdequate:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Capadequate
+          description: Whether the cap is meaningful against plausible harm and deal value. A cap tied to fees paid to date is inadequate even though a cap exists.
+          examples:
+          - false
+        mutualCap:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Mutualcap
+          description: Whether the cap applies to both sides equally.
+          examples:
+          - false
+        consequentialDamagesExcluded:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Consequentialdamagesexcluded
+          description: Whether consequential and indirect damages are excluded.
+          examples:
+          - false
+        uncappedCarveouts:
+          items:
+            type: string
+          type: array
+          title: Uncappedcarveouts
+          description: Categories of liability that sit OUTSIDE the cap, for example indemnity or confidentiality breaches.
+          examples:
+          - - Indemnity for IP infringement
+            - Confidentiality breach
+        supercap:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Supercap
+          description: A raised cap that applies to specific categories, when the contract sets one.
+          examples:
+          - Two times fees for data-security breaches
+        indemnityExposure:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Indemnityexposure
+          description: What you are indemnifying the counterparty for.
+          examples:
+          - Uncapped for third-party IP claims.
+        insuranceRequired:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Insurancerequired
+          description: Insurance the contract requires you to carry.
+          examples:
+          - $5M commercial general liability
+        claimTimeBar:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Claimtimebar
+          description: Any deadline for bringing a claim under the contract.
+          examples:
+          - Claims must be brought within 12 months.
+      additionalProperties: false
+      type: object
+      required:
+      - exposureLevel
+      title: ReviewLiabilityExposure
+      description: 'How much the reviewer is on the hook for, in one panel.
+
+
+        Every field is nullable and stays nullable. This is assembled defensively
+
+        from LLM output about contract language that may not exist: a contract with
+
+        no liability clause has no cap, and `null` is the true answer rather than a
+
+        zero that reads as "capped at nothing".'
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
+    Operation:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `op_` followed by 32 hex characters. Poll `GET /v1/operations/{operationId}` with it.
+          examples:
+          - op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        type:
+          type: string
+          title: Type
+          description: What kind of work this is, for example `matrix.run` or `draft.generate`.
+          examples:
+          - matrix.run
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: 'One of five values: `queued`, `running`, `succeeded`, `failed`, `cancelled`. There is no sixth and there are no synonyms. Stop polling once it is `succeeded`, `failed` or `cancelled`.'
+          examples:
+          - succeeded
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the operation was accepted (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        completedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Completedat
+          description: When the operation reached a terminal status (RFC 3339). Present if and only if the status is terminal.
+          examples:
+          - '2026-08-19T14:32:10Z'
+        matterId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matterid
+          description: '`mat_` identifier of the matter this work belongs to, when it belongs to one.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        resource:
+          anyOf:
+          - $ref: '#/components/schemas/OperationResource'
+          - type: 'null'
+          description: What the operation produced. Absent until the underlying job row exists, which an idempotent replay can briefly observe, so treat absence as 'not yet' rather than 'never'.
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/OperationError'
+          - type: 'null'
+          description: Why the work failed. Present only when `status` is `failed`. Partial success is `succeeded` with `progress.done < progress.total`, never an error.
+        progress:
+          anyOf:
+          - $ref: '#/components/schemas/OperationProgress'
+          - type: 'null'
+          description: How far along the work is, when the underlying job reports it. Absent does not mean no progress.
+        requestId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Requestid
+          description: The `X-Request-ID` of the request that created this operation. Quote it in a support ticket.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - type
+      - status
+      - createdAt
+      title: Operation
+      description: 'One long-running operation, whatever kind of work it is.
+
+
+        Readable for `OPERATION_RETENTION_DAYS` after creation, per AIP-151.'
+    ReviewExport:
+      properties:
+        format:
+          type: string
+          const: docx
+          title: Format
+          description: Format of the exported file. Only DOCX is produced today.
+          default: docx
+          examples:
+          - docx
+        filename:
+          type: string
+          title: Filename
+          description: Suggested filename for the download.
+          examples:
+          - msa-acme-v3.docx
+        url:
+          type: string
+          title: Url
+          description: Short-lived signed URL to download the marked-up contract. Fetch it promptly and do not store it.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+        expiresAt:
+          type: string
+          format: date-time
+          title: Expiresat
+          description: When the URL stops working (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        sizeBytes:
+          type: integer
+          title: Sizebytes
+          description: Size of the exported file in bytes.
+          examples:
+          - 248193
+        redlineCount:
+          type: integer
+          title: Redlinecount
+          description: How many redlines were applied to produce this file.
+          examples:
+          - 9
+        trackedChanges:
+          type: boolean
+          title: Trackedchanges
+          description: Whether the export uses native Word tracked changes.
+          examples:
+          - false
+        approvalGate:
+          anyOf:
+          - $ref: '#/components/schemas/ReviewApprovalGate'
+          - type: 'null'
+          description: Repeated from the review on purpose. An integration that exports without re-reading the review is exactly the one that would send an unapproved redline to a counterparty, so the gate travels with the bytes.
+      additionalProperties: false
+      type: object
+      required:
+      - filename
+      - url
+      - expiresAt
+      - sizeBytes
+      - redlineCount
+      - trackedChanges
+      title: ReviewExport
+      description: 'A short-lived URL to the marked-up contract.
+
+
+        The same shape as a comparison export, and for the same reason: the route
+
+        declares a response model, and a DOCX is not one. The bytes live in object
+
+        storage and the customer fetches them directly.
+
+
+        `approvalGate` is repeated here rather than left on the review. An
+
+        integration that exports without re-reading the review is exactly the one
+
+        that would send an unapproved redline to a counterparty, and the gate is
+
+        cheap to carry at the point where content actually leaves the workspace.'
+    ReviewApprovalReason:
+      properties:
+        clauseName:
+          type: string
+          title: Clausename
+          description: The clause driving this part of the gate.
+          examples:
+          - Limitation of Liability
+        approvalLevel:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Approvallevel
+          description: Sign-off this clause requires.
+          examples:
+          - partner
+        isDealBreaker:
+          type: boolean
+          title: Isdealbreaker
+          description: True when this clause is at or below the walk-away floor.
+          default: false
+          examples:
+          - false
+        note:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Note
+          description: 'Set when a conditional rule RAISED this clause''s sign-off, for example ''Escalated to GC: deal value over $1M''. Absent when the level came straight from the playbook position.'
+          examples:
+          - 'Escalated to GC: deal value over $1M.'
+      additionalProperties: false
+      type: object
+      required:
+      - clauseName
+      title: ReviewApprovalReason
+      description: One clause driving the review-level sign-off gate.
+    UserSide:
+      type: string
+      enum:
+      - vendor
+      - customer
+      - licensor
+      - licensee
+      - partner
+      - supplier
+      - reseller
+      - employer
+      - employee
+      - buyer
+      - seller
+      - company
+      - investor
+      - lender
+      - borrower
+      - disclosing_party
+      - receiving_party
+      - plaintiff
+      - defendant
+      - other
+      title: UserSide
+      description: 'Which side the reviewer represents.
+
+
+        Kept in sync with the FE `UserSide` union + `USER_SIDE_LABELS`
+
+        (`frontend/src/types/legal-tools.ts`) by the drift-guard in
+
+        `app/tests/unit/test_contract_type_taxonomy.py`. Request-only enum (no DB
+
+        CHECK), so widening it needs no migration; that guard also fails if a
+
+        `user_side` CHECK ever appears, because this sentence would then be wrong.'
+    ReviewApprovalGate:
+      properties:
+        required:
+          type: boolean
+          title: Required
+          description: 'Whether a human should sign this off before it goes to the counterparty. REPORTED, never enforced: it does not block the review or the export. Implement the gate on your side using this field.'
+          default: false
+          examples:
+          - false
+        level:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Level
+          description: 'The highest sign-off any gating clause needs: `manager`, `partner` or `gc`. Absent when `required` is false.'
+          examples:
+          - partner
+        dealBreakerCount:
+          type: integer
+          title: Dealbreakercount
+          description: How many clauses sit at or below the walk-away floor.
+          default: 0
+          examples:
+          - 1
+        reasons:
+          items:
+            $ref: '#/components/schemas/ReviewApprovalReason'
+          type: array
+          title: Reasons
+          description: Which clauses drive the gate, and why each one does.
+        summary:
+          type: string
+          title: Summary
+          description: One-line explanation of the gate, suitable to show a reviewer.
+          default: ''
+          examples:
+          - Twelve substantive changes, seven of them in the liability and indemnity sections.
+      additionalProperties: false
+      type: object
+      title: ReviewApprovalGate
+      description: 'Whether a human has to sign this off before it goes to the counterparty.
+
+
+        **Reported, never enforced.** The gate is computed deterministically from the
+
+        playbook''s own `approvalLevel` and `dealBreaker` on clauses that actually
+
+        deviated, and it is published as a fact about the result. It does not block
+
+        the review, it does not block the export, and the operation reaches a
+
+        terminal status either way.
+
+
+        That is the same decision the acting-user header already carries (docs 07.3):
+
+        we record what we know and build no enforcement machinery we cannot honour.
+
+        Enforcing would mean an approval workflow, an enrolled approver directory and
+
+        a state a review can sit in indefinitely, which is precisely the "do not let
+
+        it hang" failure the handoff for this track warned about. A caller that wants
+
+        a gate has everything it needs to implement one: `required` says whether,
+
+        `level` says who, and `reasons` says why.'
+    ReviewNegotiationPriority:
+      properties:
+        tier:
+          type: integer
+          title: Tier
+          description: 'Priority tier: 1 is must-have and covers deal breakers, 2 is should-have, 3 is nice-to-have.'
+          examples:
+          - 1
+        tierLabel:
+          type: string
+          title: Tierlabel
+          description: Human-readable name for the tier.
+          examples:
+          - Must have
+        items:
+          items:
+            type: string
+          type: array
+          title: Items
+          description: What to raise at this tier, in order.
+          examples:
+          - - Cap liability
+            - Remove uncapped indemnity
+      additionalProperties: false
+      type: object
+      required:
+      - tier
+      - tierLabel
+      - items
+      title: ReviewNegotiationPriority
+      description: 'One tier of the negotiation plan: what to raise first, and what to trade.'
+    OperationStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: OperationStatus
+      description: 'The public five. There is no sixth, and there are no synonyms.
+
+
+        Internal vocabularies spell terminal success `completed`, `ready`,
+
+        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+
+        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+
+        `app.workspace_api.adapters.status_map`, which refuses to guess.'
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
+          examples:
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
+
+
+        `total` is the count of rows matching the filter, not the count returned,
+
+        so a caller can size a job before running it.'
+    ReviewDealContext:
+      properties:
+        contractValue:
+          anyOf:
+          - type: number
+            minimum: 0.0
+          - type: 'null'
+          title: Contractvalue
+          description: 'Total deal value, used by playbook escalation rules that key on it. Omit if unknown: a rule referencing a value you did not supply simply does not fire, which is the fail-safe direction.'
+          examples:
+          - 1500000
+        governingLaw:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Governinglaw
+          description: Governing law of the deal, used by playbook escalation rules that key on it.
+          examples:
+          - Delaware
+      additionalProperties: false
+      type: object
+      title: ReviewDealContext
+      description: 'Deal attributes the playbook''s conditional escalation rules evaluate.
+
+
+        Everything is optional and stays optional. A rule referencing an attribute
+
+        the caller did not supply simply does not fire, which is the fail-safe
+
+        direction: a missing contract value must not escalate a clause to GC on the
+
+        strength of a number nobody provided.'
+    AcceptedRedline:
+      properties:
+        clauseName:
+          type: string
+          maxLength: 200
+          title: Clausename
+          description: Which clause this edit applies to.
+          examples:
+          - Limitation of Liability
+        currentLanguage:
+          type: string
+          maxLength: 200000
+          title: Currentlanguage
+          description: The exact text to replace. Must match the contract verbatim or the edit cannot be anchored.
+          examples:
+          - Supplier's total liability shall be unlimited.
+        replacementLanguage:
+          type: string
+          maxLength: 200000
+          title: Replacementlanguage
+          description: The text to put in its place.
+          examples:
+          - Supplier's total liability shall not exceed the fees paid in the preceding twelve months.
+        sectionReference:
+          anyOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+          title: Sectionreference
+          description: Where the clause sits in the contract, for example `8.2`.
+          examples:
+          - '8.2'
+        comment:
+          anyOf:
+          - type: string
+            maxLength: 2000
+          - type: 'null'
+          title: Comment
+          description: 'Attached to the inserted text as a native Word comment, which is where a negotiation rationale belongs: in the margin of the document the other side opens.'
+          examples:
+          - Our standard cap. Happy to discuss a supercap for data-security breaches.
+      additionalProperties: false
+      type: object
+      required:
+      - clauseName
+      - currentLanguage
+      - replacementLanguage
+      title: AcceptedRedline
+      description: One edit to apply to the contract text in an export.
+    OperationError:
+      properties:
+        code:
+          type: string
+          title: Code
+          description: Stable, machine-readable failure code. Branch on this, never on `message`.
+          examples:
+          - EXTRACTION_FAILED
+        message:
+          type: string
+          title: Message
+          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
+          examples:
+          - The upstream extraction did not finish.
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - message
+      title: OperationError
+      description: 'Why a failed operation failed, in terms a customer can act on.
+
+
+        `code` is stable and machine-readable. `message` is sanitized: the internal
+
+        job tables store stack traces and file paths in their `error_message`
+
+        columns, and forwarding those verbatim leaks our internals into a customer''s
+
+        logs.'
+    ReviewFlag:
+      properties:
+        clauseName:
+          type: string
+          title: Clausename
+          description: Which clause or part of the contract the observation is about.
+          examples:
+          - Limitation of Liability
+        sectionReference:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectionreference
+          description: Where it sits in the contract.
+          examples:
+          - '8.2'
+        observation:
+          type: string
+          title: Observation
+          description: What the reviewer noticed. These are things a human should confirm before signing, not edits, which makes them the most important field here for a caller automating the review away.
+          examples:
+          - The counterparty entity name differs from the one on the signature block.
+      additionalProperties: false
+      type: object
+      required:
+      - clauseName
+      - observation
+      title: ReviewFlag
+      description: 'Something the reviewer noticed and deliberately did NOT redline.
+
+
+        A wrong entity name, an odd schedule entry, a real ambiguity. These are not
+
+        edits; they are things a human should confirm before signing, which makes
+
+        them the most important thing on this surface for a caller that is otherwise
+
+        automating the review away.'
+  securitySchemes:
+    WorkspaceAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: vq_ws_*
+      description: 'Workspace credential issued from the automation console at `/automation`. Send it as `Authorization: Bearer vq_ws_...`. This is NOT a Data API key: a `vq_key_` credential is refused here and names the other product in the error.'
+externalDocs:
+  description: Getting started guide and error reference
+  url: https://vaquill.ai/docs/workspace-api
+x-refined-from:
+- vaquill-ai-workspace-openapi.json
+- vaquill-ai-workspace-openapi.yml

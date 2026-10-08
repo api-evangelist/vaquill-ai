@@ -1,0 +1,224 @@
+generated: '2026-10-07'
+method: searched
+source: https://www.vaquill.ai/docs/integrations/mcp/vaquill
+name: Vaquill MCP Server
+description: 'Hosted and local MCP server over the Vaquill Developer API (US primary law: statutes, regulations, constitutions, court rules, session laws, agency
+  guidance, plus law-change watches) with a separate mount for Indian legislation. Two mounts are deliberately disjoint: /s/_ (US) and /in/s/_ (India).'
+status: official
+provider: Vaquill AI
+license: MIT
+repository: https://github.com/Vaquill-AI/vaquill-mcp
+docs:
+- https://www.vaquill.ai/docs/integrations/mcp/vaquill
+- https://www.vaquill.ai/mcp
+- https://www.vaquill.ai/docs/integrations/mcp/claude-connector
+- https://www.vaquill.ai/docs/integrations/mcp/claude-plugin
+- https://www.vaquill.ai/docs/integrations/mcp/chatgpt
+deployment:
+  mode: both
+  endpoint: https://mcp.vaquill.ai/mcp
+  endpoints:
+  - url: https://mcp.vaquill.ai/mcp
+    auth: oauth
+    note: 'OAuth 2.1 connector; POST tools/list unauthenticated returned 401 with WWW-Authenticate: Bearer resource_metadata="https://mcp.vaquill.ai/.well-known/oauth-protected-resource/mcp"
+      (probed 2026-10-07).'
+  - url: https://mcp.vaquill.ai/s/_
+    auth: api-key
+    note: 'Authorization: Bearer vq_key_... header, or the key in the path (/s/vq_key_...); unauthenticated POST answered 400 "Missing session ID" (probed 2026-10-07).
+      US corpus.'
+  - url: https://mcp.vaquill.ai/in/s/_
+    auth: api-key
+    note: India mount; same key; probed 400 "Missing session ID" 2026-10-07.
+  install: uvx vaquill-mcp
+  package: https://pypi.org/project/vaquill-mcp/
+  package_version: 0.4.0
+  transport: streamable-http (remote), stdio (local)
+  auth: oauth
+  verified: probed
+  env:
+    VAQUILL_API_KEY: required for the local package and the /s/_ mount
+    VAQUILL_BASE_URL: optional, default https://api.vaquill.ai
+oauth:
+  protected_resource_metadata: https://mcp.vaquill.ai/.well-known/oauth-protected-resource/mcp
+  authorization_server_metadata: https://mcp.vaquill.ai/.well-known/oauth-authorization-server
+  authorization_endpoint: https://mcp.vaquill.ai/authorize
+  token_endpoint: https://mcp.vaquill.ai/token
+  registration_endpoint: https://mcp.vaquill.ai/register
+  scopes_supported:
+  - offline_access
+  grant_types_supported:
+  - authorization_code
+  - refresh_token
+  code_challenge_methods_supported:
+  - S256
+  saved:
+  - well-known/mcp.vaquill.ai-oauth-protected-resource-mcp.json
+  - well-known/mcp.vaquill.ai-oauth-authorization-server.json
+tool_evidence:
+  l3: table
+  evidence_url: https://www.vaquill.ai/docs/integrations/mcp/vaquill
+  note: Tool names, descriptions and credit costs are copied from the provider's documented Tools table. The live tools/list is auth-gated (401 / 400 without a session)
+    and was NOT called; input schemas therefore come from the bound OpenAPI operations in the tool crosswalk, not from a live introspection.
+tools:
+- name: list_statutes_coverage
+  description: 'The live coverage matrix: corpus legend, per-jurisdiction counts, freshness and retrieval status. Call this before treating an empty result as an
+    absence.'
+  credits: Free
+  mount: us
+- name: get_pricing
+  description: Current credit pricing per endpoint. No auth required.
+  credits: Free
+  mount: us
+- name: list_statute_divisions
+  description: Walk the statutory hierarchy one level down. Refunded on an empty level.
+  credits: '1'
+  mount: us
+- name: search_us_statutes
+  description: Hybrid semantic and keyword search across every US corpus, with filters for `corpusType`, `state`, `code`, `source`, status, year and Federal Register
+    facets.
+  credits: '4'
+  mount: us
+- name: get_us_statute_section
+  description: 'Section metadata by `act_id`: citation, hierarchy, breadcrumb, status and every format link.'
+  credits: '2'
+  mount: us
+- name: get_us_statute_section_text
+  description: Full text. Supports `format=content` (operative text only, USC), `structured=true` for a subsection tree, and `asOf` for point-in-time.
+  credits: '6'
+  mount: us
+- name: get_sections_batch
+  description: Metadata for up to 50 `act_id`s in one call, with a diagnosis for each miss.
+  credits: 2 per section returned
+  mount: us
+- name: resolve_statute_citation
+  description: Turn one citation string into the exact section, confirmed against the corpus.
+  credits: '2'
+  mount: us
+- name: resolve_statute_citations_batch
+  description: The same verdict for up to 50 citations at once.
+  credits: 2 per citation
+  mount: us
+- name: get_section_changes
+  description: Every observed add, amend and remove for one section, cursor-paged.
+  credits: '1'
+  mount: us
+- name: get_section_neighbors
+  description: The sections immediately before and after, in statutory order.
+  credits: '2'
+  mount: us
+- name: get_section_cited_by
+  description: Which USC and CFR sections cross-reference this one.
+  credits: '2'
+  mount: us
+- name: get_section_definitions
+  description: The defined terms from the chapter's definitions section that govern this one.
+  credits: '4'
+  mount: us
+- name: get_section_cross_state
+  description: At most one comparable provision per other state, most similar first.
+  credits: '6'
+  mount: us
+- name: list_session_laws
+  description: One state's session laws (acts as enacted), filtered by session, approval date or effective date. `jurisdiction` is required. An empty page is charged.
+  credits: 1 per page
+  mount: us
+- name: get_session_law
+  description: 'One law''s record: citation, session, dates, code sections affected, official sources and `textStatus`. Takes a `sessionLawId` or a citation (a citation
+    adds the resolve price).'
+  credits: '2'
+  mount: us
+- name: get_session_law_body
+  description: 'The law''s text exactly as printed, about 30,000 characters per page. Check `amendatoryMarkup`: if `lost`, struck language may read as law.'
+  credits: 6 per page
+  mount: us
+- name: list_boards
+  description: Every watchable board with its cadence, `lastRetrievedAt` and `retrievalStatus`.
+  credits: Free
+  mount: us
+- name: create_watch
+  description: Subscribe, repoint or pause, and remove.
+  credits: Free
+  mount: us
+- name: update_watch
+  description: Subscribe, repoint or pause, and remove.
+  credits: Free
+  mount: us
+- name: delete_watch
+  description: Subscribe, repoint or pause, and remove.
+  credits: Free
+  mount: us
+- name: list_watches
+  description: Your watches with last-notified state.
+  credits: Free
+  mount: us
+- name: test_watch
+  description: Fire a one-off `board.test` delivery. One per watch per 30 seconds.
+  credits: Free
+  mount: us
+- name: list_watch_changes
+  description: What the board added, amended or removed. Metadata only.
+  credits: Free
+  mount: us
+- name: list_watch_deliveries
+  description: Recent webhook delivery attempts.
+  credits: Free
+  mount: us
+- name: get_watch_change_diff
+  description: The before and after text for one change.
+  credits: '4'
+  mount: us
+- name: search
+  description: Single-string search, for clients that require this exact interface.
+  credits: '4'
+  mount: us
+- name: fetch
+  description: Single-string fetch by id or URL, same constraint.
+  credits: Varies
+  mount: us
+- name: search_acts
+  description: Semantic search across Indian central and state enactments.
+  credits: '2'
+  mount: india
+- name: list_acts
+  description: Browse acts to discover identifiers.
+  credits: '1'
+  mount: india
+- name: list_act_filters
+  description: The filter vocabulary available for the two above.
+  credits: Free
+  mount: india
+- name: get_act_text
+  description: Full text of an act or provision.
+  credits: '3'
+  mount: india
+- name: get_act_amendments
+  description: 'Amendment history: substitutions, insertions, omissions.'
+  credits: '5'
+  mount: india
+- name: get_corresponding_provisions
+  description: Map a provision in a repealed code to its successor.
+  credits: '1'
+  mount: india
+resources:
+- uri: vaquill://guide
+  description: 'How to use the corpus correctly: identifier rules, what "still good law" actually means here, what an empty change list does and does not tell you,
+    and where the cost is. Read before a first substantive query.'
+- uri: vaquill://us/coverage
+  description: The live coverage matrix as a resource.
+- uri: vaquill://pricing
+  description: Live per-endpoint credit pricing.
+- uri: vaquill://in/filters
+  description: 'India mount: available act filters.'
+clients_documented:
+- Claude.ai connector
+- Claude Desktop
+- Claude Code
+- Cowork
+- Cursor
+- VS Code (Copilot)
+- Windsurf
+- ChatGPT
+- Codex
+notes:
+- 'A Claude Code plugin (primary-law, v0.2.0) bundles this server with ten commands and a us-statute-research skill: https://github.com/Vaquill-AI/vaquill-plugin'
+- MCP connections are available on every account plan including Expired (docs/guides/plans-and-limits).

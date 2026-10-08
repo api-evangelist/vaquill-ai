@@ -1,0 +1,4318 @@
+openapi: 3.2.0
+info:
+  title: Vaquill Ai Matrices API
+  version: 1.0.0
+  description: 'Operations tagged Matrices across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.vaquill.ai/workspace
+  description: Vaquill Legal Workspace API (production)
+- url: /workspace
+  description: Vaquill Legal Workspace API (relative to the mount)
+security:
+- WorkspaceAuth: []
+tags:
+- name: Matrices
+  description: 'Spreadsheet-style extraction across many documents: rows are documents, columns are questions, cells are answers with verified citations. Building a grid is free; running it is what costs.'
+paths:
+  /v1/matters/{matterId}/matrices:
+    post:
+      tags:
+      - Matrices
+      summary: Create a matrix
+      description: 'Build a grid. Nothing is extracted until you run it.
+
+
+        Rows are documents and columns are questions, so the grid is `documents x
+
+        columns` cells and each cell is one billable extraction when the matrix is
+
+        run. Every document must already be in this matter and finished ingesting:
+
+        a still-ingesting document is refused, because retrieval over it would
+
+        answer "not in this document" for every column.
+
+
+        Note the column vocabulary: `free_text`, `single_select`, `date`, `money`,
+
+        `yes_no`, `party_name`. There is no `text`, `number` or `boolean`.'
+      operationId: matrices.create
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatrixCreateRequest'
+            example:
+              title: Vendor agreement review
+              description: Master services agreement with Acme for the 2026 platform rollout.
+              documentIds:
+              - value
+              columns:
+              - label: Liability cap
+                question: What is the liability cap, and what does it apply to?
+                columnType: free_text
+                options:
+                - 'yes'
+                - 'no'
+                - not addressed
+                instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Matrix'
+              example:
+                id: mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                title: Vendor agreement review
+                description: Master services agreement with Acme for the 2026 platform rollout.
+                status: succeeded
+                columns:
+                - id: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  label: Liability cap
+                  question: What is the liability cap, and what does it apply to?
+                  columnType: free_text
+                  options:
+                  - 'yes'
+                  - 'no'
+                  - not addressed
+                  instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+                  dependsOnColumnId: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  gateExpression: 'yes'
+                  injectUpstream: false
+                  position: 0
+                rows:
+                - id: row_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  filename: msa-acme-v3.docx
+                  position: 0
+                cellCount: 24
+                pendingCellCount: 0
+                errorCellCount: 0
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    get:
+      tags:
+      - Matrices
+      summary: List a matter's matrices
+      description: 'The matrices filed to this matter, newest first.
+
+
+        Headers only, so this is for finding a matrix rather than for reading one.
+
+        Cell counts and the grid itself are deliberately absent: the counts are
+
+        three queries per matrix, so a page of two hundred would be six hundred
+
+        round trips on the cheapest read this API offers. `GET
+
+        .../matrices/{matrixId}` is where they live.
+
+
+        Only matrices filed to this matter appear. Every matrix created through this
+
+        API is one, because the create always names a matter; a matrix somebody made
+
+        in the web app without filing it to a matter is not visible here.'
+      operationId: matrices.list
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: How many rows to return, 1 to 200. Defaults to 50.
+          default: 50
+          title: Limit
+        description: How many rows to return, 1 to 200. Defaults to 50.
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+          default: 0
+          title: Offset
+        description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_MatrixSummary_'
+              example:
+                data:
+                - id: mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  title: Vendor agreement review
+                  description: Master services agreement with Acme for the 2026 platform rollout.
+                  status: succeeded
+                  createdAt: '2026-08-19T14:32:10Z'
+                  updatedAt: '2026-08-19T14:32:10Z'
+                pagination:
+                  limit: 50
+                  offset: 0
+                  total: 128
+                  hasMore: false
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/matrices/{matrixId}:
+    get:
+      tags:
+      - Matrices
+      summary: Get a matrix
+      description: 'The grid header with its rows and columns. Cells are a separate read.
+
+
+        Rows and columns are inlined because a cell names only a `rowId` and a
+
+        `columnId`, so these are what make one readable. Watch `pendingCellCount`
+
+        for completion and `errorCellCount` for cells that failed, which is a
+
+        different thing from a cell that succeeded with no answer.'
+      operationId: matrices.get
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: matrixId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matrixid
+        description: '`mtx_` identifier of the matrix. Take it from the matter''s matrix list.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Matrix'
+              example:
+                id: mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                title: Vendor agreement review
+                description: Master services agreement with Acme for the 2026 platform rollout.
+                status: succeeded
+                columns:
+                - id: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  label: Liability cap
+                  question: What is the liability cap, and what does it apply to?
+                  columnType: free_text
+                  options:
+                  - 'yes'
+                  - 'no'
+                  - not addressed
+                  instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+                  dependsOnColumnId: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  gateExpression: 'yes'
+                  injectUpstream: false
+                  position: 0
+                rows:
+                - id: row_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  filename: msa-acme-v3.docx
+                  position: 0
+                cellCount: 24
+                pendingCellCount: 0
+                errorCellCount: 0
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      tags:
+      - Matrices
+      summary: Delete a matrix
+      description: 'Delete the matrix, its rows, its columns and every answer in it.
+
+
+        There is no undo and no trash. The cells, columns, rows, comments, history
+
+        and any webhooks configured on it in the web app all go with it. A workflow
+
+        run that produced this matrix survives and loses its reference to it.
+
+
+        Refused with 409 `operation-in-flight` while a run over the matrix has not
+
+        finished: deleting a matrix mid-run would leave that run''s operation
+
+        reporting `running` until a sweeper marked it failed hours later. Poll the
+
+        operation first, or cancel the run.
+
+
+        Not idempotent. A second delete of the same id answers 404, so on a delete
+
+        that timed out, treat a subsequent 404 as success.'
+      operationId: matrices.delete
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: matrixId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matrixid
+        description: '`mtx_` identifier of the matrix. Take it from the matter''s matrix list.'
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    patch:
+      tags:
+      - Matrices
+      summary: Update a matrix
+      description: 'Rename a matrix, or change what it says it is for.
+
+
+        `title` and `description` only. Send at least one; an empty patch is
+
+        refused rather than applied. `description: null` clears it.
+
+
+        A matrix cannot be moved to another matter or shared with another
+
+        organization through this API, and its status cannot be written: the status
+
+        is what our own extraction reports about itself.'
+      operationId: matrices.update
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: matrixId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matrixid
+        description: '`mtx_` identifier of the matrix. Take it from the matter''s matrix list.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatrixUpdateRequest'
+            example:
+              title: Vendor agreement review
+              description: Master services agreement with Acme for the 2026 platform rollout.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Matrix'
+              example:
+                id: mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                title: Vendor agreement review
+                description: Master services agreement with Acme for the 2026 platform rollout.
+                status: succeeded
+                columns:
+                - id: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  label: Liability cap
+                  question: What is the liability cap, and what does it apply to?
+                  columnType: free_text
+                  options:
+                  - 'yes'
+                  - 'no'
+                  - not addressed
+                  instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+                  dependsOnColumnId: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  gateExpression: 'yes'
+                  injectUpstream: false
+                  position: 0
+                rows:
+                - id: row_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  filename: msa-acme-v3.docx
+                  position: 0
+                cellCount: 24
+                pendingCellCount: 0
+                errorCellCount: 0
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/matrices/{matrixId}/runs:
+    post:
+      tags:
+      - Matrices
+      summary: Run a matrix
+      description: 'Extract every unanswered cell. 202 with an operation to poll.
+
+
+        An answer a person wrote, approved or rejected is left alone and is not
+
+        charged for; `force` re-runs it and overwrites it. A run whose every
+
+        eligible cell was stopped by a cancel is refused rather than accepted,
+
+        because the extractor skips a cancelled cell and the run would otherwise do
+
+        nothing while reporting success.
+
+
+        413 when the run is over the single-run cell ceiling, 429 when too many runs
+
+        are already in flight, 503 when the guard deciding that cannot be reached.
+
+        None of the three writes anything, so a refused run is free.
+
+
+        The 429 counts runs per PERSON rather than per organization, and the person
+
+        is the human who provisioned this installation, so the three slots are
+
+        shared with that person''s own matrix runs in the web app. An integration can
+
+        be refused with no API run outstanding at all.'
+      operationId: matrices.run
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: matrixId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matrixid
+        description: '`mtx_` identifier of the matrix. Take it from the matter''s matrix list.'
+      - name: Idempotency-Key
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency-Key
+        description: A unique value of your choosing, so a retried launch returns the FIRST operation instead of starting a second billable job. Reusing one with a different body is refused. Retrying with the same key and the same body is free and is the intended way to recover from a timeout.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+              - $ref: '#/components/schemas/MatrixRunRequest'
+              - type: 'null'
+              title: Body
+            example:
+              force: false
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operation'
+              example:
+                id: op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                type: matrix.run
+                status: succeeded
+                createdAt: '2026-08-19T14:32:10Z'
+                completedAt: '2026-08-19T14:32:10Z'
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                resource:
+                  kind: matrix
+                  id: mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  url: https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+                progress:
+                  done: 24
+                  total: 128
+                  unit: cells
+                requestId: req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/matrices/{matrixId}/cells:
+    get:
+      tags:
+      - Matrices
+      summary: List matrix cells
+      description: 'The answers, with their verified citations, one page at a time.
+
+
+        A cell whose `status` is `succeeded` with a null `answer` means the answer
+
+        is not in that document. That is a finding, not a failure: the failures are
+
+        the cells with a `failed` status. Every citation''s quote was verified to be
+
+        a literal span of the cited passage before the cell was saved, and any that
+
+        failed that check were dropped.'
+      operationId: matrices.cells
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: matrixId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matrixid
+        description: '`mtx_` identifier of the matrix. Take it from the matter''s matrix list.'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: How many rows to return, 1 to 200. Defaults to 50.
+          default: 50
+          title: Limit
+        description: How many rows to return, 1 to 200. Defaults to 50.
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+          default: 0
+          title: Offset
+        description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_MatrixCell_'
+              example:
+                data:
+                - id: cel_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  rowId: row_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  columnId: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  status: succeeded
+                  answer: Twelve months of fees paid.
+                  citations:
+                  - quote: in no event shall either party be liable for indirect damages
+                    page: 1
+                    chunkId: chunk_00f1
+                  confidence: 0.92
+                  extractedAt: '2026-08-19T14:32:10Z'
+                pagination:
+                  limit: 50
+                  offset: 0
+                  total: 128
+                  hasMore: false
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/matrices/{matrixId}/exports:
+    post:
+      tags:
+      - Matrices
+      summary: Export a matrix as CSV or XLSX
+      description: 'Render the grid to CSV or XLSX and return the file inline.
+
+
+        Bytes rather than a signed URL, and it is one of only two operations here
+
+        that work that way. A matrix export is rendered per call and stored nowhere,
+
+        so a URL would mean writing your work product into our storage first.
+
+        `content` is base64 and `sizeBytes` is the length of the DECODED file.
+
+
+        `includeCitations` adds one extra column per question holding that answer''s
+
+        supporting quotes. It is on by default, and it is what makes the export
+
+        checkable by somebody who was not watching the run.
+
+
+        413 `export-too-large` above 10 MiB. Export without citations, or split the
+
+        matrix.'
+      operationId: matrices.export
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: matrixId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matrixid
+        description: '`mtx_` identifier of the matrix. Take it from the matter''s matrix list.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatrixExportRequest'
+            example:
+              format: csv
+              includeCitations: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatrixExport'
+              example:
+                format: csv
+                filename: msa-acme-v3.docx
+                sizeBytes: 248193
+                content: UEsDBBQABgAIAAAAIQ...
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/matrices/{matrixId}/rows:
+    post:
+      tags:
+      - Matrices
+      summary: Add documents as matrix rows
+      description: 'Add documents to the grid, one row each. Extracts nothing.
+
+
+        Every new row gets one pending cell per existing column, so watch
+
+        `pendingCellCount` in the response to see what a run would now cost.
+
+
+        Each document must be in this matter and must have finished ingesting. A
+
+        document that is already a row is refused with 409 naming it, rather than
+
+        silently skipped: a request naming five documents of which two were already
+
+        rows would otherwise report success having added three.'
+      operationId: matrices.addRows
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: matrixId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matrixid
+        description: '`mtx_` identifier of the matrix. Take it from the matter''s matrix list.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatrixRowSpec'
+            example:
+              documentIds:
+              - value
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Matrix'
+              example:
+                id: mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                title: Vendor agreement review
+                description: Master services agreement with Acme for the 2026 platform rollout.
+                status: succeeded
+                columns:
+                - id: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  label: Liability cap
+                  question: What is the liability cap, and what does it apply to?
+                  columnType: free_text
+                  options:
+                  - 'yes'
+                  - 'no'
+                  - not addressed
+                  instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+                  dependsOnColumnId: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  gateExpression: 'yes'
+                  injectUpstream: false
+                  position: 0
+                rows:
+                - id: row_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  filename: msa-acme-v3.docx
+                  position: 0
+                cellCount: 24
+                pendingCellCount: 0
+                errorCellCount: 0
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/matrices/{matrixId}/rows/{rowId}:
+    delete:
+      tags:
+      - Matrices
+      summary: Delete a matrix row
+      description: 'Remove one document from the grid, with every answer for it.
+
+
+        The document itself is untouched; only its row in this matrix goes. Row
+
+        positions are not renumbered afterwards, so `position` stays ascending and
+
+        stops being contiguous.'
+      operationId: matrices.deleteRow
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: matrixId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matrixid
+        description: '`mtx_` identifier of the matrix. Take it from the matter''s matrix list.'
+      - name: rowId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Rowid
+        description: '`row_` identifier of one row of the matrix, which is one document in the grid. Take it from the matrix''s `rows`.'
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/matrices/{matrixId}/columns:
+    post:
+      tags:
+      - Matrices
+      summary: Add questions as matrix columns
+      description: 'Add questions to the grid, one column each. Extracts nothing.
+
+
+        Every new column gets one pending cell per existing row, so adding one
+
+        column to a forty-row grid adds forty billable extractions to the next run.
+
+        The response carries the new `pendingCellCount`.
+
+
+        Conditional columns are set with `PATCH .../columns/{columnId}` once these
+
+        exist, because a dependency names a column id and these do not have one yet.'
+      operationId: matrices.addColumns
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: matrixId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matrixid
+        description: '`mtx_` identifier of the matrix. Take it from the matter''s matrix list.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatrixColumnsRequest'
+            example:
+              columns:
+              - label: Liability cap
+                question: What is the liability cap, and what does it apply to?
+                columnType: free_text
+                options:
+                - 'yes'
+                - 'no'
+                - not addressed
+                instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Matrix'
+              example:
+                id: mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                title: Vendor agreement review
+                description: Master services agreement with Acme for the 2026 platform rollout.
+                status: succeeded
+                columns:
+                - id: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  label: Liability cap
+                  question: What is the liability cap, and what does it apply to?
+                  columnType: free_text
+                  options:
+                  - 'yes'
+                  - 'no'
+                  - not addressed
+                  instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+                  dependsOnColumnId: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  gateExpression: 'yes'
+                  injectUpstream: false
+                  position: 0
+                rows:
+                - id: row_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  filename: msa-acme-v3.docx
+                  position: 0
+                cellCount: 24
+                pendingCellCount: 0
+                errorCellCount: 0
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/matrices/{matrixId}/columns/order:
+    put:
+      tags:
+      - Matrices
+      summary: Reorder matrix columns
+      description: 'Set the complete left-to-right order of the grid''s columns.
+
+
+        `columnIds` has to name every column in this matrix exactly once. A subset
+
+        is refused with 422 naming what was left out, and a repeat is refused too: a
+
+        reorder naming some of the columns is not a reorder, it is an unstated rule
+
+        about where the rest go.
+
+
+        This is the only way to move a column. `position` is not writable on a
+
+        column patch, because writing one directly collides with the uniqueness
+
+        constraint the reorder exists to work around.'
+      operationId: matrices.reorderColumns
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: matrixId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matrixid
+        description: '`mtx_` identifier of the matrix. Take it from the matter''s matrix list.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ColumnOrderRequest'
+            example:
+              columnIds:
+              - value
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Matrix'
+              example:
+                id: mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                title: Vendor agreement review
+                description: Master services agreement with Acme for the 2026 platform rollout.
+                status: succeeded
+                columns:
+                - id: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  label: Liability cap
+                  question: What is the liability cap, and what does it apply to?
+                  columnType: free_text
+                  options:
+                  - 'yes'
+                  - 'no'
+                  - not addressed
+                  instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+                  dependsOnColumnId: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  gateExpression: 'yes'
+                  injectUpstream: false
+                  position: 0
+                rows:
+                - id: row_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  filename: msa-acme-v3.docx
+                  position: 0
+                cellCount: 24
+                pendingCellCount: 0
+                errorCellCount: 0
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/matrices/{matrixId}/columns/{columnId}:
+    patch:
+      tags:
+      - Matrices
+      summary: Update a matrix column
+      description: 'Change one column, including making it conditional on another.
+
+
+        **Changing `question`, `columnType` or `options` clears every answer in this
+
+        column**, including answers a person wrote or approved and any verification
+
+        on them, and leaves the cells unanswered until the next run. Changing
+
+        `label` or `instructions` clears nothing.
+
+
+        `dependsOnColumnId` makes this column conditional: its cells only run when
+
+        the named column has answered, and `gateExpression` says what the answer has
+
+        to be. The gate vocabulary is closed (`any`, `not_empty`, `yes`, `no`,
+
+        `yes_no:yes`, `yes_no:no`, `equals:VALUE`, `in:A|B|C`) because an expression
+
+        we cannot parse marks every cell in the column as deliberately skipped with
+
+        no error anywhere. `injectUpstream` prepends the upstream answer to this
+
+        column''s prompt.
+
+
+        A dependency naming a column outside this matrix is 404. One that would
+
+        close a cycle is 422. There is no `position`: use `PUT .../columns/order`.'
+      operationId: matrices.updateColumn
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: matrixId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matrixid
+        description: '`mtx_` identifier of the matrix. Take it from the matter''s matrix list.'
+      - name: columnId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Columnid
+        description: '`col_` identifier of one column of the matrix, which is one question asked of every document. Take it from the matrix''s `columns`.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatrixColumnPatch'
+            example:
+              label: Liability cap
+              question: What is the liability cap, and what does it apply to?
+              columnType: free_text
+              options:
+              - 'yes'
+              - 'no'
+              - not addressed
+              instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+              dependsOnColumnId: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+              gateExpression: 'yes'
+              injectUpstream: false
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Matrix'
+              example:
+                id: mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                title: Vendor agreement review
+                description: Master services agreement with Acme for the 2026 platform rollout.
+                status: succeeded
+                columns:
+                - id: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  label: Liability cap
+                  question: What is the liability cap, and what does it apply to?
+                  columnType: free_text
+                  options:
+                  - 'yes'
+                  - 'no'
+                  - not addressed
+                  instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+                  dependsOnColumnId: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  gateExpression: 'yes'
+                  injectUpstream: false
+                  position: 0
+                rows:
+                - id: row_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  filename: msa-acme-v3.docx
+                  position: 0
+                cellCount: 24
+                pendingCellCount: 0
+                errorCellCount: 0
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      tags:
+      - Matrices
+      summary: Delete a matrix column
+      description: 'Remove one question from the grid, with every answer to it.
+
+
+        Refused with 409 while another column is conditional on this one. Deleting
+
+        it would leave that column with a gate and nothing to gate on, so it would
+
+        stop being conditional and start answering a question whose premise was
+
+        never checked. Clear the dependants'' `dependsOnColumnId` first, or delete
+
+        them.
+
+
+        Column positions are not renumbered afterwards.'
+      operationId: matrices.deleteColumn
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: matrixId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matrixid
+        description: '`mtx_` identifier of the matrix. Take it from the matter''s matrix list.'
+      - name: columnId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Columnid
+        description: '`col_` identifier of one column of the matrix, which is one question asked of every document. Take it from the matrix''s `columns`.'
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/matrices/{matrixId}/cells/{cellId}:
+    patch:
+      tags:
+      - Matrices
+      summary: Write or review a matrix cell answer
+      description: 'Write a human answer into a cell, or record a review decision on it.
+
+
+        An answer written here **survives the next run**: a run with no body skips
+
+        cells that already carry a human answer or a review decision and does not
+
+        charge for them. `{"force": true}` on a run has no such guard and overwrites
+
+        them.
+
+
+        `review` is `approved` or `rejected`. The extractor''s own statuses cannot be
+
+        written: an integration writing `extracted` onto an answer no machine
+
+        produced makes the grid unauditable. Citations cannot be written either,
+
+        because a published citation carries the promise that its quote was verified
+
+        against the document, and there is no verification on a written one.
+
+
+        The cell keeps reading as `succeeded`, because the extraction did succeed.'
+      operationId: matrices.updateCell
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: matrixId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matrixid
+        description: '`mtx_` identifier of the matrix. Take it from the matter''s matrix list.'
+      - name: cellId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Cellid
+        description: '`cel_` identifier of one cell, which is one document''s answer to one question. Take it from `GET .../matrices/{matrixId}/cells`.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatrixCellPatch'
+            example:
+              answer: Twelve months of fees paid.
+              review: approved
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatrixCell'
+              example:
+                id: cel_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                rowId: row_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                columnId: col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                status: succeeded
+                answer: Twelve months of fees paid.
+                citations:
+                - quote: in no event shall either party be liable for indirect damages
+                  page: 1
+                  chunkId: chunk_00f1
+                confidence: 0.92
+                extractedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/matrices/{matrixId}/cells/{cellId}/verifications:
+    post:
+      tags:
+      - Matrices
+      summary: Verify that a cell's citations support its answer
+      description: 'Ask whether this answer''s citations actually support it. Costs one call.
+
+
+        The citations on a cell were already checked to be literal quotes from the
+
+        passages they cite. This asks the harder question: taken together, do those
+
+        passages ENTAIL the answer. A quote can be verbatim and still not support
+
+        the claim built on it.
+
+
+        The verdict is `supported`, `partially_supported`, `unsupported` or
+
+        `contradicted`, with the verifier''s reasoning and its own confidence.
+
+
+        409 `cell-not-verifiable` when the cell has no answer, or an answer with no
+
+        surviving citation: there is nothing to check and no evidence to check it
+
+        against. 409 `matrix-not-runnable` when the matrix was built by someone else
+
+        in your organization, which is the same refusal a run gets.'
+      operationId: matrices.verifyCell
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: matrixId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matrixid
+        description: '`mtx_` identifier of the matrix. Take it from the matter''s matrix list.'
+      - name: cellId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Cellid
+        description: '`cel_` identifier of one cell, which is one document''s answer to one question. Take it from `GET .../matrices/{matrixId}/cells`.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CellVerification'
+              example:
+                cellId: cel_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                verdict: supported
+                explanation: The cited passage states that liability shall not exceed the fees paid in the preceding twelve months, which is what the answer reports. Nothing in the cited sections qualifies that cap.
+                confidence: 0.92
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+components:
+  schemas:
+    Page_MatrixSummary_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/MatrixSummary'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[MatrixSummary]
+    MatrixRunRequest:
+      properties:
+        force:
+          type: boolean
+          title: Force
+          description: 'False (the default) runs only cells that have not answered yet: never-run cells, failed cells, and cells that ran and found nothing. Answers you or a reviewer wrote, approved or rejected are left alone and are not charged for. True re-runs EVERY cell including those, OVERWRITING any answer a human wrote, approved or rejected, and charges for all of them. It is the only way to pick up an edited question.'
+          default: false
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      title: MatrixRunRequest
+      description: 'Start extraction.
+
+
+        An empty body runs every cell that has not answered yet. `force` re-runs
+
+        cells that already have an answer, which is the only way to pick up an
+
+        edited question, and is charged like any other run.
+
+
+        Cell, row and column subsetting is not published. The internal request
+
+        accepts all three; each is a list of ids a customer would have to have read
+
+        from a cells page first, and none of them changes what a customer can
+
+        achieve, only how narrowly. The explicit `cell_ids` path is also the one
+
+        that bypasses the terminal-status filter below, which is why `schedule_run`
+
+        re-applies that filter by hand for it: publishing the subset would put the
+
+        one path that can clobber a reviewed answer into the public contract.'
+    MatrixCellPatch:
+      properties:
+        answer:
+          anyOf:
+          - type: string
+            maxLength: 20000
+            minLength: 1
+          - type: 'null'
+          title: Answer
+          description: The answer to record for this cell, replacing whatever is there. There is no way to clear an answer back to empty; re-run the cell with `force` to have the extractor produce a fresh one.
+          examples:
+          - Twelve months of fees paid.
+        review:
+          anyOf:
+          - type: string
+            enum:
+            - approved
+            - rejected
+          - type: 'null'
+          title: Review
+          description: '`approved` or `rejected`, recording what a reviewer decided about the answer. The extractor''s own statuses cannot be written here: an integration writing `extracted` onto an answer no machine produced makes the grid unauditable.'
+          examples:
+          - approved
+      additionalProperties: false
+      type: object
+      title: MatrixCellPatch
+      description: 'Write a human answer into a cell, or record a review decision on it.
+
+
+        Writing `answer` promotes the cell to an edited state, and **an edited,
+
+        approved or rejected cell is not re-run and not re-charged by a default
+
+        run.** `MatrixService._select_cells_for_run` selects only `pending`,
+
+        `error`, `not_found` and `not_applicable`, `schedule_run` re-applies that
+
+        filter on its bulk reset, and `extract_cell_by_id` short-circuits before any
+
+        model call. `force: true` on a run has none of those guards and overwrites
+
+        the answer with no warning.
+
+
+        The cell keeps reading as `succeeded`, because the extraction job did
+
+        succeed. The review verdict is not published back on the cell for the same
+
+        reason the comments and decisions are not published at all: it is a
+
+        collaboration primitive, and this API publishes the five public statuses and
+
+        no sixth.'
+    MatrixExportRequest:
+      properties:
+        format:
+          type: string
+          enum:
+          - csv
+          - xlsx
+          title: Format
+          description: 'Which format to render: `csv` or `xlsx`.'
+          examples:
+          - csv
+        includeCitations:
+          type: boolean
+          title: Includecitations
+          description: True (the default) adds one extra column per question holding that answer's supporting quotes. False renders answers only.
+          default: true
+          examples:
+          - true
+      additionalProperties: false
+      type: object
+      required:
+      - format
+      title: MatrixExportRequest
+      description: Ask for the finished grid rendered to a file.
+    MatrixColumnPatch:
+      properties:
+        label:
+          anyOf:
+          - type: string
+            maxLength: 200
+            minLength: 1
+          - type: 'null'
+          title: Label
+          description: New column heading. Resets nothing.
+          examples:
+          - Liability cap
+        question:
+          anyOf:
+          - type: string
+            maxLength: 4000
+            minLength: 1
+          - type: 'null'
+          title: Question
+          description: 'New question for this column. WARNING: changing it clears every existing answer in this column, including answers a human wrote or approved and any verification verdict on them, and leaves the cells unanswered until the next run.'
+          examples:
+          - What is the liability cap, and what does it apply to?
+        columnType:
+          anyOf:
+          - type: string
+            enum:
+            - free_text
+            - single_select
+            - date
+            - money
+            - yes_no
+            - party_name
+          - type: 'null'
+          title: Columntype
+          description: 'New answer shape: `free_text`, `single_select`, `date`, `money`, `yes_no` or `party_name`. WARNING: changing it clears every existing answer in this column, as changing the question does.'
+          examples:
+          - free_text
+        options:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Options
+          description: 'New allowed answers for a `single_select` column. WARNING: changing them clears every existing answer in this column, as changing the question does.'
+          examples:
+          - - 'yes'
+            - 'no'
+            - not addressed
+        instructions:
+          anyOf:
+          - type: string
+            maxLength: 4000
+          - type: 'null'
+          title: Instructions
+          description: New extractor guidance scoped to this column. Resets nothing.
+          examples:
+          - House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+        dependsOnColumnId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Dependsoncolumnid
+          description: '`col_` identifier of a column in this same matrix that this one becomes conditional on, or null to make it unconditional again. A cycle is refused.'
+          examples:
+          - col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        gateExpression:
+          anyOf:
+          - type: string
+            maxLength: 500
+            pattern: ^(any|not_empty|yes|no|yes_no:(?:yes|no)|equals:.+|in:.+)$
+          - type: 'null'
+          title: Gateexpression
+          description: 'The condition on the upstream answer that has to hold for this column to run, or null to run whenever the dependency has answered. One of `any`, `not_empty`, `yes`, `no`, `yes_no:yes`, `yes_no:no`, `equals:VALUE` or `in:A|B|C`. Anything else is refused: an expression we cannot parse would mark every cell in the column as deliberately skipped with no error anywhere. `yes`, `no` and `equals:` match the WHOLE upstream answer, not part of it, so they belong on a `yes_no` or `single_select` upstream column; over a `free_text` one, use `not_empty`.'
+          examples:
+          - 'yes'
+        injectUpstream:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Injectupstream
+          description: True prepends the upstream column's answer to this column's prompt, so the question can refer to it. False asks the question on its own.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      title: MatrixColumnPatch
+      description: 'Change one column, including whether it is conditional on another.
+
+
+        **Changing `question`, `columnType` or `options` BLANKS every cell in this
+
+        column.** `MatrixService.update_column` bulk-resets them to pending with a
+
+        null answer, no citations and no `answer_data`, which destroys a manually
+
+        edited or approved answer and the verifier''s verdict along with it. That is
+
+        defensible in a browser where a human just typed the new question and is
+
+        looking at the grid; it is not something a PATCH should do silently, which is
+
+        why it is stated in each of those three field descriptions and not only
+
+        here. A generated client shows the field description.
+
+
+        `label` and `instructions` do not reset anything: they change how the column
+
+        reads and what guidance it carries, not what was asked.'
+    MatrixColumnsRequest:
+      properties:
+        columns:
+          items:
+            $ref: '#/components/schemas/MatrixColumnSpec'
+          type: array
+          maxItems: 60
+          minItems: 1
+          title: Columns
+          description: The questions to add, one column each. At most 60 in one request, and at most 60 in the grid.
+      additionalProperties: false
+      type: object
+      required:
+      - columns
+      title: MatrixColumnsRequest
+      description: 'Questions to add to the grid, one column each.
+
+
+        Every added column backfills a pending cell against every existing row, so
+
+        adding one column to a forty-row grid creates forty cells and moves
+
+        `pendingCellCount` by forty. That is why the response is the whole matrix
+
+        rather than the created columns: the number a caller needs before deciding
+
+        whether to run is the new cell count, and it is invisible in a response that
+
+        only describes what was created.
+
+
+        Conditional columns are not settable here. A dependency names a `col_` id,
+
+        and the ids in this request do not exist yet; patch the edges with
+
+        `matrices.updateColumn` once the create has returned them.'
+    MatrixColumn:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier for the column, `col_` followed by 32 hex characters. Cells reference it as `columnId`.
+          examples:
+          - col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        label:
+          type: string
+          title: Label
+          description: Column heading.
+          examples:
+          - Liability cap
+        question:
+          type: string
+          title: Question
+          description: The question asked of every document in this column.
+          examples:
+          - What is the liability cap, and what does it apply to?
+        columnType:
+          type: string
+          title: Columntype
+          description: What shape of answer this column asks for. Published as a plain string, since production predates this API.
+          examples:
+          - free_text
+        options:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Options
+          description: Allowed answers for a select column.
+          examples:
+          - - 'yes'
+            - 'no'
+            - not addressed
+        instructions:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Instructions
+          description: Extra extractor guidance scoped to this column.
+          examples:
+          - House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+        dependsOnColumnId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Dependsoncolumnid
+          description: '`col_` identifier of the column this one is conditional on, or null when it always runs.'
+          examples:
+          - col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        gateExpression:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Gateexpression
+          description: The condition on the upstream answer that has to hold for this column to run. Null means it always runs when its dependency has answered.
+          examples:
+          - 'yes'
+        injectUpstream:
+          type: boolean
+          title: Injectupstream
+          description: Whether the upstream column's answer is prepended to this column's prompt.
+          default: false
+          examples:
+          - false
+        position:
+          type: integer
+          title: Position
+          description: 'Left-to-right position of the column in the grid. Ascending, and not necessarily contiguous: deleting a column leaves a gap rather than renumbering.'
+          examples:
+          - 0
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - label
+      - question
+      - columnType
+      - position
+      title: MatrixColumn
+      description: One column of the grid, as stored.
+    Problem:
+      type: object
+      title: Problem
+      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: true
+    OperationProgress:
+      properties:
+        done:
+          type: integer
+          minimum: 0.0
+          title: Done
+          description: How many units are finished.
+          examples:
+          - 24
+        total:
+          type: integer
+          minimum: 0.0
+          title: Total
+          description: How many units there are in total. Can legitimately be zero for an empty run.
+          examples:
+          - 128
+        unit:
+          type: string
+          enum:
+          - cells
+          - steps
+          - documents
+          - files
+          - rows
+          - percent
+          title: Unit
+          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
+          examples:
+          - cells
+      additionalProperties: false
+      type: object
+      required:
+      - done
+      - total
+      - unit
+      title: OperationProgress
+      description: 'How far along, and in what units.
+
+
+        The unit is not decoration. A workflow run stores only a percentage while a
+
+        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
+
+        as 43 of 100 documents and a client builds a wrong estimate from it.'
+    ColumnOrderRequest:
+      properties:
+        columnIds:
+          items:
+            type: string
+          type: array
+          minItems: 1
+          title: Columnids
+          description: '`col_` identifiers of every column in this matrix, in the order you want them. The set has to match the matrix''s columns exactly, with no omissions, extras or repeats.'
+          examples:
+          - - value
+      additionalProperties: false
+      type: object
+      required:
+      - columnIds
+      title: ColumnOrderRequest
+      description: 'The complete left-to-right order of the grid''s columns.
+
+
+        Every column in the matrix, exactly once. A subset is refused with a 422
+
+        rather than applied, because `MatrixService.reorder_columns` drops ids it
+
+        does not recognise and returns an empty list when none match, so one typo
+
+        would give a partial reorder and a 200 and an all-wrong body would give no
+
+        reorder and a 200. A reorder naming some of the columns is not a reorder; it
+
+        is an unstated rule about where the rest go.'
+    OperationResource:
+      properties:
+        kind:
+          type: string
+          title: Kind
+          description: What sort of thing was produced, for example `matrix` or `document`.
+          examples:
+          - matrix
+        id:
+          type: string
+          title: Id
+          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
+          examples:
+          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+      additionalProperties: false
+      type: object
+      required:
+      - kind
+      - id
+      title: OperationResource
+      description: 'What the operation produced, or is producing.
+
+
+        `url` is a path on this API rather than an absolute URL, because the service
+
+        is mounted today and gets its own hostname later (docs 07.5). A relative
+
+        path survives that move; a baked-in host does not.'
+    Page_MatrixCell_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/MatrixCell'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[MatrixCell]
+    MatrixUpdateRequest:
+      properties:
+        title:
+          anyOf:
+          - type: string
+            maxLength: 300
+            minLength: 1
+          - type: 'null'
+          title: Title
+          description: New display title for the matrix.
+          examples:
+          - Vendor agreement review
+        description:
+          anyOf:
+          - type: string
+            maxLength: 2000
+          - type: 'null'
+          title: Description
+          description: New description, or null to clear it.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+      additionalProperties: false
+      type: object
+      title: MatrixUpdateRequest
+      description: 'Rename a matrix, or change what it says it is for.
+
+
+        `title` and `description`, and nothing else. The internal
+
+        `MatrixUpdateRequest` also carries `status`, `metadata`, `folder_id`,
+
+        `matter_id` and `share_with_organization_id`; the module docstring records
+
+        why each of the last three is not here, and `status` is absent because
+
+        writing `running` onto a matrix nothing is running, or `archived`, which the
+
+        status map reads as public `cancelled`, would let a caller publish a lie
+
+        about our own job state.'
+    MatrixColumnSpec:
+      properties:
+        label:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Label
+          description: Short column heading, as it appears across the top of the grid.
+          examples:
+          - Liability cap
+        question:
+          type: string
+          maxLength: 4000
+          minLength: 1
+          title: Question
+          description: The question asked of every document in the matrix. This is the prompt the extractor runs per cell, so be specific about what counts as an answer.
+          examples:
+          - What is the liability cap, and what does it apply to?
+        columnType:
+          type: string
+          enum:
+          - free_text
+          - single_select
+          - date
+          - money
+          - yes_no
+          - party_name
+          title: Columntype
+          description: 'What shape of answer to ask for. Note the vocabulary: `free_text`, `single_select`, `date`, `money`, `yes_no`, `party_name`. There is no `text`, `number` or `boolean`.'
+          default: free_text
+          examples:
+          - free_text
+        options:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Options
+          description: Allowed answers, required when `columnType` is `single_select` and ignored otherwise.
+          examples:
+          - - 'yes'
+            - 'no'
+            - not addressed
+        instructions:
+          anyOf:
+          - type: string
+            maxLength: 4000
+          - type: 'null'
+          title: Instructions
+          description: Extra guidance for the extractor on this column only, for example how to handle a missing value.
+          examples:
+          - House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+      additionalProperties: false
+      type: object
+      required:
+      - label
+      - question
+      title: MatrixColumnSpec
+      description: 'One question asked of every document in the matrix.
+
+
+        Conditional columns (`dependsOnColumnId`, `gateExpression`,
+
+        `injectUpstream`) are not published HERE, and the reason is narrower than it
+
+        used to be. They key on a column id that does not exist until the create
+
+        returns, so a dependency cannot be expressed in the same call that mints
+
+        both columns without inventing a client-side reference scheme.
+
+
+        They ARE published on `matrices.updateColumn`
+
+        (`contracts/models/matrix_edits.MatrixColumnPatch`), where the caller names
+
+        a `col_` id it read off a `Matrix` response, which is an ordinary
+
+        caller-supplied reference. That is the two-pass shape the product already
+
+        uses internally: `MatrixService._wire_template_dependencies` creates the
+
+        columns and then patches the edges, and a customer does the same thing with
+
+        two calls.'
+    MatrixCell:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier for the cell, `cel_` followed by 32 hex characters.
+          examples:
+          - cel_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        rowId:
+          type: string
+          title: Rowid
+          description: '`row_` identifier of the row this cell sits in. Resolve it against the matrix''s `rows`.'
+          examples:
+          - row_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        columnId:
+          type: string
+          title: Columnid
+          description: '`col_` identifier of the column this cell sits in. Resolve it against the matrix''s `columns`.'
+          examples:
+          - col_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: Extraction status for this one cell, using the same five public values as an operation.
+          examples:
+          - succeeded
+        answer:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Answer
+          description: The extracted answer. Null on a SUCCEEDED cell means the answer is not in that document, which is a finding rather than a failure. Null on a non-terminal cell means it has not run yet.
+          examples:
+          - Twelve months of fees paid.
+        citations:
+          items:
+            $ref: '#/components/schemas/MatrixCitation'
+          type: array
+          title: Citations
+          description: Verified supporting quotes for the answer. An empty list on a succeeded cell with an answer means every candidate citation failed verification and was dropped.
+        confidence:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Confidence
+          description: The extractor's confidence in the answer, 0 to 1.
+          examples:
+          - 0.92
+        extractedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Extractedat
+          description: When this cell was last extracted (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - rowId
+      - columnId
+      - status
+      title: MatrixCell
+      description: 'One answer. `answer is None` on a succeeded cell means "not in this
+
+        document", which is a finding rather than a failure.'
+    Operation:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `op_` followed by 32 hex characters. Poll `GET /v1/operations/{operationId}` with it.
+          examples:
+          - op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        type:
+          type: string
+          title: Type
+          description: What kind of work this is, for example `matrix.run` or `draft.generate`.
+          examples:
+          - matrix.run
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: 'One of five values: `queued`, `running`, `succeeded`, `failed`, `cancelled`. There is no sixth and there are no synonyms. Stop polling once it is `succeeded`, `failed` or `cancelled`.'
+          examples:
+          - succeeded
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the operation was accepted (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        completedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Completedat
+          description: When the operation reached a terminal status (RFC 3339). Present if and only if the status is terminal.
+          examples:
+          - '2026-08-19T14:32:10Z'
+        matterId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matterid
+          description: '`mat_` identifier of the matter this work belongs to, when it belongs to one.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        resource:
+          anyOf:
+          - $ref: '#/components/schemas/OperationResource'
+          - type: 'null'
+          description: What the operation produced. Absent until the underlying job row exists, which an idempotent replay can briefly observe, so treat absence as 'not yet' rather than 'never'.
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/OperationError'
+          - type: 'null'
+          description: Why the work failed. Present only when `status` is `failed`. Partial success is `succeeded` with `progress.done < progress.total`, never an error.
+        progress:
+          anyOf:
+          - $ref: '#/components/schemas/OperationProgress'
+          - type: 'null'
+          description: How far along the work is, when the underlying job reports it. Absent does not mean no progress.
+        requestId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Requestid
+          description: The `X-Request-ID` of the request that created this operation. Quote it in a support ticket.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - type
+      - status
+      - createdAt
+      title: Operation
+      description: 'One long-running operation, whatever kind of work it is.
+
+
+        Readable for `OPERATION_RETENTION_DAYS` after creation, per AIP-151.'
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
+    MatrixCreateRequest:
+      properties:
+        title:
+          type: string
+          maxLength: 300
+          minLength: 1
+          title: Title
+          description: Display title for the matrix.
+          examples:
+          - Vendor agreement review
+        description:
+          anyOf:
+          - type: string
+            maxLength: 2000
+          - type: 'null'
+          title: Description
+          description: Free-text description of what the matrix is for.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        documentIds:
+          items:
+            type: string
+          type: array
+          title: Documentids
+          description: '`doc_` identifiers that become the rows, one row per document. Each must be in this matter and must have finished ingesting. Duplicates are refused rather than de-duplicated.'
+          examples:
+          - - value
+        columns:
+          items:
+            $ref: '#/components/schemas/MatrixColumnSpec'
+          type: array
+          maxItems: 60
+          title: Columns
+          description: The questions asked of every document, one column each. At most 60. Documents times columns is the number of billable extractions a run performs.
+      additionalProperties: false
+      type: object
+      required:
+      - title
+      title: MatrixCreateRequest
+      description: Build a grid. Nothing is extracted until `matrices.run`.
+    MatrixExport:
+      properties:
+        format:
+          type: string
+          enum:
+          - csv
+          - xlsx
+          title: Format
+          description: The format that was rendered.
+          examples:
+          - csv
+        filename:
+          type: string
+          title: Filename
+          description: Suggested filename for the rendered file.
+          examples:
+          - msa-acme-v3.docx
+        sizeBytes:
+          type: integer
+          title: Sizebytes
+          description: Length of the DECODED file in bytes, so you can size storage without doing base64 arithmetic.
+          examples:
+          - 248193
+        content:
+          type: string
+          title: Content
+          description: 'The rendered file, base64 encoded. Bytes rather than a signed URL because a matrix export is rendered on demand: a URL would mean writing your work product to storage first.'
+          examples:
+          - UEsDBBQABgAIAAAAIQ...
+      additionalProperties: false
+      type: object
+      required:
+      - format
+      - filename
+      - sizeBytes
+      - content
+      title: MatrixExport
+      description: 'A rendered grid, returned as bytes rather than as a signed URL.
+
+
+        The second artifact on this API that does, after a draft export, and for the
+
+        same reason. Every other export is a URL signed over an object a worker
+
+        already wrote; `MatrixService.export_matrix` builds the CSV with
+
+        `csv.writer` or the XLSX with `openpyxl` inside the request and writes
+
+        nothing anywhere, so there is no object to sign. Minting one would mean
+
+        putting client work product into storage on every export, which with
+
+        encryption on in every deployment is a choice between a URL the customer
+
+        cannot decrypt and plaintext in a bucket.
+
+
+        `content` is base64 and bounded by `MAX_INLINE_EXPORT_BYTES`, with a 413
+
+        above it. A 250-row, 60-column grid with citations is well inside that.'
+    MatrixCitation:
+      properties:
+        quote:
+          type: string
+          title: Quote
+          description: The exact supporting text from the document. Verified to be a literal substring of the cited passage before the cell was saved, so a citation that appears here has been checked.
+          examples:
+          - in no event shall either party be liable for indirect damages
+        page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Page
+          description: Page the quote appears on, when the source format has pages.
+          examples:
+          - 1
+        chunkId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Chunkid
+          description: Identifier of the retrieval chunk the quote came from.
+          examples:
+          - chunk_00f1
+      additionalProperties: false
+      type: object
+      required:
+      - quote
+      title: MatrixCitation
+      description: 'Where in the document the answer came from.
+
+
+        `quote` is verified to be a literal substring of the cited passage before
+
+        the cell is persisted, and citations that fail that check are dropped. So a
+
+        citation present here has been checked, which is the property that makes it
+
+        worth publishing at all.'
+    Matrix:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `mtx_` followed by 32 hex characters.
+          examples:
+          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        matterId:
+          type: string
+          title: Matterid
+          description: '`mat_` identifier of the matter this matrix belongs to.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        title:
+          type: string
+          title: Title
+          description: Display title for the matrix.
+          examples:
+          - Vendor agreement review
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: Free-text description of what the matrix is for.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: Matrix status, using the same five public values as an operation.
+          examples:
+          - succeeded
+        columns:
+          items:
+            $ref: '#/components/schemas/MatrixColumn'
+          type: array
+          title: Columns
+          description: Every column, inlined. A cell names only ids, so these are what make one readable.
+        rows:
+          items:
+            $ref: '#/components/schemas/MatrixRow'
+          type: array
+          title: Rows
+          description: Every row, inlined, one per document.
+        cellCount:
+          type: integer
+          title: Cellcount
+          description: Total cells in the grid, which is rows times columns.
+          default: 0
+          examples:
+          - 24
+        pendingCellCount:
+          type: integer
+          title: Pendingcellcount
+          description: Cells that have not produced an answer yet. Zero means extraction is complete.
+          default: 0
+          examples:
+          - 0
+        errorCellCount:
+          type: integer
+          title: Errorcellcount
+          description: Cells whose extraction failed. These are distinct from cells that succeeded with a null answer.
+          default: 0
+          examples:
+          - 0
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the matrix was created (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        updatedAt:
+          type: string
+          format: date-time
+          title: Updatedat
+          description: When the matrix was last updated (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - matterId
+      - title
+      - status
+      - createdAt
+      - updatedAt
+      title: Matrix
+      description: 'The grid header plus its axes. Cells are a separate, paged read.
+
+
+        Rows and columns are inlined because they are bounded and because a cell is
+
+        unreadable without them: a cell names a row id and a column id and nothing
+
+        else, so a client that could not resolve those would have to page the whole
+
+        grid to interpret one answer.'
+    MatrixRow:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier for the row, `row_` followed by 32 hex characters. Cells reference it as `rowId`.
+          examples:
+          - row_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        documentId:
+          type: string
+          title: Documentid
+          description: '`doc_` identifier of the document this row represents.'
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        filename:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Filename
+          description: Filename of that document, joined in for display.
+          examples:
+          - msa-acme-v3.docx
+        position:
+          type: integer
+          title: Position
+          description: 'Top-to-bottom position of the row in the grid. Ascending, and not necessarily contiguous: deleting a row leaves a gap rather than renumbering.'
+          examples:
+          - 0
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - documentId
+      - position
+      title: MatrixRow
+      description: One document in the grid.
+    OperationStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: OperationStatus
+      description: 'The public five. There is no sixth, and there are no synonyms.
+
+
+        Internal vocabularies spell terminal success `completed`, `ready`,
+
+        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+
+        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+
+        `app.workspace_api.adapters.status_map`, which refuses to guess.'
+    CellVerification:
+      properties:
+        cellId:
+          type: string
+          title: Cellid
+          description: '`cel_` identifier of the cell that was verified.'
+          examples:
+          - cel_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        verdict:
+          type: string
+          enum:
+          - supported
+          - partially_supported
+          - unsupported
+          - contradicted
+          title: Verdict
+          description: '`supported` when the cited passages entail the answer, `partially_supported` when a meaningful element is missing or vague, `unsupported` when the passages do not contain what is needed, and `contradicted` when they assert something inconsistent with it.'
+          examples:
+          - supported
+        explanation:
+          type: string
+          title: Explanation
+          description: Why the verifier reached that verdict, in its own words. Written for a lawyer to read, not to be parsed.
+          examples:
+          - The cited passage states that liability shall not exceed the fees paid in the preceding twelve months, which is what the answer reports. Nothing in the cited sections qualifies that cap.
+        confidence:
+          type: number
+          title: Confidence
+          description: The verifier's confidence in its own verdict, 0 to 1. Not the same thing as the cell's `confidence`, which is the extractor's confidence in the answer.
+          examples:
+          - 0.92
+      additionalProperties: false
+      type: object
+      required:
+      - cellId
+      - verdict
+      - explanation
+      - confidence
+      title: CellVerification
+      description: 'A second opinion on one answer, from a fresh model call.
+
+
+        The cell''s own citations were already checked to be literal substrings of
+
+        the passages they cite before the cell was saved. This asks the different
+
+        and harder question: taken together, do those passages actually ENTAIL the
+
+        answer. A quote can be verbatim and still not support the claim built on it.
+
+
+        `model` is not published. Which model we asked is our choice, on the same
+
+        standing list as our token counts and our retrieval spend.'
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
+          examples:
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
+
+
+        `total` is the count of rows matching the filter, not the count returned,
+
+        so a caller can size a job before running it.'
+    MatrixRowSpec:
+      properties:
+        documentIds:
+          items:
+            type: string
+          type: array
+          minItems: 1
+          title: Documentids
+          description: '`doc_` identifiers to add as rows. Each must be in this matter, must have finished ingesting, and must not already be a row.'
+          examples:
+          - - value
+      additionalProperties: false
+      type: object
+      required:
+      - documentIds
+      title: MatrixRowSpec
+      description: 'Documents to add to the grid, one row each.
+
+
+        Each id must be in the matter named in the path and must have finished
+
+        ingesting, exactly as on the create: retrieval over a document with no
+
+        chunks yet answers "not in this document" for every column, which is one
+
+        paid call per cell to learn nothing.
+
+
+        A document already enrolled as a row is REFUSED, not skipped. `matrix_rows`
+
+        is UNIQUE on `(matrix_id, document_id)` and the service filters duplicates
+
+        out of its own payload, so without the refusal a request naming five
+
+        documents could add three and answer 201 with nothing saying which two it
+
+        dropped.
+
+
+        `autoRun` is not published. Adding rows creates pending cells and starts
+
+        nothing; `matrices.run` starts it.'
+    OperationError:
+      properties:
+        code:
+          type: string
+          title: Code
+          description: Stable, machine-readable failure code. Branch on this, never on `message`.
+          examples:
+          - EXTRACTION_FAILED
+        message:
+          type: string
+          title: Message
+          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
+          examples:
+          - The upstream extraction did not finish.
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - message
+      title: OperationError
+      description: 'Why a failed operation failed, in terms a customer can act on.
+
+
+        `code` is stable and machine-readable. `message` is sanitized: the internal
+
+        job tables store stack traces and file paths in their `error_message`
+
+        columns, and forwarding those verbatim leaks our internals into a customer''s
+
+        logs.'
+    MatrixSummary:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `mtx_` followed by 32 hex characters.
+          examples:
+          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        matterId:
+          type: string
+          title: Matterid
+          description: '`mat_` identifier of the matter this matrix belongs to.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        title:
+          type: string
+          title: Title
+          description: Display title for the matrix.
+          examples:
+          - Vendor agreement review
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: Free-text description of what the matrix is for.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: Matrix status, using the same five public values as an operation. A matrix that has been built and never run reads as `queued`.
+          examples:
+          - succeeded
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the matrix was created (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        updatedAt:
+          type: string
+          format: date-time
+          title: Updatedat
+          description: When the matrix was last updated (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - matterId
+      - title
+      - status
+      - createdAt
+      - updatedAt
+      title: MatrixSummary
+      description: 'One row of `matrices.list`. The header only, with no axes and no counts.
+
+
+        `cellCount`, `pendingCellCount` and `errorCellCount` are deliberately
+
+        absent, and so are `rows` and `columns`. `MatrixService._aggregate_counts`
+
+        is three queries per matrix, so a page of two hundred would be six hundred
+
+        round trips paid for by the cheapest read on the surface. `operations.list`
+
+        made the same call for the same reason and says so in its own docstring.
+
+
+        `GET .../matrices/{matrixId}` is where the grid and the counts live, so the
+
+        list is for finding an id and the read is for using it.'
+  securitySchemes:
+    WorkspaceAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: vq_ws_*
+      description: 'Workspace credential issued from the automation console at `/automation`. Send it as `Authorization: Bearer vq_ws_...`. This is NOT a Data API key: a `vq_key_` credential is refused here and names the other product in the error.'
+externalDocs:
+  description: Getting started guide and error reference
+  url: https://vaquill.ai/docs/workspace-api
+x-refined-from:
+- vaquill-ai-workspace-openapi.json
+- vaquill-ai-workspace-openapi.yml

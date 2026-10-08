@@ -1,0 +1,852 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/vaquill-ai/main/json-schema/vaquill-ai-review-schema.json",
+  "title": "Review",
+  "description": "One contract review: its findings, or its progress toward them.",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/vaquill-ai-workspace-openapi.yml#/components/schemas/Review",
+  "properties": {
+    "id": {
+      "type": "string",
+      "title": "Id",
+      "description": "Public identifier, `rev_` followed by 32 hex characters."
+    },
+    "matterId": {
+      "type": "string",
+      "title": "Matterid",
+      "description": "`mat_` identifier of the matter this review belongs to."
+    },
+    "status": {
+      "$ref": "#/$defs/OperationStatus",
+      "description": "Review status, using the same five public values as an operation. While `queued` or `running`, every findings list is empty and the scalar fields are absent. That is the truthful shape of a review that has not happened yet, not an error."
+    },
+    "contractType": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Contracttype",
+      "description": "Contract type the review ran as, echoed from the request."
+    },
+    "userSide": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Userside",
+      "description": "Which side the review argued for, echoed from the request."
+    },
+    "playbookId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Playbookid",
+      "description": "The playbook the review actually ran against. Absent when it ran against the built-in defaults, so the two cases can be told apart after the fact."
+    },
+    "jurisdiction": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Jurisdiction",
+      "description": "Jurisdiction the review ran under."
+    },
+    "round": {
+      "type": "integer",
+      "title": "Round",
+      "description": "Negotiation round this review was run for.",
+      "default": 1
+    },
+    "summary": {
+      "type": "string",
+      "title": "Summary",
+      "description": "Prose summary of the review's conclusions.",
+      "default": ""
+    },
+    "overallRisk": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Overallrisk",
+      "description": "Overall risk rating for the contract: `green`, `yellow` or `red`."
+    },
+    "businessImpactSummary": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Businessimpactsummary",
+      "description": "What the findings mean commercially, in plain language."
+    },
+    "approvalGate": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReviewApprovalGate"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Whether a human should sign this off before it goes out. Reported, never enforced."
+    },
+    "liabilityExposure": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReviewLiabilityExposure"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "How much you are on the hook for: caps, carve-outs, indemnities and insurance."
+    },
+    "counterpartyMatch": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReviewCounterpartyMatch"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Set when a known counterparty paper was recognized, which means the findings include counterparty-specific redlines layered on the general analysis."
+    },
+    "clauses": {
+      "items": {
+        "$ref": "#/$defs/ReviewClause"
+      },
+      "type": "array",
+      "title": "Clauses",
+      "description": "Every clause analyzed, with its severity against the playbook position."
+    },
+    "redlines": {
+      "items": {
+        "$ref": "#/$defs/ReviewRedline"
+      },
+      "type": "array",
+      "title": "Redlines",
+      "description": "Proposed edits, ready to send to counterparty counsel. Check each one's `grounding` before applying it automatically."
+    },
+    "negotiationPriorities": {
+      "items": {
+        "$ref": "#/$defs/ReviewNegotiationPriority"
+      },
+      "type": "array",
+      "title": "Negotiationpriorities",
+      "description": "What to raise first and what to trade, in tiers."
+    },
+    "missingClauses": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "title": "Missingclauses",
+      "description": "Standard clauses ABSENT from the contract. The one finding that cannot be expressed as a clause analysis, because there is no clause to analyze."
+    },
+    "flags": {
+      "items": {
+        "$ref": "#/$defs/ReviewFlag"
+      },
+      "type": "array",
+      "title": "Flags",
+      "description": "Things the reviewer noticed and deliberately did not redline: a wrong entity name, an odd schedule entry, a real ambiguity. Confirm these with a human before signing."
+    },
+    "parseWarning": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Parsewarning",
+      "description": "Set when the model's output only partly parsed, which means the findings may be incomplete. Present is the difference between acting on the findings and asking a human first."
+    },
+    "deep": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReviewDeepMeta"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "What the deep verification pass did. Absent on a standard review, which is the signal that no verification ran rather than that it found nothing."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Createdat",
+      "description": "When the review was created (RFC 3339)."
+    },
+    "completedAt": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Completedat",
+      "description": "When the review reached a terminal status (RFC 3339)."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "id",
+    "matterId",
+    "status",
+    "createdAt"
+  ],
+  "$defs": {
+    "OperationStatus": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "running",
+        "succeeded",
+        "failed",
+        "cancelled"
+      ],
+      "title": "OperationStatus",
+      "description": "The public five. There is no sixth, and there are no synonyms.\n\nInternal vocabularies spell terminal success `completed`, `ready`,\n`extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;\nqueued `pending`, `queued` and `draft`. All of that is collapsed here by\n`app.workspace_api.adapters.status_map`, which refuses to guess."
+    },
+    "ReviewApprovalGate": {
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "title": "Required",
+          "description": "Whether a human should sign this off before it goes to the counterparty. REPORTED, never enforced: it does not block the review or the export. Implement the gate on your side using this field.",
+          "default": false
+        },
+        "level": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Level",
+          "description": "The highest sign-off any gating clause needs: `manager`, `partner` or `gc`. Absent when `required` is false."
+        },
+        "dealBreakerCount": {
+          "type": "integer",
+          "title": "Dealbreakercount",
+          "description": "How many clauses sit at or below the walk-away floor.",
+          "default": 0
+        },
+        "reasons": {
+          "items": {
+            "$ref": "#/$defs/ReviewApprovalReason"
+          },
+          "type": "array",
+          "title": "Reasons",
+          "description": "Which clauses drive the gate, and why each one does."
+        },
+        "summary": {
+          "type": "string",
+          "title": "Summary",
+          "description": "One-line explanation of the gate, suitable to show a reviewer.",
+          "default": ""
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "title": "ReviewApprovalGate",
+      "description": "Whether a human has to sign this off before it goes to the counterparty.\n\n**Reported, never enforced.** The gate is computed deterministically from the\nplaybook's own `approvalLevel` and `dealBreaker` on clauses that actually\ndeviated, and it is published as a fact about the result. It does not block\nthe review, it does not block the export, and the operation reaches a\nterminal status either way.\n\nThat is the same decision the acting-user header already carries (docs 07.3):\nwe record what we know and build no enforcement machinery we cannot honour.\nEnforcing would mean an approval workflow, an enrolled approver directory and\na state a review can sit in indefinitely, which is precisely the \"do not let\nit hang\" failure the handoff for this track warned about. A caller that wants\na gate has everything it needs to implement one: `required` says whether,\n`level` says who, and `reasons` says why."
+    },
+    "ReviewApprovalReason": {
+      "properties": {
+        "clauseName": {
+          "type": "string",
+          "title": "Clausename",
+          "description": "The clause driving this part of the gate."
+        },
+        "approvalLevel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approvallevel",
+          "description": "Sign-off this clause requires."
+        },
+        "isDealBreaker": {
+          "type": "boolean",
+          "title": "Isdealbreaker",
+          "description": "True when this clause is at or below the walk-away floor.",
+          "default": false
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note",
+          "description": "Set when a conditional rule RAISED this clause's sign-off, for example 'Escalated to GC: deal value over $1M'. Absent when the level came straight from the playbook position."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "clauseName"
+      ],
+      "title": "ReviewApprovalReason",
+      "description": "One clause driving the review-level sign-off gate."
+    },
+    "ReviewClause": {
+      "properties": {
+        "clauseName": {
+          "type": "string",
+          "title": "Clausename",
+          "description": "Human-readable name of the clause, for example 'Limitation of Liability'."
+        },
+        "clauseType": {
+          "type": "string",
+          "title": "Clausetype",
+          "description": "Clause-type slug the analysis matched, the same key a playbook's `positions` map uses."
+        },
+        "sectionReference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sectionreference",
+          "description": "Where the clause sits in the contract, for example `8.2`."
+        },
+        "currentLanguage": {
+          "type": "string",
+          "title": "Currentlanguage",
+          "description": "The exact quote from the contract this analysis is about. Empty when the finding is that the clause is ABSENT, which is the one case with nothing to quote.",
+          "default": ""
+        },
+        "severity": {
+          "type": "string",
+          "title": "Severity",
+          "description": "How far the clause deviates from the playbook position: `green`, `yellow` or `red`. Published as a plain string so a new level cannot break your client."
+        },
+        "analysis": {
+          "type": "string",
+          "title": "Analysis",
+          "description": "What the reviewer concluded about this clause."
+        },
+        "riskDescription": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Riskdescription",
+          "description": "What could go wrong if the clause stands as written."
+        },
+        "playbookPosition": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Playbookposition",
+          "description": "The playbook position this clause was measured against."
+        },
+        "approvalLevel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approvallevel",
+          "description": "Sign-off a deviation on this clause needs: `none`, `manager`, `partner` or `gc`. Computed server-side by matching the clause to its playbook position, never asserted by the model. Only meaningful when `severity` is not green."
+        },
+        "isDealBreaker": {
+          "type": "boolean",
+          "title": "Isdealbreaker",
+          "description": "True when the clause is at or below the playbook's walk-away floor.",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "clauseName",
+        "clauseType",
+        "severity",
+        "analysis"
+      ],
+      "title": "ReviewClause",
+      "description": "One clause, as analyzed against the playbook position for its type."
+    },
+    "ReviewCounterpartyMatch": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the recognized counterparty paper."
+        },
+        "vendor": {
+          "type": "string",
+          "title": "Vendor",
+          "description": "The vendor whose standard form this is."
+        },
+        "flexibility": {
+          "type": "string",
+          "title": "Flexibility",
+          "description": "How negotiable this paper is in practice: `rigid`, `limited` or `standard`."
+        },
+        "negotiationStrategyNote": {
+          "type": "string",
+          "title": "Negotiationstrategynote",
+          "description": "How to approach negotiating against this specific paper."
+        },
+        "counterpartyRedlinesCount": {
+          "type": "integer",
+          "title": "Counterpartyredlinescount",
+          "description": "How many redlines the counterparty overlay contributed on top of the general analysis. A non-zero value means the findings are tuned to this specific paper.",
+          "default": 0
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "vendor",
+        "flexibility",
+        "negotiationStrategyNote"
+      ],
+      "title": "ReviewCounterpartyMatch",
+      "description": "A known counterparty paper was recognised in the contract text.\n\nPublished so a caller knows the findings include counterparty-specific\nredlines layered on top of the general analysis, which changes how the result\nshould be read. The catalogue slug and the phrases that matched are NOT\npublished: they are our detection internals, and neither is actionable."
+    },
+    "ReviewDeepMeta": {
+      "properties": {
+        "clausesReviewed": {
+          "type": "integer",
+          "title": "Clausesreviewed",
+          "description": "How many first-pass flagged clauses the deep pass verified."
+        },
+        "redlinesKept": {
+          "type": "integer",
+          "title": "Redlineskept",
+          "description": "How many survived verification and are in `redlines`."
+        },
+        "clearedAsCompliant": {
+          "type": "integer",
+          "title": "Clearedascompliant",
+          "description": "How many first-pass flags the deep pass cleared as already compliant, and therefore dropped. Fewer false positives is the point of running deep."
+        },
+        "clauseLimit": {
+          "type": "integer",
+          "title": "Clauselimit",
+          "description": "The ceiling on how many flagged clauses a deep review verifies, currently 40.",
+          "default": 40
+        },
+        "clausesTruncated": {
+          "type": "boolean",
+          "title": "Clausestruncated",
+          "description": "True when the deep pass hit its 40-clause ceiling, which means first-pass flags beyond it were NOT verified and are NOT in `redlines`. Treat the review as covering the first 40 findings only. A boolean rather than a count because the number dropped is not recorded anywhere upstream.",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "clausesReviewed",
+        "redlinesKept",
+        "clearedAsCompliant"
+      ],
+      "title": "ReviewDeepMeta",
+      "description": "What the deep verification pass did, present only when one ran.\n\nAbsent on a standard review, which is the honest signal that no verification\nhappened rather than a zeroed object implying one found nothing.\n\n`estimatedCostUsd` is dropped on the way through. It is our spend and our\nmodel choice, and it is on the list of things a published DTO always drops."
+    },
+    "ReviewFlag": {
+      "properties": {
+        "clauseName": {
+          "type": "string",
+          "title": "Clausename",
+          "description": "Which clause or part of the contract the observation is about."
+        },
+        "sectionReference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sectionreference",
+          "description": "Where it sits in the contract."
+        },
+        "observation": {
+          "type": "string",
+          "title": "Observation",
+          "description": "What the reviewer noticed. These are things a human should confirm before signing, not edits, which makes them the most important field here for a caller automating the review away."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "clauseName",
+        "observation"
+      ],
+      "title": "ReviewFlag",
+      "description": "Something the reviewer noticed and deliberately did NOT redline.\n\nA wrong entity name, an odd schedule entry, a real ambiguity. These are not\nedits; they are things a human should confirm before signing, which makes\nthem the most important thing on this surface for a caller that is otherwise\nautomating the review away."
+    },
+    "ReviewLiabilityExposure": {
+      "properties": {
+        "exposureLevel": {
+          "type": "string",
+          "title": "Exposurelevel",
+          "description": "Overall liability exposure from your side: `green`, `yellow` or `red`."
+        },
+        "verdict": {
+          "type": "string",
+          "title": "Verdict",
+          "description": "Plain-language summary of the liability position.",
+          "default": ""
+        },
+        "capStatus": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Capstatus",
+          "description": "Whether liability is capped: `capped`, `uncapped`, `partial` or `not_addressed`. Null when it could not be determined."
+        },
+        "capAmount": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Capamount",
+          "description": "The cap as written, as a string rather than a number since contracts express it in many forms (a figure, a multiple of fees, a formula)."
+        },
+        "capQuote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Capquote",
+          "description": "The verbatim contract sentence the cap claim is drawn from, so a headline number can be checked against the source rather than trusted."
+        },
+        "grounding": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Grounding",
+          "description": "`verified` when `capQuote` is a literal span of the contract, `unverified` when it could not be found. Same meaning as on a redline."
+        },
+        "capScope": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Capscope",
+          "description": "What the cap applies across: `per_claim`, `aggregate`, `both` or `unclear`."
+        },
+        "capAdequate": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Capadequate",
+          "description": "Whether the cap is meaningful against plausible harm and deal value. A cap tied to fees paid to date is inadequate even though a cap exists."
+        },
+        "mutualCap": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mutualcap",
+          "description": "Whether the cap applies to both sides equally."
+        },
+        "consequentialDamagesExcluded": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Consequentialdamagesexcluded",
+          "description": "Whether consequential and indirect damages are excluded."
+        },
+        "uncappedCarveouts": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Uncappedcarveouts",
+          "description": "Categories of liability that sit OUTSIDE the cap, for example indemnity or confidentiality breaches."
+        },
+        "supercap": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Supercap",
+          "description": "A raised cap that applies to specific categories, when the contract sets one."
+        },
+        "indemnityExposure": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Indemnityexposure",
+          "description": "What you are indemnifying the counterparty for."
+        },
+        "insuranceRequired": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Insurancerequired",
+          "description": "Insurance the contract requires you to carry."
+        },
+        "claimTimeBar": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Claimtimebar",
+          "description": "Any deadline for bringing a claim under the contract."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "exposureLevel"
+      ],
+      "title": "ReviewLiabilityExposure",
+      "description": "How much the reviewer is on the hook for, in one panel.\n\nEvery field is nullable and stays nullable. This is assembled defensively\nfrom LLM output about contract language that may not exist: a contract with\nno liability clause has no cap, and `null` is the true answer rather than a\nzero that reads as \"capped at nothing\"."
+    },
+    "ReviewNegotiationPriority": {
+      "properties": {
+        "tier": {
+          "type": "integer",
+          "title": "Tier",
+          "description": "Priority tier: 1 is must-have and covers deal breakers, 2 is should-have, 3 is nice-to-have."
+        },
+        "tierLabel": {
+          "type": "string",
+          "title": "Tierlabel",
+          "description": "Human-readable name for the tier."
+        },
+        "items": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Items",
+          "description": "What to raise at this tier, in order."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "tier",
+        "tierLabel",
+        "items"
+      ],
+      "title": "ReviewNegotiationPriority",
+      "description": "One tier of the negotiation plan: what to raise first, and what to trade."
+    },
+    "ReviewRedline": {
+      "properties": {
+        "clauseName": {
+          "type": "string",
+          "title": "Clausename",
+          "description": "Which clause this edit applies to."
+        },
+        "sectionReference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sectionreference",
+          "description": "Where the clause sits in the contract, for example `8.2`."
+        },
+        "currentLanguage": {
+          "type": "string",
+          "title": "Currentlanguage",
+          "description": "The text to be replaced, as it stands in the contract. Empty for an insertion.",
+          "default": ""
+        },
+        "proposedLanguage": {
+          "type": "string",
+          "title": "Proposedlanguage",
+          "description": "The replacement text to send to the counterparty."
+        },
+        "rationale": {
+          "type": "string",
+          "title": "Rationale",
+          "description": "Why this edit is being proposed. Suitable to put in a margin comment."
+        },
+        "priority": {
+          "type": "string",
+          "title": "Priority",
+          "description": "How hard to push for this edit: `must_have`, `should_have` or `nice_to_have`."
+        },
+        "fallbackPosition": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Fallbackposition",
+          "description": "What to retreat to if this edit is rejected, taken from the playbook's fallback ladder."
+        },
+        "grounding": {
+          "type": "string",
+          "title": "Grounding",
+          "description": "Whether `currentLanguage` was found verbatim in the contract. `verified` means it was. `unverified` means it was NOT, so the edit may be misanchored. `insertion` means there is nothing to anchor because the clause is missing. An integration applying redlines automatically must stop and ask a human on `unverified`.",
+          "default": "verified"
+        },
+        "approvalLevel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approvallevel",
+          "description": "Sign-off this edit needs before it goes out: `none`, `manager`, `partner` or `gc`."
+        },
+        "isDealBreaker": {
+          "type": "boolean",
+          "title": "Isdealbreaker",
+          "description": "True when the clause this edit addresses is at or below the walk-away floor.",
+          "default": false
+        },
+        "nature": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Nature",
+          "description": "`substantive` or `housekeeping`. Absent means unclassified, on a review produced before the pipeline classified this. Absent is NOT the same as `housekeeping`."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "clauseName",
+        "proposedLanguage",
+        "rationale",
+        "priority"
+      ],
+      "title": "ReviewRedline",
+      "description": "One proposed edit, ready to send to counterparty counsel."
+    }
+  }
+}

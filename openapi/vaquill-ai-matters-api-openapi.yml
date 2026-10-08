@@ -1,0 +1,1622 @@
+openapi: 3.2.0
+info:
+  title: Vaquill Ai Matters API
+  version: 1.0.0
+  description: 'Operations tagged Matters across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.vaquill.ai/workspace
+  description: Vaquill Legal Workspace API (production)
+- url: /workspace
+  description: Vaquill Legal Workspace API (relative to the mount)
+security:
+- WorkspaceAuth: []
+tags:
+- name: Matters
+  description: The unit of work everything else hangs off. A matter scopes documents, drafts, reviews, comparisons and matrices, and it is what a credential's access is checked against.
+paths:
+  /v1/matters:
+    get:
+      tags:
+      - Matters
+      summary: List matters
+      description: 'Every matter in the credential''s organization, one page at a time.
+
+
+        Ordered by name, A to Z.
+
+
+        Includes the organization''s default matter, the one minted at signup that
+
+        unfiled work lands in, flagged as `isDefault`.'
+      operationId: matters.list
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: How many rows to return, 1 to 200. Defaults to 50.
+          default: 50
+          title: Limit
+        description: How many rows to return, 1 to 200. Defaults to 50.
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+          default: 0
+          title: Offset
+        description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_Matter_'
+              example:
+                data:
+                - id: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  name: Acme / Series B Financing
+                  clientId: cli_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  description: Master services agreement with Acme for the 2026 platform rollout.
+                  instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+                  status: open
+                  practiceArea: commercial
+                  matterType: financing
+                  caseNumber: 2026-CV-0117
+                  responsibleAttorneyName: Dana Whitfield
+                  openDate: '2026-08-19'
+                  closeDate: '2026-08-19'
+                  billingType: hourly
+                  billingRate: '450.00'
+                  billingCurrency: USD
+                  country: US
+                  metadata:
+                    externalId: CRM-4471
+                  isDefault: false
+                  createdAt: '2026-08-19T14:32:10Z'
+                  updatedAt: '2026-08-19T14:32:10Z'
+                pagination:
+                  limit: 50
+                  offset: 0
+                  total: 128
+                  hasMore: false
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    post:
+      tags:
+      - Matters
+      summary: Create a matter
+      description: 'Create a matter.
+
+
+        The organization comes from the credential, so there is no field for it.
+
+        Only `name` is required. A `clientId`, if given, is verified to belong to
+
+        your organization before the matter is written.'
+      operationId: matters.create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatterCreateRequest'
+            example:
+              name: Acme / Series B Financing
+              clientId: cli_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+              description: Master services agreement with Acme for the 2026 platform rollout.
+              instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+              status: open
+              practiceArea: commercial
+              matterType: financing
+              caseNumber: 2026-CV-0117
+              responsibleAttorneyName: Dana Whitfield
+              openDate: '2026-08-19'
+              closeDate: '2026-08-19'
+              billingType: hourly
+              billingRate: '450.00'
+              billingCurrency: USD
+              country: US
+              metadata:
+                externalId: CRM-4471
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Matter'
+              example:
+                id: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                name: Acme / Series B Financing
+                clientId: cli_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                description: Master services agreement with Acme for the 2026 platform rollout.
+                instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+                status: open
+                practiceArea: commercial
+                matterType: financing
+                caseNumber: 2026-CV-0117
+                responsibleAttorneyName: Dana Whitfield
+                openDate: '2026-08-19'
+                closeDate: '2026-08-19'
+                billingType: hourly
+                billingRate: '450.00'
+                billingCurrency: USD
+                country: US
+                metadata:
+                  externalId: CRM-4471
+                isDefault: false
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/default:
+    get:
+      tags:
+      - Matters
+      summary: Get the default matter
+      description: 'The organization''s default matter, the one unfiled work lands in.
+
+
+        Minted at signup, exactly one per organization, and never created or renamed
+
+        by this API. Answers `404` when the organization has none; it will not
+
+        substitute another matter, because filing a client''s contract into a matter
+
+        you did not name is worse than an error you can act on.'
+      operationId: matters.default
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Matter'
+              example:
+                id: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                name: Acme / Series B Financing
+                clientId: cli_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                description: Master services agreement with Acme for the 2026 platform rollout.
+                instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+                status: open
+                practiceArea: commercial
+                matterType: financing
+                caseNumber: 2026-CV-0117
+                responsibleAttorneyName: Dana Whitfield
+                openDate: '2026-08-19'
+                closeDate: '2026-08-19'
+                billingType: hourly
+                billingRate: '450.00'
+                billingCurrency: USD
+                country: US
+                metadata:
+                  externalId: CRM-4471
+                isDefault: false
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}:
+    get:
+      tags:
+      - Matters
+      summary: Get a matter
+      description: 'One matter by id.
+
+
+        A `404` covers "no such matter", "not this organization''s" and "outside this
+
+        installation''s matter allowlist" alike. The three are deliberately
+
+        indistinguishable, so the status cannot be used to discover which matters
+
+        exist elsewhere.'
+      operationId: matters.get
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Matter'
+              example:
+                id: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                name: Acme / Series B Financing
+                clientId: cli_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                description: Master services agreement with Acme for the 2026 platform rollout.
+                instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+                status: open
+                practiceArea: commercial
+                matterType: financing
+                caseNumber: 2026-CV-0117
+                responsibleAttorneyName: Dana Whitfield
+                openDate: '2026-08-19'
+                closeDate: '2026-08-19'
+                billingType: hourly
+                billingRate: '450.00'
+                billingCurrency: USD
+                country: US
+                metadata:
+                  externalId: CRM-4471
+                isDefault: false
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    patch:
+      tags:
+      - Matters
+      summary: Update a matter
+      description: 'Apply a partial update to a matter.
+
+
+        Omitted fields are left alone; an explicit `null` clears the field, except
+
+        `name`, which cannot be nulled. Setting `closeDate` does not change
+
+        `status`: the two are independent, so close the matter explicitly if that is
+
+        what you mean.'
+      operationId: matters.update
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatterUpdateRequest'
+            example:
+              name: Acme / Series B Financing
+              clientId: cli_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+              description: Master services agreement with Acme for the 2026 platform rollout.
+              instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+              status: open
+              practiceArea: commercial
+              matterType: financing
+              caseNumber: 2026-CV-0117
+              responsibleAttorneyName: Dana Whitfield
+              openDate: '2026-08-19'
+              closeDate: '2026-08-19'
+              billingType: hourly
+              billingRate: '450.00'
+              billingCurrency: USD
+              country: US
+              metadata:
+                externalId: CRM-4471
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Matter'
+              example:
+                id: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                name: Acme / Series B Financing
+                clientId: cli_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                description: Master services agreement with Acme for the 2026 platform rollout.
+                instructions: House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+                status: open
+                practiceArea: commercial
+                matterType: financing
+                caseNumber: 2026-CV-0117
+                responsibleAttorneyName: Dana Whitfield
+                openDate: '2026-08-19'
+                closeDate: '2026-08-19'
+                billingType: hourly
+                billingRate: '450.00'
+                billingCurrency: USD
+                country: US
+                metadata:
+                  externalId: CRM-4471
+                isDefault: false
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      tags:
+      - Matters
+      summary: Delete a matter
+      description: 'Delete an empty matter.
+
+
+        Refused with `409 resource-not-empty` while the matter still holds a
+
+        document, folder, draft, comparison, matrix, workflow run, review or chat.
+
+        The `blockers` array on that problem names each one and how many there are,
+
+        so you can clear them without discovering them one at a time. Empty them
+
+        first: deleting a matter that held documents would remove those documents,
+
+        their stored files and their vectors, and nothing can undo that.
+
+
+        The organization''s default matter is refused with `409
+
+        matter-not-deletable`, in the app as well as here.
+
+
+        There is no undo, and a repeated delete answers `404`. If a delete timed
+
+        out, treat a subsequent `404` as success.'
+      operationId: matters.delete
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+components:
+  schemas:
+    Matter:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `mat_` followed by 32 hex characters. This is the value that goes in every matter-nested path.
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        name:
+          type: string
+          title: Name
+          description: The matter's display name.
+          examples:
+          - Acme / Series B Financing
+        clientId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Clientid
+          description: '`cli_` identifier of the client this matter belongs to, if one was set.'
+          examples:
+          - cli_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: Free-text description of the matter.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        instructions:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Instructions
+          description: Standing instructions the customer wants applied to AI work on this matter. Carried into drafting and review prompts.
+          examples:
+          - House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+        status:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Status
+          description: Lifecycle status. Usually `open`, `pending` or `closed`, but published as a plain string because production holds values no UI offers. Do not branch on it without a fallback.
+          examples:
+          - open
+        practiceArea:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Practicearea
+          description: Practice area, for example `employment` or `real_estate`. Free text.
+          examples:
+          - commercial
+        matterType:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Mattertype
+          description: Customer's own sub-classification of the matter. Free text.
+          examples:
+          - financing
+        caseNumber:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Casenumber
+          description: Docket or internal case reference.
+          examples:
+          - 2026-CV-0117
+        responsibleAttorneyName:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Responsibleattorneyname
+          description: Name of the attorney responsible for the matter. The underlying user id is deliberately not published.
+          examples:
+          - Dana Whitfield
+        openDate:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Opendate
+          description: Date the matter opened (`YYYY-MM-DD`).
+          examples:
+          - '2026-08-19'
+        closeDate:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Closedate
+          description: Date the matter closed (`YYYY-MM-DD`). Absent while it is open.
+          examples:
+          - '2026-08-19'
+        billingType:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Billingtype
+          description: Billing arrangement, normally one of `hourly`, `flat_fee`, `contingency` or `pro_bono`. Published as a plain string.
+          examples:
+          - hourly
+        billingRate:
+          anyOf:
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: 'null'
+          title: Billingrate
+          description: Billing rate in `billingCurrency`. Rendered as a JSON STRING, not a number, so the value stays exact.
+          examples:
+          - '450.00'
+        billingCurrency:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Billingcurrency
+          description: ISO 4217 currency code for `billingRate`, for example `USD`.
+          examples:
+          - USD
+        country:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Country
+          description: ISO 3166-1 alpha-2 country code, for example `US`. Unlike a client's `country`, this is a validated code.
+          examples:
+          - US
+        metadata:
+          additionalProperties: true
+          type: object
+          title: Metadata
+          description: Arbitrary JSON the customer stores against the matter. Vaquill never reads it.
+        isDefault:
+          type: boolean
+          title: Isdefault
+          description: 'True for the one matter minted at signup that unfiled work lands in. Read-only: exactly one exists per organization and this API cannot create or move it.'
+          default: false
+          examples:
+          - false
+        createdAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Createdat
+          description: When the matter was created (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        updatedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Updatedat
+          description: When the matter was last modified (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - name
+      title: Matter
+      description: A matter as this API publishes it.
+    MatterUpdateRequest:
+      properties:
+        name:
+          anyOf:
+          - type: string
+            maxLength: 100
+            minLength: 1
+          - type: 'null'
+          title: Name
+          description: New display name. Cannot be set to null; omit it to leave the name alone.
+          examples:
+          - Acme / Series B Financing
+        clientId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Clientid
+          description: '`cli_` identifier to refile the matter under, or null to unfile it. Must belong to your organization.'
+          examples:
+          - cli_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        description:
+          anyOf:
+          - type: string
+            maxLength: 5000
+          - type: 'null'
+          title: Description
+          description: New description, or null to clear it.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        instructions:
+          anyOf:
+          - type: string
+            maxLength: 10000
+          - type: 'null'
+          title: Instructions
+          description: New standing instructions, or null to clear them.
+          examples:
+          - House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+        status:
+          anyOf:
+          - $ref: '#/components/schemas/MatterStatus'
+          - type: 'null'
+          description: New lifecycle status, or null to clear it.
+          examples:
+          - open
+        practiceArea:
+          anyOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+          title: Practicearea
+          description: New practice area, or null to clear it.
+          examples:
+          - commercial
+        matterType:
+          anyOf:
+          - type: string
+            maxLength: 50
+          - type: 'null'
+          title: Mattertype
+          description: New matter type, or null to clear it.
+          examples:
+          - financing
+        caseNumber:
+          anyOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+          title: Casenumber
+          description: New case reference, or null to clear it.
+          examples:
+          - 2026-CV-0117
+        responsibleAttorneyName:
+          anyOf:
+          - type: string
+            maxLength: 255
+          - type: 'null'
+          title: Responsibleattorneyname
+          description: New responsible attorney name, or null to clear it.
+          examples:
+          - Dana Whitfield
+        openDate:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Opendate
+          description: New open date, or null to clear it.
+          examples:
+          - '2026-08-19'
+        closeDate:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Closedate
+          description: New close date, or null to clear it. Setting one does not change `status`.
+          examples:
+          - '2026-08-19'
+        billingType:
+          anyOf:
+          - $ref: '#/components/schemas/BillingType'
+          - type: 'null'
+          description: New billing arrangement, or null to clear it.
+          examples:
+          - hourly
+        billingRate:
+          anyOf:
+          - type: number
+            minimum: 0.0
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: 'null'
+          title: Billingrate
+          description: New billing rate, or null to clear it.
+          examples:
+          - '450.00'
+        billingCurrency:
+          anyOf:
+          - type: string
+            pattern: ^[A-Z]{3}$
+          - type: 'null'
+          title: Billingcurrency
+          description: New ISO 4217 currency code, or null to clear it.
+          examples:
+          - USD
+        country:
+          anyOf:
+          - type: string
+            pattern: ^[A-Z]{2}$
+          - type: 'null'
+          title: Country
+          description: New ISO 3166-1 alpha-2 country code, or null to clear it.
+          examples:
+          - US
+        metadata:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Metadata
+          description: Replacement metadata object, or null to clear it. Not merged with what is stored.
+      additionalProperties: false
+      type: object
+      title: MatterUpdateRequest
+      description: A partial update. Absent leaves alone; explicit null clears.
+    MatterStatus:
+      type: string
+      enum:
+      - open
+      - pending
+      - closed
+      title: MatterStatus
+      description: The write vocabulary. The read side accepts whatever is stored.
+    MatterCreateRequest:
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Name
+          description: Display name for the matter. Trimmed; whitespace alone is refused.
+          examples:
+          - Acme / Series B Financing
+        clientId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Clientid
+          description: '`cli_` identifier of the client to file this matter under. Must belong to your organization.'
+          examples:
+          - cli_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        description:
+          anyOf:
+          - type: string
+            maxLength: 5000
+          - type: 'null'
+          title: Description
+          description: Free-text description of the matter.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        instructions:
+          anyOf:
+          - type: string
+            maxLength: 10000
+          - type: 'null'
+          title: Instructions
+          description: Standing instructions to apply to AI work on this matter. Carried into drafting and review prompts, so this is where house style and known counterparties belong.
+          examples:
+          - House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+        status:
+          $ref: '#/components/schemas/MatterStatus'
+          description: Lifecycle status. Defaults to `open`.
+          default: open
+          examples:
+          - open
+        practiceArea:
+          anyOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+          title: Practicearea
+          description: Practice area, for example `employment`. Free text.
+          examples:
+          - commercial
+        matterType:
+          anyOf:
+          - type: string
+            maxLength: 50
+          - type: 'null'
+          title: Mattertype
+          description: Your own sub-classification of the matter. Free text.
+          examples:
+          - financing
+        caseNumber:
+          anyOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+          title: Casenumber
+          description: Docket or internal case reference.
+          examples:
+          - 2026-CV-0117
+        responsibleAttorneyName:
+          anyOf:
+          - type: string
+            maxLength: 255
+          - type: 'null'
+          title: Responsibleattorneyname
+          description: 'Name of the responsible attorney. A name, not an identifier: this API does not resolve users.'
+          examples:
+          - Dana Whitfield
+        openDate:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Opendate
+          description: Date the matter opened (`YYYY-MM-DD`).
+          examples:
+          - '2026-08-19'
+        closeDate:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Closedate
+          description: Date the matter closed (`YYYY-MM-DD`).
+          examples:
+          - '2026-08-19'
+        billingType:
+          anyOf:
+          - $ref: '#/components/schemas/BillingType'
+          - type: 'null'
+          description: Billing arrangement for the matter.
+          examples:
+          - hourly
+        billingRate:
+          anyOf:
+          - type: number
+            minimum: 0.0
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: 'null'
+          title: Billingrate
+          description: Billing rate in `billingCurrency`. Send it as a JSON string to keep the value exact.
+          examples:
+          - '450.00'
+        billingCurrency:
+          anyOf:
+          - type: string
+            pattern: ^[A-Z]{3}$
+          - type: 'null'
+          title: Billingcurrency
+          description: ISO 4217 currency code for `billingRate`, three uppercase letters, for example `USD`.
+          examples:
+          - USD
+        country:
+          anyOf:
+          - type: string
+            pattern: ^[A-Z]{2}$
+          - type: 'null'
+          title: Country
+          description: ISO 3166-1 alpha-2 country code, two uppercase letters, for example `US`.
+          examples:
+          - US
+        metadata:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Metadata
+          description: Arbitrary JSON to store against the matter. Vaquill never reads it.
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      title: MatterCreateRequest
+      description: Everything a caller may set when creating a matter.
+    Page_Matter_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Matter'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[Matter]
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
+          examples:
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
+
+
+        `total` is the count of rows matching the filter, not the count returned,
+
+        so a caller can size a job before running it.'
+    BillingType:
+      type: string
+      enum:
+      - hourly
+      - flat_fee
+      - contingency
+      - pro_bono
+      title: BillingType
+      description: 'Closed at the four arrangements in use.
+
+
+        There is no CHECK on this column, so an open string here would let a
+
+        customer populate it with anything and make it impossible to narrow later.
+
+        Adding a fifth arrangement is a one-line additive change; withdrawing a
+
+        free-form string is not.'
+    Problem:
+      type: object
+      title: Problem
+      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: true
+  securitySchemes:
+    WorkspaceAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: vq_ws_*
+      description: 'Workspace credential issued from the automation console at `/automation`. Send it as `Authorization: Bearer vq_ws_...`. This is NOT a Data API key: a `vq_key_` credential is refused here and names the other product in the error.'
+externalDocs:
+  description: Getting started guide and error reference
+  url: https://vaquill.ai/docs/workspace-api
+x-refined-from:
+- vaquill-ai-workspace-openapi.json
+- vaquill-ai-workspace-openapi.yml

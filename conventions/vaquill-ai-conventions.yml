@@ -1,0 +1,155 @@
+generated: '2026-10-07'
+method: searched
+source: https://www.vaquill.ai/docs/api-guide/pagination; https://www.vaquill.ai/docs/api-guide/errors; https://www.vaquill.ai/docs/workspace-api/concepts/errors;
+  https://www.vaquill.ai/docs/workspace-api/overview; openapi/vaquill-ai-workspace-openapi.yml
+name: Vaquill API conventions
+surfaces:
+  legal_data_api:
+    base: https://api.vaquill.ai/api/v1
+    credential: vq_key_
+    errors: 'Vaquill error object ({"detail": ...})'
+  workspace_api:
+    base: https://api.vaquill.ai/workspace/v1
+    credential: vq_ws_
+    errors: RFC 9457 application/problem+json
+auth:
+  style: Bearer API key
+  data_api: 'Authorization: Bearer vq_key_... (preferred), X-API-Key header, or api_key query parameter'
+  workspace_api: 'Authorization: Bearer vq_ws_... with resource:action scopes'
+  docs: https://www.vaquill.ai/docs/api-guide/authentication
+idempotency:
+  coverage: partial
+  header: Idempotency-Key
+  scope:
+  - comparisons.create
+  - complianceChecks.create
+  - drafts.generate
+  - drafts.improve
+  - drafts.saveAsDocument
+  - factSets.generate
+  - matrices.run
+  - summaries.generate
+  - research.ask
+  - messages.verify
+  - ndaTriages.create
+  - playbookExtractions.create
+  - deepResearch.run
+  - reviews.create
+  - templates.run
+  - workflows.run
+  scope_note: '16 Workspace API launch operations accept Idempotency-Key out of 76 Workspace writes; the Legal Data API (10 writes: search/batch
+    POSTs and board watches) documents no idempotency key. Watches are unique on (board, channel, scope) and a duplicate POST /watches answers
+    409.'
+  semantics: 'A retry with the same key and the same body returns the FIRST operation rather than starting a second billable job. Empty header:
+    400 idempotency-key-required; over 255 characters: 400 idempotency-key-too-long; same key different payload: 422 idempotency-key-reused.'
+  retention: not stated
+  docs: https://www.vaquill.ai/docs/workspace-api/overview
+pagination:
+  style: offset and cursor, by endpoint
+  offset:
+    params:
+    - limit
+    - offset
+    response_fields:
+    - results
+    - count
+    - total (deprecated alias for count)
+    - offset
+    - hasMore
+    - creditsConsumed
+    search_window: 'POST /us/statutes/search: limit 1-50 (default 10), offset 0-70; ranked candidate pool capped at 120 results'
+  cursor:
+    params:
+    - sinceId
+    - beforeId
+    endpoints:
+    - GET /watches/{id}/changes (meta.cursor)
+    - GET /us/statutes/section/{actId}/changes (top-level cursor)
+  limit_only:
+  - cited-by (25/100)
+  - cross-state (5/25)
+  - related (3/10)
+  - deliveries (50/200)
+  docs: https://www.vaquill.ai/docs/api-guide/pagination
+request_id:
+  workspace_api: X-Request-ID response header and requestId in every problem body; a client X-Request-ID is echoed back as X-Correlation-ID (at
+    most 128 printable characters)
+  data_api: not documented
+versioning:
+  style: URL path
+  data_api: /api/v1
+  workspace_api: /workspace/v1
+  changelog: https://www.vaquill.ai/docs/api-guide/changelog (dated entries, no version numbers)
+  deprecated_fields:
+  - search response total (deprecated alias for count)
+errors:
+  data_api:
+    envelope: '{"detail": string | [{loc, msg, type}]}'
+    validation: 422 with loc array (FastAPI); 400 for well-formed but refused requests
+    docs: https://www.vaquill.ai/docs/api-guide/errors
+  workspace_api:
+    envelope: 'RFC 9457 problem+json: type (a real URL), title, status, detail, instance, requestId; 422 adds errors[]'
+    rule: Branch on type, never on detail
+    docs: https://www.vaquill.ai/docs/workspace-api/concepts/errors
+rate_limiting:
+  status: 429
+  headers:
+  - Retry-After (seconds)
+  data_api: Limits enforced per API key and scale with plan; watch cap 3 (100 on Business)
+  workspace_api: Per-credential budgets by operation tier (Poll/Read/Write/Download/Launch/Upload) per minute/hour/day; 429 concurrency-limit-reached
+    is separate
+  docs: https://www.vaquill.ai/docs/workspace-api/concepts/rate-limits
+async_operations:
+  workspace_api: Launches answer 202 with an operation to poll at GET /v1/operations/{operationId}; states queued, running, succeeded, failed,
+    cancelled. No webhooks (outbound webhooks were cut; polling is the only completion signal).
+metering:
+  data_api: Credit-metered per call; read creditsConsumed on each response rather than computing from list price; GET /api-credits/pricing is
+    free and unauthenticated
+dry_run_mode:
+  status: na
+  note: No dry-run or test mode is documented; POST /watches/{id}/test fires a real one-off board.test delivery.
+reversibility:
+  status: documented
+  write_surfaces:
+  - surface: Workspace drafts
+    operation: drafts.delete
+    reversal: drafts.restore
+    window: restorable for 30 days, after which it is permanently removed and drafts.restore answers 404
+    grade: verified
+    source: openapi/vaquill-ai-workspace-openapi.yml (drafts.delete and drafts.restore descriptions)
+  - surface: Workspace comparisons
+    operation: comparisons.delete
+    reversal: app trash only (a lawyer can restore it in the app); no API reversal
+    window: not stated
+    grade: documented
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - surface: Workspace clients, documents, conversations
+    operation: clients.delete, documents.delete, chats.delete
+    reversal: 'none: "There is no undo, and a repeated delete answers 404"'
+    window: none
+    grade: none
+    source: openapi/vaquill-ai-workspace-openapi.yml
+  - surface: Workspace launches
+    operation: comparisons.create, reviews.create, matrices.run, workflows.run and other launches
+    reversal: operation state cancelled exists in the operation envelope; a cancel operation is not documented
+    window: not stated
+    grade: none
+    source: https://www.vaquill.ai/docs/workspace-api/overview
+  - surface: Board watches
+    operation: create_watch_api_v1_watches_post
+    reversal: 'update_watch_api_v1_watches__watch_id__patch (isActive: false pauses without losing history) or delete_watch_api_v1_watches__watch_id__delete'
+    window: not stated
+    grade: documented
+    source: https://www.vaquill.ai/docs/api-guide/alerts
+  - surface: API credits
+    operation: credit purchase (dashboard)
+    reversal: non-refundable once consumed; unused credits do not expire for at least 12 months; refunded at purchase price if the API is discontinued
+    window: 7-day refund window applies to new subscriptions, not consumed credits
+    grade: documented
+    source: https://www.vaquill.ai/refund-policy
+  read_only_note: The Legal Data API is read-only apart from board watches; search and batch POSTs create nothing.
+links:
+  errors: errors/vaquill-ai-problem-types.yml
+  lifecycle: lifecycle/vaquill-ai-lifecycle.yml
+  authentication: authentication/vaquill-ai-authentication.yml
+  rate_limits: rate-limits/vaquill-ai-rate-limits.yml

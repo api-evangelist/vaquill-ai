@@ -1,0 +1,78 @@
+generated: '2026-10-07'
+method: searched
+source: https://www.vaquill.ai/docs/workspace-api/concepts/errors
+name: Vaquill Workspace API problem types
+format: application/problem+json (RFC 9457)
+envelope:
+  fields:
+  - type (a real URL that lands on a page for that error)
+  - title
+  - status
+  - detail
+  - instance
+  - requestId
+  validation: 422 adds errors[]
+  rule: Branch on type, never on detail
+type_base: https://vaquill.ai/docs/workspace-api/errors/
+problems:
+- status: 400
+  title: Idempotency key required
+  type: https://vaquill.ai/docs/workspace-api/errors/idempotency-key-required
+  description: You sent the header empty.
+  remediation: Send a real value, or omit it entirely, which is allowed
+- status: 400
+  title: Idempotency key too long
+  type: https://vaquill.ai/docs/workspace-api/errors/idempotency-key-too-long
+  description: Over 255 characters.
+  remediation: A UUID is well inside
+- status: 401
+  title: Invalid credential
+  type: https://vaquill.ai/docs/workspace-api/errors/invalid-credential
+  description: The credential is truncated, expired or revoked.
+  remediation: Check for truncation, expiry or revocation
+- status: 401
+  title: Wrong product credential
+  type: https://vaquill.ai/docs/workspace-api/errors/wrong-product-credential
+  description: You sent a vq_key_ Data API key.
+  remediation: Use a vq_ws_ credential
+- status: 403
+  title: Insufficient scope
+  type: https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+  description: The credential does not carry the scope the operation needs.
+  remediation: The response names the scopes needed. Issue a new credential
+- status: 403
+  title: Installation inactive
+  type: https://vaquill.ai/docs/workspace-api/errors/installation-inactive
+  description: The installation was suspended or revoked.
+  remediation: Contact the organization owner
+- status: 404
+  title: Matter not found (and friends)
+  type: https://vaquill.ai/docs/workspace-api/errors/matter-not-found
+  description: The resource in the path does not exist inside the authorization boundary.
+  remediation: List the parent resource and reuse a real id
+- status: 409
+  title: Document not readable
+  type: https://vaquill.ai/docs/workspace-api/errors/document-not-readable
+  description: The document has no extracted text yet.
+  remediation: Poll its ingestion operation
+- status: 409
+  title: Export not available
+  type: https://vaquill.ai/docs/workspace-api/errors/export-not-available
+  description: The thing you asked to export is not in an exportable state.
+  remediation: Wait for the producing operation to succeed
+- status: 422
+  title: Invalid request
+  type: https://vaquill.ai/docs/workspace-api/errors/invalid-request
+  description: Schema validation failed.
+  remediation: Field-level detail is in errors[]
+- status: 422
+  title: Idempotency key reused
+  type: https://vaquill.ai/docs/workspace-api/errors/idempotency-key-reused
+  description: Same key, different payload.
+  remediation: Use a new key for a different request
+- status: 429
+  title: Rate limited / concurrency limit reached
+  type: https://vaquill.ai/docs/workspace-api/errors/concurrency-limit-reached
+  description: Per-credential tier budget exhausted, or too many jobs already running (concurrency-limit-reached).
+  remediation: Honor Retry-After; for concurrency, wait for a running job to finish
+request_id: X-Request-ID response header; a client X-Request-ID is echoed as X-Correlation-ID

@@ -1,0 +1,18 @@
+generated: '2026-10-07'
+method: searched
+source: https://www.vaquill.ai/playground; https://www.vaquill.ai/docs/guides/plans-and-limits; https://www.vaquill.ai/docs/api-guide/alerts
+name: Vaquill sandbox and testing
+description: 'There is no separate sandbox environment, test-mode key prefix or test fixtures for the Developer API. A browser Playground runs
+  queries against the live corpus, every new account starts a 7-day free trial with the full feature set (no credit card), GET /api/v1/api-credits/pricing
+  is free and unauthenticated, and POST /watches/{id}/test fires a real one-off delivery tagged X-Vaquill-Event: board.test so a receiver can
+  tell it from a real update.'
+docs: https://www.vaquill.ai/playground
+playground: https://www.vaquill.ai/playground
+test_mode: false
+test_keys: null
+free_trial: 7 days from signup, full feature set, no credit card required; on expiry requests return 402 with an upgrade link
+free_endpoints:
+- GET /api/v1/api-credits/pricing (no auth)
+- GET /api/v1/us/statutes/coverage
+- board watch endpoints other than the change diff
+webhook_test: 'POST /api/v1/watches/{watchId}/test sends X-Vaquill-Event: board.test; not persisted to delivery history'

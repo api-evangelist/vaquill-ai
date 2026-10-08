@@ -1,0 +1,2191 @@
+generated: '2026-10-07'
+method: derived
+generator: derive-data-model.py
+source:
+- openapi/vaquill-ai-india-openapi.yml
+- openapi/vaquill-ai-openapi.yml
+- openapi/vaquill-ai-workspace-openapi.yml
+notation: has_one = property $ref; has_many = array of $ref; belongs_to = <entity>_id field
+summary:
+  entities: 327
+  entities_in_spec: 327
+  relationships: 317
+entities:
+- name: AcceptedRedline
+  fields: 5
+  description: One edit to apply to the contract text in an export.
+- name: ActAmendmentsResponse
+  fields: 10
+- name: ActCitedByResponse
+  fields: 15
+- name: ActDefinitionsResponse
+  fields: 13
+- name: ActFilterValue
+  fields: 2
+- name: ActFiltersData
+  fields: 4
+- name: ActFiltersResponse
+  fields: 2
+- name: ActListItem
+  fields: 12
+  description: Lightweight act summary for browsing and discovery.
+- name: ActListResponse
+  fields: 7
+- name: ActMeta
+  fields: 2
+  description: What this call cost and how long it took.
+- name: ActReferencesResponse
+  fields: 12
+- name: ActSearchData
+  fields: 2
+- name: ActSearchMeta
+  fields: 7
+- name: ActSearchRequest
+  fields: 17
+  description: Search Indian legislation by semantic query.
+- name: ActSearchResponse
+  fields: 2
+- name: ActSearchResult
+  fields: 25
+  description: A single legislation search result with full metadata.
+- name: ActSection
+  fields: 36
+- name: ActSectionBodyResponse
+  fields: 12
+- name: ActSectionHistoryResponse
+  fields: 11
+- name: ActSectionResponse
+  fields: 3
+- name: ActStatusResponse
+  fields: 26
+- name: ActStructureResponse
+  fields: 9
+- name: ActSubordinateResponse
+  fields: 15
+- name: ActTextResponse
+  fields: 13
+- name: AmendmentEvent
+  fields: 12
+- name: ApiCreditCostResponse
+  fields: 7
+  description: Single endpoint credit cost for the pricing matrix.
+- name: ApiCreditPricingResponse
+  fields: 4
+  description: Full pricing information for the API credit system. USD only.
+- name: ApiDetailError
+  fields: 2
+  description: Error envelope the API actually returns.
+- name: ApiFieldError
+  fields: 3
+  description: One rejected field in a 422 response.
+- name: ArticleContent
+  fields: 7
+  description: One page, read in full.
+- name: ArticleRequest
+  fields: 2
+  description: Fetch one page's full text. Same egress note as `SimilarRequest`.
+- name: AsOfAnswer
+  fields: 7
+  description: A dated question answered with a TIMELINE, never with reconstructed text.
+- name: AsOfProvenance
+  fields: 12
+  description: Where an `asOf` body came from, and how far the evidence reaches.
+- name: AskRequest
+  fields: 15
+  description: One turn posted to a conversation.
+- name: BodyFigure
+  fields: 13
+  description: One figure, equation or form image inside a rendered section body.
+- name: BodyTable
+  fields: 5
+  description: One table inside a rendered section body.
+- name: CategoryLegend
+  fields: 2
+- name: CellVerification
+  fields: 4
+  description: A second opinion on one answer, from a fresh model call.
+- name: Chat
+  fields: 9
+  description: One conversation inside a matter.
+- name: ChatCreateRequest
+  fields: 1
+  description: Open a conversation. One INSERT; nothing is generated and nothing is spent.
+- name: ChatUpdateRequest
+  fields: 1
+  description: Rename a conversation. Absent leaves alone; an explicit null is refused.
+- name: ChronologyEvent
+  fields: 21
+  description: One dated event on the matter's timeline.
+- name: ChronologyEventCreateRequest
+  fields: 12
+  description: A hand-entered event.
+- name: ChronologyEventUpdateRequest
+  fields: 10
+  description: Fields to change. Omitted fields are left alone.
+- name: ChronologyExport
+  fields: 5
+  description: A rendered timeline, returned as bytes rather than as a signed URL.
+- name: ChronologyExportRequest
+  fields: 2
+  description: A POST, because the filters live in the body.
+- name: ChronologyExtractionStatus
+  fields: 6
+  description: How far the automatic extraction has got across the whole matter.
+- name: ChronologyFilters
+  fields: 11
+  description: Which events to include.
+- name: Citation
+  fields: 4
+  description: How to cite the thing this response is about.
+- name: CitationOutsideFilters
+  fields: 6
+  description: A citation that names a real section the caller's own filters exclude.
+- name: CitedByRow
+  fields: 5
+- name: Client
+  fields: 15
+  description: A client as this API publishes it.
+- name: ClientCreateRequest
+  fields: 12
+  description: Everything a caller may set when creating a client.
+- name: ClientUpdateRequest
+  fields: 12
+  description: A partial update. Absent leaves alone; explicit null clears.
+- name: CodeSectionAffected
+  fields: 4
+  description: A code section the publisher lists the act as affecting.
+- name: ColumnOrderRequest
+  fields: 1
+  description: The complete left-to-right order of the grid's columns.
+- name: Comparison
+  fields: 13
+  description: One comparison. `status` is the public five, never the stored spelling.
+- name: ComparisonCreateRequest
+  fields: 4
+  description: Start a comparison between two documents already in the matter.
+- name: ComparisonExport
+  fields: 3
+  description: A short-lived pointer to the rendered comparison.
+- name: ComparisonExportRequest
+  fields: 1
+  description: Ask for a pointer to a rendered redline the worker already produced.
+- name: ComparisonHunk
+  fields: 15
+  description: One structural change, in terms that survive outside the viewer.
+- name: ComparisonSettings
+  fields: 9
+  description: How the diff engine treats the two inputs.
+- name: ComparisonSource
+  fields: 5
+  description: One side of a comparison, as it was resolved at launch.
+- name: CompletedPart
+  fields: 2
+  description: One uploaded part, as R2 acknowledged it.
+- name: ComplianceCheck
+  fields: 21
+  description: 'One compliance check: its findings, or its progress toward them.'
+- name: ComplianceCheckCreateRequest
+  fields: 4
+  description: Check one document against one regulation.
+- name: ComplianceGap
+  fields: 5
+  description: One compliance gap, named so it can be tracked.
+- name: ComplianceRemediationAction
+  fields: 4
+  description: One thing to do, in priority order.
+- name: ComplianceRequirement
+  fields: 8
+  description: One requirement of the regulation, and whether the document meets it.
+- name: CorrespondingProvisionItem
+  fields: 6
+- name: CorrespondingProvisionsResponse
+  fields: 7
+- name: CoverageCount
+  fields: 2
+  description: A live facet hit.
+- name: CoverageData
+  fields: 8
+- name: CoverageDepth
+  fields: 7
+  description: The corpus against the four questions worth asking of it.
+- name: CoverageResponse
+  fields: 2
+- name: CoverageTotals
+  fields: 5
+- name: CreateWatchRequest
+  fields: 8
+- name: CreditExpiry
+  fields: 2
+  description: The soonest expiry, and what dies with it.
+- name: CreditRateLimit
+  fields: 3
+  description: Request-rate ceilings in force for the calling key.
+- name: CreditSourceBreakdown
+  fields: 2
+  description: Live credits held under one funding source.
+- name: DeepResearchRequest
+  fields: 3
+  description: A long web-research pass, posted into a conversation.
+- name: DefinedTerm
+  fields: 2
+- name: Document
+  fields: 14
+  description: One file in a matter, and how far its ingestion got.
+- name: DocumentExtractionState
+  fields: 4
+  description: Where one document's chronology extraction got to.
+- name: DocumentSummary
+  fields: 8
+  description: What was persisted the last time this document was summarized.
+- name: DocumentText
+  fields: 4
+  description: The reassembled text of a document.
+- name: DocumentUpdateRequest
+  fields: 1
+  description: Move a document between folders. That is the whole of it.
+- name: Draft
+  fields: 13
+  description: One draft with its body, section by section.
+- name: DraftCategory
+  fields: 3
+  description: One document type the drafting pipeline knows how to write.
+- name: DraftCopyRequest
+  fields: 1
+  description: Copy a draft, optionally under a new name.
+- name: DraftCreateRequest
+  fields: 7
+  description: Start a generation. There is no synchronous create.
+- name: DraftExport
+  fields: 5
+  description: A rendered draft, returned as bytes rather than as a URL.
+- name: DraftExportRequest
+  fields: 1
+  description: Ask for the draft rendered to a file.
+- name: DraftFromDocumentRequest
+  fields: 3
+  description: Turn a document you already uploaded into an editable draft.
+- name: DraftImproveRequest
+  fields: 3
+  description: Revise an existing draft into a NEW one.
+- name: DraftReplaceRequest
+  fields: 5
+  description: Replace a draft's body, and optionally its title and lifecycle status.
+- name: DraftSection
+  fields: 3
+  description: One heading and the text beneath it.
+- name: DraftSummary
+  fields: 12
+  description: 'A draft as it appears in a list: everything except the body.'
+- name: DraftVersion
+  fields: 3
+  description: One point in a draft's history. Metadata only.
+- name: EnactmentCoverage
+  fields: 3
+  description: What this answer is read from, and what it is not.
+- name: EnactmentSession
+  fields: 3
+  description: One legislative session of the jurisdiction whose code-section tables are read.
+- name: EscalationCondition
+  fields: 5
+  description: A rule that RAISES a clause's required sign-off when it holds.
+- name: ExternalCreditBalanceResponse
+  fields: 9
+  description: Spendable credit balance for the calling API key's account.
+- name: Fact
+  fields: 18
+  description: One clustered statement, with every passage that supports it.
+- name: FactCitation
+  fields: 7
+  description: One verified passage behind a fact.
+- name: FactSet
+  fields: 12
+  description: One generated ledger.
+- name: FactSetCoverage
+  fields: 3
+  description: What the generation actually read, and what it did not.
+- name: FactSetExport
+  fields: 5
+  description: A rendered ledger, returned as bytes rather than as a signed URL.
+- name: FactSetExportRequest
+  fields: 1
+- name: FactSetGenerateRequest
+  fields: 1
+  description: What to generate.
+- name: Folder
+  fields: 6
+  description: A folder as this API publishes it.
+- name: FolderCreateRequest
+  fields: 3
+  description: Everything a caller may set when creating a folder.
+- name: FolderUpdateRequest
+  fields: 2
+  description: Rename a folder, or move it under a different parent.
+- name: FootnoteItem
+  fields: 9
+- name: FrRelatedDocument
+  fields: 5
+  description: One other Federal Register document sharing a RIN with this one.
+- name: HTTPValidationError
+  fields: 1
+- name: HistoryCoverage
+  fields: 4
+- name: IdentifierResolution
+  fields: 6
+  description: How the act_id or section number you sent was matched, when not as sent.
+- name: JurisdictionCoverage
+  fields: 4
+  description: Acts and sections held for one jurisdiction, in the unit a lawyer thinks in.
+- name: Matrix
+  fields: 12
+  description: The grid header plus its axes. Cells are a separate, paged read.
+- name: MatrixCell
+  fields: 8
+  description: One answer. `answer is None` on a succeeded cell means "not in this
+- name: MatrixCellPatch
+  fields: 2
+  description: Write a human answer into a cell, or record a review decision on it.
+- name: MatrixCitation
+  fields: 3
+  description: Where in the document the answer came from.
+- name: MatrixColumn
+  fields: 10
+  description: One column of the grid, as stored.
+- name: MatrixColumnPatch
+  fields: 8
+  description: Change one column, including whether it is conditional on another.
+- name: MatrixColumnSpec
+  fields: 5
+  description: One question asked of every document in the matrix.
+- name: MatrixColumnsRequest
+  fields: 1
+  description: Questions to add to the grid, one column each.
+- name: MatrixCreateRequest
+  fields: 4
+  description: Build a grid. Nothing is extracted until `matrices.run`.
+- name: MatrixExport
+  fields: 4
+  description: A rendered grid, returned as bytes rather than as a signed URL.
+- name: MatrixExportRequest
+  fields: 2
+  description: Ask for the finished grid rendered to a file.
+- name: MatrixRow
+  fields: 4
+  description: One document in the grid.
+- name: MatrixRowSpec
+  fields: 1
+  description: Documents to add to the grid, one row each.
+- name: MatrixRunRequest
+  fields: 1
+  description: Start extraction.
+- name: MatrixSummary
+  fields: 7
+  description: One row of `matrices.list`. The header only, with no axes and no counts.
+- name: MatrixUpdateRequest
+  fields: 2
+  description: Rename a matrix, or change what it says it is for.
+- name: Matter
+  fields: 20
+  description: A matter as this API publishes it.
+- name: MatterCreateRequest
+  fields: 16
+  description: Everything a caller may set when creating a matter.
+- name: MatterSummary
+  fields: 14
+  description: One generation of a matter summary, and its content once it has one.
+- name: MatterSummaryExport
+  fields: 4
+  description: A rendered summary, returned as bytes rather than as a signed URL.
+- name: MatterSummaryExportRequest
+  fields: 1
+- name: MatterSummaryGenerateRequest
+  fields: 1
+  description: What to generate.
+- name: MatterSummarySection
+  fields: 4
+  description: One heading of the narrative.
+- name: MatterUpdateRequest
+  fields: 16
+  description: A partial update. Absent leaves alone; explicit null clears.
+- name: Message
+  fields: 11
+  description: 'One turn: what was asked, or what was answered.'
+- name: Meta
+  fields: 2
+- name: NdaPlaybookAssessment
+  fields: 4
+  description: One criterion measured against the organization's own positions.
+- name: NdaTriage
+  fields: 22
+  description: 'One NDA triage: its screen, or its progress toward one.'
+- name: NdaTriageCreateRequest
+  fields: 5
+  description: Screen one inbound NDA, optionally against one of your own playbooks.
+- name: NdaTriageCriterion
+  fields: 7
+  description: One of the ten screening criteria, and what the NDA said about it.
+- name: Operation
+  fields: 10
+  description: One long-running operation, whatever kind of work it is.
+- name: OperationError
+  fields: 2
+  description: Why a failed operation failed, in terms a customer can act on.
+- name: OperationProgress
+  fields: 3
+  description: How far along, and in what units.
+- name: OperationResource
+  fields: 3
+  description: What the operation produced, or is producing.
+- name: Page_Chat_
+  fields: 2
+- name: Page_ChronologyEvent_
+  fields: 2
+- name: Page_Client_
+  fields: 2
+- name: Page_ComparisonHunk_
+  fields: 2
+- name: Page_Comparison_
+  fields: 2
+- name: Page_Document_
+  fields: 2
+- name: Page_DraftCategory_
+  fields: 2
+- name: Page_DraftSummary_
+  fields: 2
+- name: Page_DraftVersion_
+  fields: 2
+- name: Page_FactSet_
+  fields: 2
+- name: Page_Fact_
+  fields: 2
+- name: Page_Folder_
+  fields: 2
+- name: Page_MatrixCell_
+  fields: 2
+- name: Page_MatrixSummary_
+  fields: 2
+- name: Page_MatterSummary_
+  fields: 2
+- name: Page_Matter_
+  fields: 2
+- name: Page_Message_
+  fields: 2
+- name: Page_Operation_
+  fields: 2
+- name: Page_PlaybookTemplate_
+  fields: 2
+- name: Page_Playbook_
+  fields: 2
+- name: Page_Review_
+  fields: 2
+- name: Page_Skill_
+  fields: 2
+- name: Page_Template_
+  fields: 2
+- name: Page_UploadSummary_
+  fields: 2
+- name: Page_WorkflowDefinition_
+  fields: 2
+- name: Page_WorkflowRun_
+  fields: 2
+- name: Pagination
+  fields: 4
+  description: Where the caller is, and whether there is more.
+- name: ParentAct
+  fields: 4
+  description: The act a subordinate instrument was made under, and how to fetch it.
+- name: ParsedPinpoint
+  fields: 7
+  description: What we read out of the citation, so a caller can see our reading.
+- name: Playbook
+  fields: 9
+  description: One organization playbook, with every position it holds.
+- name: PlaybookCreateRequest
+  fields: 4
+  description: Author a playbook from positions the caller supplies.
+- name: PlaybookExtraction
+  fields: 8
+  description: What an extraction found, in the shape a playbook takes.
+- name: PlaybookExtractionCreateRequest
+  fields: 4
+  description: The contract to read positions out of. Exactly one source.
+- name: PlaybookFromTemplateRequest
+  fields: 4
+  description: Adopt one of our starter templates as an organization playbook.
+- name: PlaybookPosition
+  fields: 11
+  description: The organization's negotiating position on one clause type.
+- name: PlaybookTemplate
+  fields: 10
+  description: A starter template. Ours, read-only, identical for every organization.
+- name: PlaybookUpdateRequest
+  fields: 3
+  description: Replace a playbook's name, description and positions.
+- name: Problem
+  fields: 6
+  description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written
+    for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expecte
+- name: Provenance
+  fields: 4
+- name: ReferencedAct
+  fields: 3
+- name: ReferencedSection
+  fields: 2
+- name: RepealClaim
+  fields: 6
+  description: The publisher's claim about repeal, with our caveat attached.
+- name: ResearchConfig
+  fields: 16
+  description: The retrieval settings a matter applies to every question asked in it.
+- name: ResearchConfigUpdateRequest
+  fields: 12
+  description: A partial update to a matter's research settings.
+- name: ResearchSettings
+  fields: 8
+  description: What a turn was asked to do, or what it recorded doing.
+- name: ResolveBatchRequest
+  fields: 3
+  description: Up to 50 citations, priced per citation.
+- name: ResolveCandidate
+  fields: 10
+- name: ResolveItem
+  fields: 6
+- name: ResolveResponse
+  fields: 4
+- name: Retirement
+  fields: 3
+- name: Review
+  fields: 23
+  description: 'One contract review: its findings, or its progress toward them.'
+- name: ReviewApprovalGate
+  fields: 5
+  description: Whether a human has to sign this off before it goes to the counterparty.
+- name: ReviewApprovalReason
+  fields: 4
+  description: One clause driving the review-level sign-off gate.
+- name: ReviewClause
+  fields: 10
+  description: One clause, as analyzed against the playbook position for its type.
+- name: ReviewCounterpartyMatch
+  fields: 5
+  description: A known counterparty paper was recognised in the contract text.
+- name: ReviewCreateRequest
+  fields: 14
+  description: Start a review of one contract against one playbook.
+- name: ReviewDealContext
+  fields: 2
+  description: Deal attributes the playbook's conditional escalation rules evaluate.
+- name: ReviewDeepMeta
+  fields: 5
+  description: What the deep verification pass did, present only when one ran.
+- name: ReviewExport
+  fields: 8
+  description: A short-lived URL to the marked-up contract.
+- name: ReviewExportRequest
+  fields: 2
+  description: Which of a review's redlines to apply, and how to mark them up.
+- name: ReviewFlag
+  fields: 3
+  description: Something the reviewer noticed and deliberately did NOT redline.
+- name: ReviewLiabilityExposure
+  fields: 15
+  description: How much the reviewer is on the hook for, in one panel.
+- name: ReviewNegotiationPriority
+  fields: 3
+  description: 'One tier of the negotiation plan: what to raise first, and what to trade.'
+- name: ReviewRedline
+  fields: 11
+  description: One proposed edit, ready to send to counterparty counsel.
+- name: SectionEnactment
+  fields: 17
+  description: 'One printed entry of a publisher''s table: this act, against this section.'
+- name: SectionEnactmentsResponse
+  fields: 11
+  description: Response for `GET /us/statutes/section/{act_id}/enactments`.
+- name: SectionIdentifierResolution
+  fields: 4
+  description: How the identifier you sent was matched, when it was not an exact act_id.
+- name: SectionShape
+  fields: 6
+  description: Structural features found in the provision's own text.
+- name: SessionLawBatchLaw
+  fields: 50
+  description: 'One served law: the same record `GET /us/session-laws/{sessionLawId}` returns.'
+- name: SessionLawBatchMiss
+  fields: 10
+  description: One entry of `ids` that did not yield a law, and why.
+- name: SessionLawBatchRequest
+  fields: 3
+  description: Batch read. See `POST /us/session-laws/batch`.
+- name: SessionLawBatchResponse
+  fields: 7
+  description: Response for `POST /us/session-laws/batch`.
+- name: SessionLawBodyResponse
+  fields: 25
+  description: Response for `GET /us/session-laws/{sessionLawId}/body`.
+- name: SessionLawChange
+  fields: 5
+  description: One entry of the registry feed.
+- name: SessionLawChangesResponse
+  fields: 6
+  description: Response for `GET /us/session-laws/changes`.
+- name: SessionLawCitationCandidate
+  fields: 14
+  description: One session law a citation names.
+- name: SessionLawCitationMatch
+  fields: 16
+  description: A citation that names a STATE session law rather than a code section.
+- name: SessionLawDate
+  fields: 5
+  description: One printed date on a session law.
+- name: SessionLawDenominator
+  fields: 3
+  description: How many laws a session is supposed to hold, and where that number comes from.
+- name: SessionLawDetailSession
+  fields: 5
+  description: 'The session block of a single law: the session, and whether we hold all of it.'
+- name: SessionLawJurisdictionCoverage
+  fields: 8
+  description: A jurisdiction's state session laws (acts as enacted), by session.
+- name: SessionLawListCoverage
+  fields: 8
+  description: What we hold of the session or state an EMPTY page was asked about.
+- name: SessionLawListResponse
+  fields: 7
+  description: Response for `GET /us/session-laws/list`.
+- name: SessionLawNotFoundError
+  fields: 9
+  description: The 404 from `GET /us/session-laws/{sessionLawId}` and its `/body`.
+- name: SessionLawProvenance
+  fields: 4
+  description: How the text of an act was obtained, and what the collector noted about the record.
+- name: SessionLawPublisher
+  fields: 9
+  description: What the publisher itself printed or published about an act, beyond the record's dates and citation.
+- name: SessionLawPublisherId
+  fields: 2
+  description: An identifier the publisher itself gives an act.
+- name: SessionLawResolution
+  fields: 4
+  description: How a citation sent in place of a `sessionLawId` was matched.
+- name: SessionLawResponse
+  fields: 46
+  description: Response for `GET /us/session-laws/{sessionLawId}`.
+- name: SessionLawSearchParsed
+  fields: 4
+  description: How the query was read, so a caller can see why a result matched.
+- name: SessionLawSearchPassage
+  fields: 8
+  description: The passage of the law that matched best, with a cut of its text.
+- name: SessionLawSearchRequest
+  fields: 9
+  description: Body of `POST /us/session-laws/search`.
+- name: SessionLawSearchResponse
+  fields: 9
+  description: Response for `POST /us/session-laws/search`.
+- name: SessionLawSearchResult
+  fields: 13
+  description: One law in the ranking.
+- name: SessionLawSession
+  fields: 4
+  description: The legislative session a law was enacted in.
+- name: SessionLawSessionCoverage
+  fields: 13
+  description: One legislative session's session-law coverage.
+- name: SessionLawSource
+  fields: 8
+  description: A document the record was collected from.
+- name: SessionLawSummary
+  fields: 33
+  description: One session law, as it appears in lists and citation results.
+- name: SessionLawVolume
+  fields: 4
+  description: The bound volume an act's text was cut out of.
+- name: SimilarDocuments
+  fields: 3
+  description: Pages similar to the one asked about.
+- name: SimilarRequest
+  fields: 3
+  description: Find pages similar to one you already have.
+- name: Skill
+  fields: 6
+  description: A named prompt a question can be asked through.
+- name: StatuteBodyResponse
+  fields: 20
+  description: Full text of a statute section in HTML and/or plain text.
+- name: StatuteChangeEvent
+  fields: 9
+  description: One time this section was added, amended, or removed by its publisher.
+- name: StatuteChangesResponse
+  fields: 11
+  description: Response for `GET /us/statutes/section/{act_id}/changes`.
+- name: StatuteCitedByResponse
+  fields: 8
+  description: Response for `GET /us/statutes/section/{act_id}/cited-by`.
+- name: StatuteCountRequest
+  fields: 9
+  description: Filter-only section count. See `POST /us/statutes/count`.
+- name: StatuteCountResponse
+  fields: 5
+  description: Response for `POST /us/statutes/count`.
+- name: StatuteCrossStateNeighbor
+  fields: 3
+  description: One out-of-state provision that addresses the same subject.
+- name: StatuteCrossStateResponse
+  fields: 8
+  description: Response for `GET /us/statutes/section/{act_id}/cross-state`.
+- name: StatuteDefinitionTerm
+  fields: 3
+  description: One defined term drawn from a chapter's definitions section.
+- name: StatuteDefinitionsResponse
+  fields: 8
+  description: Response for `GET /us/statutes/section/{act_id}/definitions`.
+- name: StatuteNeighborsResponse
+  fields: 7
+  description: Response for `GET /us/statutes/section/{act_id}/related`.
+- name: StatuteResolveBatchItem
+  fields: 7
+  description: One citation's verdict inside a batch response.
+- name: StatuteResolveBatchRequest
+  fields: 3
+  description: Batch citation resolution. See `POST /us/statutes/resolve`.
+- name: StatuteResolveBatchResponse
+  fields: 5
+  description: Response for `POST /us/statutes/resolve`.
+- name: StatuteResolveResponse
+  fields: 9
+  description: Response for `GET /us/statutes/resolve`.
+- name: StatuteResult
+  fields: 148
+  description: A single statute section from search results.
+- name: StatuteSearchRequest
+  fields: 24
+- name: StatuteSearchResponse
+  fields: 13
+- name: StatuteSectionNotFoundError
+  fields: 4
+  description: The 404 from any `/us/statutes/section/{act_id}/...` route.
+- name: StatuteSectionResponse
+  fields: 4
+  description: Detailed section metadata (no full text, use /body for that).
+- name: StatuteSectionsNotFoundDetail
+  fields: 3
+  description: Why one `actId` missed, and what to send instead.
+- name: StatuteSectionsRequest
+  fields: 2
+  description: Batch metadata lookup. See `POST /us/statutes/sections`.
+- name: StatuteSectionsResponse
+  fields: 7
+  description: Response for `POST /us/statutes/sections`.
+- name: StructureNode
+  fields: 6
+- name: SubordinateRow
+  fields: 6
+- name: SubsectionNode
+  fields: 6
+  description: One node in a section's subsection tree (see `/body?structured=true`).
+- name: SummaryCitation
+  fields: 7
+  description: One passage behind a claim, snapshotted when the summary was generated.
+- name: SummaryClaim
+  fields: 7
+  description: One assertion inside a section, with the passages that support it.
+- name: SummarySection
+  fields: 2
+  description: One heading of the summary.
+- name: Template
+  fields: 7
+  description: One uploaded template, as listed.
+- name: TemplateCopyRequest
+  fields: 1
+  description: Copy a template, optionally under a new name.
+- name: TemplateCreateRequest
+  fields: 4
+  description: Author a template from markdown you supply.
+- name: TemplateDetail
+  fields: 9
+  description: One template with everything needed to run it without guessing.
+- name: TemplateFromDocumentRequest
+  fields: 4
+  description: Turn a document you already uploaded into a template.
+- name: TemplateRun
+  fields: 9
+  description: One invocation, and what it produced.
+- name: TemplateRunRequest
+  fields: 2
+  description: What to fill the template with.
+- name: TemplateSlot
+  fields: 3
+  description: One variable and the value the run put in it.
+- name: TemplateUpdateRequest
+  fields: 3
+  description: Replace a template's body, and optionally its title and description.
+- name: TemplateVariable
+  fields: 7
+  description: One fillable span the template declares.
+- name: ToolReportExport
+  fields: 5
+  description: A short-lived URL to the rendered report.
+- name: ToolReportExportRequest
+  fields: 1
+  description: Which format to render the finished analysis in.
+- name: UpdateWatchRequest
+  fields: 6
+- name: UploadCompleteRequest
+  fields: 1
+  description: Assemble the parts into the final object and start ingesting it.
+- name: UploadFormats
+  fields: 5
+  description: What this API will accept, and how it will cut it into parts.
+- name: UploadInitiateRequest
+  fields: 6
+  description: Ask for somewhere to put a file.
+- name: UploadPartLink
+  fields: 3
+  description: Where to PUT one part, and how long that stays true.
+- name: UploadSession
+  fields: 5
+  description: An open upload, and every URL needed to fill it.
+- name: UploadSummary
+  fields: 9
+  description: 'One upload session as a LIST publishes it: no URLs, ever.'
+- name: UsCorpusTypeInfo
+  fields: 6
+  description: 'One entry in the coverage legend: what a `corpusType` token means.'
+- name: UsDivisionNode
+  fields: 6
+  description: One child division in a `GET /us/statutes/divisions` listing.
+- name: UsFreeCallMeta
+  fields: 2
+  description: '`meta` on a free discovery endpoint.'
+- name: UsJurisdictionCoverage
+  fields: 8
+  description: One row of the /us/statutes/states response.
+- name: UsStatutesCoverageEnvelope
+  fields: 2
+  description: 'What `GET /us/statutes/coverage` returns: the matrix under `data`.'
+- name: UsStatutesCoverageResponse
+  fields: 6
+  description: Response for `GET /us/statutes/coverage`.
+- name: UsStatutesDivisionsResponse
+  fields: 11
+  description: Response for `GET /us/statutes/divisions`.
+- name: ValidationError
+  fields: 5
+- name: ValidationProblem
+  fields: 7
+  description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value
+    you submitted is deliberately not echoed, so a validation failure cannot copy your content into an err
+- name: Verification
+  fields: 11
+  description: Whether an answer accurately represented the sources it was built from.
+- name: VerifiedClaim
+  fields: 6
+  description: One statement pulled out of an answer, and whether the sources support it.
+- name: WebResult
+  fields: 9
+  description: One page a web search found.
+- name: WebSearchRequest
+  fields: 3
+  description: A one-off web search. Touches no client data and stores nothing.
+- name: WebSearchResults
+  fields: 3
+  description: What a web search returned. Nothing is stored.
+- name: WebhookAuthRequest
+  fields: 3
+  description: How a delivery should authenticate itself to your endpoint.
+- name: WorkflowArtifact
+  fields: 4
+  description: 'An artifact a finished run produced. No URL: fetching one is its own call.'
+- name: WorkflowArtifactDownload
+  fields: 3
+  description: A short-lived pointer to one artifact's bytes.
+- name: WorkflowArtifactSpec
+  fields: 4
+  description: A deliverable this workflow produces, named before it exists.
+- name: WorkflowDefinition
+  fields: 12
+  description: One catalogue entry.
+- name: WorkflowDocumentSlot
+  fields: 6
+  description: What a definition will accept in one role, so a caller can validate first.
+- name: WorkflowInputField
+  fields: 7
+  description: One question the definition asks, and how it is answered.
+- name: WorkflowRun
+  fields: 12
+  description: One run. `status` is the public five, never the stored spelling.
+- name: WorkflowRunDocument
+  fields: 3
+  description: One document attached to a run, in a role the definition declares.
+- name: WorkflowRunRequest
+  fields: 3
+  description: Launch a run of one definition inside one matter.
+relationships:
+- from: ActAmendmentsResponse
+  to: IdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: ActAmendmentsResponse
+  to: FootnoteItem
+  type: has_many
+  via: footnotes
+- from: ActAmendmentsResponse
+  to: ActMeta
+  type: has_one
+  via: meta
+- from: ActCitedByResponse
+  to: CitedByRow
+  type: has_many
+  via: citers
+- from: ActCitedByResponse
+  to: IdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: ActCitedByResponse
+  to: Meta
+  type: has_one
+  via: meta
+- from: ActDefinitionsResponse
+  to: DefinedTerm
+  type: has_many
+  via: terms
+- from: ActDefinitionsResponse
+  to: ReferencedSection
+  type: has_many
+  via: definitionSections
+- from: ActDefinitionsResponse
+  to: IdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: ActDefinitionsResponse
+  to: Meta
+  type: has_one
+  via: meta
+- from: ActFiltersData
+  to: ActFilterValue
+  type: has_many
+  via: categories
+- from: ActFiltersData
+  to: ActFilterValue
+  type: has_many
+  via: states
+- from: ActFiltersData
+  to: ActFilterValue
+  type: has_many
+  via: departments
+- from: ActFiltersResponse
+  to: ActFiltersData
+  type: has_one
+  via: data
+- from: ActFiltersResponse
+  to: ActMeta
+  type: has_one
+  via: meta
+- from: ActListResponse
+  to: ActListItem
+  type: has_many
+  via: results
+- from: ActListResponse
+  to: ActMeta
+  type: has_one
+  via: meta
+- from: ActReferencesResponse
+  to: Citation
+  type: has_one
+  via: citation
+- from: ActReferencesResponse
+  to: ReferencedAct
+  type: has_many
+  via: acts
+- from: ActReferencesResponse
+  to: ReferencedSection
+  type: has_many
+  via: sections
+- from: ActReferencesResponse
+  to: IdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: ActReferencesResponse
+  to: Meta
+  type: has_one
+  via: meta
+- from: ActSearchData
+  to: ActSearchResult
+  type: has_many
+  via: results
+- from: ActSearchResponse
+  to: ActSearchData
+  type: has_one
+  via: data
+- from: ActSearchResponse
+  to: ActSearchMeta
+  type: has_one
+  via: meta
+- from: ActSearchResult
+  to: Citation
+  type: has_one
+  via: citation
+- from: ActSection
+  to: ParentAct
+  type: has_one
+  via: parent
+- from: ActSection
+  to: SectionShape
+  type: has_one
+  via: shape
+- from: ActSection
+  to: Citation
+  type: has_one
+  via: citation
+- from: ActSection
+  to: Provenance
+  type: has_one
+  via: provenance
+- from: ActSectionBodyResponse
+  to: Citation
+  type: has_one
+  via: citation
+- from: ActSectionBodyResponse
+  to: Provenance
+  type: has_one
+  via: provenance
+- from: ActSectionBodyResponse
+  to: IdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: ActSectionBodyResponse
+  to: Meta
+  type: has_one
+  via: meta
+- from: ActSectionHistoryResponse
+  to: Citation
+  type: has_one
+  via: citation
+- from: ActSectionHistoryResponse
+  to: AmendmentEvent
+  type: has_many
+  via: events
+- from: ActSectionHistoryResponse
+  to: HistoryCoverage
+  type: has_one
+  via: coverage
+- from: ActSectionHistoryResponse
+  to: AsOfAnswer
+  type: has_one
+  via: asOf
+- from: ActSectionHistoryResponse
+  to: IdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: ActSectionHistoryResponse
+  to: Meta
+  type: has_one
+  via: meta
+- from: ActSectionResponse
+  to: ActSection
+  type: has_one
+  via: section
+- from: ActSectionResponse
+  to: IdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: ActSectionResponse
+  to: Meta
+  type: has_one
+  via: meta
+- from: ActStatusResponse
+  to: Citation
+  type: has_one
+  via: citation
+- from: ActStatusResponse
+  to: RepealClaim
+  type: has_one
+  via: repealClaim
+- from: ActStatusResponse
+  to: Retirement
+  type: has_one
+  via: retirement
+- from: ActStatusResponse
+  to: Provenance
+  type: has_one
+  via: provenance
+- from: ActStatusResponse
+  to: IdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: ActStatusResponse
+  to: Meta
+  type: has_one
+  via: meta
+- from: ActStructureResponse
+  to: StructureNode
+  type: has_many
+  via: nodes
+- from: ActStructureResponse
+  to: IdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: ActStructureResponse
+  to: Meta
+  type: has_one
+  via: meta
+- from: ActSubordinateResponse
+  to: SubordinateRow
+  type: has_many
+  via: children
+- from: ActSubordinateResponse
+  to: IdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: ActSubordinateResponse
+  to: Meta
+  type: has_one
+  via: meta
+- from: ActTextResponse
+  to: IdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: ActTextResponse
+  to: ActMeta
+  type: has_one
+  via: meta
+- from: ApiCreditPricingResponse
+  to: ApiCreditCostResponse
+  type: has_many
+  via: costs
+- from: CorrespondingProvisionsResponse
+  to: CorrespondingProvisionItem
+  type: has_many
+  via: provisions
+- from: CorrespondingProvisionsResponse
+  to: ActMeta
+  type: has_one
+  via: meta
+- from: CoverageData
+  to: CoverageTotals
+  type: has_one
+  via: totals
+- from: CoverageData
+  to: CoverageDepth
+  type: has_one
+  via: depth
+- from: CoverageData
+  to: CoverageCount
+  type: has_many
+  via: byCategory
+- from: CoverageData
+  to: JurisdictionCoverage
+  type: has_many
+  via: byJurisdiction
+- from: CoverageData
+  to: CategoryLegend
+  type: has_many
+  via: categoryLegend
+- from: CoverageData
+  to: CoverageCount
+  type: has_many
+  via: byRegulator
+- from: CoverageData
+  to: CoverageCount
+  type: has_many
+  via: byStatus
+- from: CoverageResponse
+  to: CoverageData
+  type: has_one
+  via: data
+- from: CoverageResponse
+  to: Meta
+  type: has_one
+  via: meta
+- from: ExternalCreditBalanceResponse
+  to: CreditSourceBreakdown
+  type: has_many
+  via: bySource
+- from: ExternalCreditBalanceResponse
+  to: CreditExpiry
+  type: has_one
+  via: nextExpiry
+- from: ExternalCreditBalanceResponse
+  to: CreditRateLimit
+  type: has_one
+  via: rateLimit
+- from: HTTPValidationError
+  to: ValidationError
+  type: has_many
+  via: detail
+- from: ResolveItem
+  to: ResolveCandidate
+  type: has_many
+  via: candidates
+- from: ResolveItem
+  to: ParsedPinpoint
+  type: has_one
+  via: parsed
+- from: ResolveResponse
+  to: ResolveItem
+  type: has_many
+  via: results
+- from: ResolveResponse
+  to: Meta
+  type: has_one
+  via: meta
+- from: CreateWatchRequest
+  to: WebhookAuthRequest
+  type: has_one
+  via: webhookAuth
+- from: EnactmentCoverage
+  to: EnactmentSession
+  type: has_many
+  via: sessionsHeld
+- from: SectionEnactment
+  to: SessionLawDate
+  type: has_many
+  via: effectiveDates
+- from: SectionEnactmentsResponse
+  to: SectionIdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: SectionEnactmentsResponse
+  to: SectionEnactment
+  type: has_many
+  via: enactments
+- from: SectionEnactmentsResponse
+  to: EnactmentCoverage
+  type: has_one
+  via: coverage
+- from: SessionLawBatchLaw
+  to: SessionLawDetailSession
+  type: has_one
+  via: session
+- from: SessionLawBatchLaw
+  to: SessionLawDate
+  type: has_many
+  via: effectiveDates
+- from: SessionLawBatchLaw
+  to: SessionLawDate
+  type: has_many
+  via: otherDates
+- from: SessionLawBatchLaw
+  to: CodeSectionAffected
+  type: has_many
+  via: codeSectionsAffected
+- from: SessionLawBatchLaw
+  to: SessionLawSource
+  type: has_many
+  via: sources
+- from: SessionLawBatchLaw
+  to: SessionLawPublisher
+  type: has_one
+  via: publisher
+- from: SessionLawBatchLaw
+  to: SessionLawProvenance
+  type: has_one
+  via: provenance
+- from: SessionLawBatchMiss
+  to: SessionLawSessionCoverage
+  type: has_one
+  via: sessionCoverage
+- from: SessionLawBatchResponse
+  to: SessionLawBatchLaw
+  type: has_many
+  via: laws
+- from: SessionLawBatchResponse
+  to: SessionLawResolution
+  type: has_many
+  via: resolved
+- from: SessionLawBatchResponse
+  to: SessionLawBatchMiss
+  type: has_many
+  via: notFound
+- from: SessionLawBodyResponse
+  to: SessionLawSession
+  type: has_one
+  via: session
+- from: SessionLawChangesResponse
+  to: SessionLawChange
+  type: has_many
+  via: changes
+- from: SessionLawCitationCandidate
+  to: SessionLawSession
+  type: has_one
+  via: session
+- from: SessionLawCitationMatch
+  to: SessionLawSession
+  type: has_one
+  via: session
+- from: SessionLawCitationMatch
+  to: SessionLawCitationCandidate
+  type: has_many
+  via: candidates
+- from: SessionLawJurisdictionCoverage
+  to: SessionLawSessionCoverage
+  type: has_many
+  via: sessions
+- from: SessionLawListCoverage
+  to: SessionLawSession
+  type: has_one
+  via: session
+- from: SessionLawListResponse
+  to: SessionLawSummary
+  type: has_many
+  via: results
+- from: SessionLawListResponse
+  to: SessionLawListCoverage
+  type: has_one
+  via: coverage
+- from: SessionLawNotFoundError
+  to: SessionLawSessionCoverage
+  type: has_one
+  via: sessionCoverage
+- from: SessionLawProvenance
+  to: SessionLawVolume
+  type: has_one
+  via: volume
+- from: SessionLawPublisher
+  to: SessionLawPublisherId
+  type: has_many
+  via: publisherIds
+- from: SessionLawResponse
+  to: SessionLawDetailSession
+  type: has_one
+  via: session
+- from: SessionLawResponse
+  to: SessionLawDate
+  type: has_many
+  via: effectiveDates
+- from: SessionLawResponse
+  to: SessionLawDate
+  type: has_many
+  via: otherDates
+- from: SessionLawResponse
+  to: CodeSectionAffected
+  type: has_many
+  via: codeSectionsAffected
+- from: SessionLawResponse
+  to: SessionLawSource
+  type: has_many
+  via: sources
+- from: SessionLawResponse
+  to: SessionLawPublisher
+  type: has_one
+  via: publisher
+- from: SessionLawResponse
+  to: SessionLawProvenance
+  type: has_one
+  via: provenance
+- from: SessionLawResponse
+  to: SessionLawResolution
+  type: has_one
+  via: resolvedFrom
+- from: SessionLawSearchResponse
+  to: SessionLawSearchParsed
+  type: has_one
+  via: parsed
+- from: SessionLawSearchResponse
+  to: SessionLawSearchResult
+  type: has_many
+  via: results
+- from: SessionLawSearchResult
+  to: SessionLawSearchPassage
+  type: has_one
+  via: passage
+- from: SessionLawSessionCoverage
+  to: SessionLawDenominator
+  type: has_one
+  via: denominator
+- from: SessionLawSummary
+  to: SessionLawSession
+  type: has_one
+  via: session
+- from: StatuteBodyResponse
+  to: AsOfProvenance
+  type: has_one
+  via: asOf
+- from: StatuteBodyResponse
+  to: SectionIdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: StatuteChangesResponse
+  to: StatuteResult
+  type: has_one
+  via: section
+- from: StatuteChangesResponse
+  to: StatuteChangeEvent
+  type: has_many
+  via: changes
+- from: StatuteChangesResponse
+  to: SectionIdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: StatuteCitedByResponse
+  to: StatuteResult
+  type: has_one
+  via: section
+- from: StatuteCitedByResponse
+  to: StatuteResult
+  type: has_many
+  via: citers
+- from: StatuteCitedByResponse
+  to: SectionIdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: StatuteCrossStateNeighbor
+  to: StatuteResult
+  type: has_one
+  via: section
+- from: StatuteCrossStateResponse
+  to: StatuteResult
+  type: has_one
+  via: section
+- from: StatuteCrossStateResponse
+  to: StatuteCrossStateNeighbor
+  type: has_many
+  via: neighbors
+- from: StatuteCrossStateResponse
+  to: SectionIdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: StatuteDefinitionsResponse
+  to: StatuteResult
+  type: has_one
+  via: section
+- from: StatuteDefinitionsResponse
+  to: StatuteResult
+  type: has_one
+  via: definitionsSection
+- from: StatuteDefinitionsResponse
+  to: StatuteDefinitionTerm
+  type: has_many
+  via: terms
+- from: StatuteDefinitionsResponse
+  to: SectionIdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: StatuteNeighborsResponse
+  to: StatuteResult
+  type: has_one
+  via: section
+- from: StatuteNeighborsResponse
+  to: StatuteResult
+  type: has_many
+  via: previous
+- from: StatuteNeighborsResponse
+  to: StatuteResult
+  type: has_many
+  via: next
+- from: StatuteNeighborsResponse
+  to: SectionIdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: StatuteResolveBatchItem
+  to: StatuteResult
+  type: has_one
+  via: section
+- from: StatuteResolveBatchItem
+  to: CitationOutsideFilters
+  type: has_one
+  via: citationOutsideFilters
+- from: StatuteResolveBatchItem
+  to: SessionLawCitationMatch
+  type: has_one
+  via: sessionLaw
+- from: StatuteResolveBatchResponse
+  to: StatuteResolveBatchItem
+  type: has_many
+  via: results
+- from: StatuteResolveResponse
+  to: StatuteResult
+  type: has_one
+  via: section
+- from: StatuteResolveResponse
+  to: CitationOutsideFilters
+  type: has_one
+  via: citationOutsideFilters
+- from: StatuteResolveResponse
+  to: SessionLawCitationMatch
+  type: has_one
+  via: sessionLaw
+- from: StatuteSearchResponse
+  to: StatuteResult
+  type: has_many
+  via: results
+- from: StatuteSearchResponse
+  to: CitationOutsideFilters
+  type: has_one
+  via: citationOutsideFilters
+- from: StatuteSectionResponse
+  to: StatuteResult
+  type: has_one
+  via: section
+- from: StatuteSectionResponse
+  to: SectionIdentifierResolution
+  type: has_one
+  via: resolvedFrom
+- from: StatuteSectionsResponse
+  to: StatuteResult
+  type: has_many
+  via: sections
+- from: StatuteSectionsResponse
+  to: StatuteSectionsNotFoundDetail
+  type: has_many
+  via: notFoundDetail
+- from: StatuteSectionsResponse
+  to: SectionIdentifierResolution
+  type: has_many
+  via: resolved
+- from: UpdateWatchRequest
+  to: WebhookAuthRequest
+  type: has_one
+  via: webhookAuth
+- from: UsJurisdictionCoverage
+  to: SessionLawJurisdictionCoverage
+  type: has_one
+  via: sessionLaws
+- from: UsStatutesCoverageEnvelope
+  to: UsStatutesCoverageResponse
+  type: has_one
+  via: data
+- from: UsStatutesCoverageEnvelope
+  to: UsFreeCallMeta
+  type: has_one
+  via: meta
+- from: UsStatutesCoverageResponse
+  to: UsCorpusTypeInfo
+  type: has_many
+  via: corpusTypes
+- from: UsStatutesCoverageResponse
+  to: UsJurisdictionCoverage
+  type: has_many
+  via: jurisdictions
+- from: UsStatutesDivisionsResponse
+  to: UsDivisionNode
+  type: has_many
+  via: divisions
+- from: Chat
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: ChronologyEvent
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: ChronologyEvent
+  to: Document
+  type: belongs_to
+  via: documentId
+- from: ChronologyEventCreateRequest
+  to: Document
+  type: belongs_to
+  via: documentId
+- from: ChronologyExportRequest
+  to: ChronologyFilters
+  type: has_one
+  via: filters
+- from: ChronologyExtractionStatus
+  to: DocumentExtractionState
+  type: has_many
+  via: documents
+- from: ChronologyFilters
+  to: Document
+  type: belongs_to
+  via: documentId
+- from: Comparison
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: Comparison
+  to: ComparisonSource
+  type: has_one
+  via: original
+- from: Comparison
+  to: ComparisonSource
+  type: has_one
+  via: revised
+- from: Comparison
+  to: ComparisonSettings
+  type: has_one
+  via: settings
+- from: ComparisonCreateRequest
+  to: ComparisonSettings
+  type: has_one
+  via: settings
+- from: ComparisonSource
+  to: Document
+  type: belongs_to
+  via: documentId
+- from: ComplianceCheck
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: ComplianceCheck
+  to: ComplianceRequirement
+  type: has_many
+  via: requirements
+- from: ComplianceCheck
+  to: ComplianceGap
+  type: has_many
+  via: gaps
+- from: ComplianceCheck
+  to: ComplianceRemediationAction
+  type: has_many
+  via: remediationActions
+- from: Document
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: Document
+  to: Folder
+  type: belongs_to
+  via: folderId
+- from: DocumentExtractionState
+  to: Document
+  type: belongs_to
+  via: documentId
+- from: DocumentSummary
+  to: Document
+  type: belongs_to
+  via: documentId
+- from: DocumentSummary
+  to: SummarySection
+  type: has_many
+  via: sections
+- from: DocumentText
+  to: Document
+  type: belongs_to
+  via: documentId
+- from: DocumentUpdateRequest
+  to: Folder
+  type: belongs_to
+  via: folderId
+- from: Draft
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: Draft
+  to: DraftSection
+  type: has_many
+  via: sections
+- from: DraftFromDocumentRequest
+  to: Document
+  type: belongs_to
+  via: documentId
+- from: DraftSummary
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: Fact
+  to: FactCitation
+  type: has_many
+  via: citations
+- from: FactCitation
+  to: Document
+  type: belongs_to
+  via: documentId
+- from: FactSet
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: FactSet
+  to: FactSetCoverage
+  type: has_one
+  via: coverage
+- from: Folder
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: FolderCreateRequest
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: Matrix
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: Matrix
+  to: MatrixColumn
+  type: has_many
+  via: columns
+- from: Matrix
+  to: MatrixRow
+  type: has_many
+  via: rows
+- from: MatrixCell
+  to: MatrixCitation
+  type: has_many
+  via: citations
+- from: MatrixColumnsRequest
+  to: MatrixColumnSpec
+  type: has_many
+  via: columns
+- from: MatrixCreateRequest
+  to: Document
+  type: belongs_to
+  via: documentIds
+- from: MatrixCreateRequest
+  to: MatrixColumnSpec
+  type: has_many
+  via: columns
+- from: MatrixRow
+  to: Document
+  type: belongs_to
+  via: documentId
+- from: MatrixRowSpec
+  to: Document
+  type: belongs_to
+  via: documentIds
+- from: MatrixSummary
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: Matter
+  to: Client
+  type: belongs_to
+  via: clientId
+- from: MatterCreateRequest
+  to: Client
+  type: belongs_to
+  via: clientId
+- from: MatterSummary
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: MatterSummarySection
+  to: SummaryClaim
+  type: has_many
+  via: claims
+- from: MatterUpdateRequest
+  to: Client
+  type: belongs_to
+  via: clientId
+- from: Message
+  to: Chat
+  type: belongs_to
+  via: chatId
+- from: Message
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: Message
+  to: Citation
+  type: has_many
+  via: citations
+- from: Message
+  to: ResearchSettings
+  type: has_one
+  via: requestedSettings
+- from: Message
+  to: ResearchSettings
+  type: has_one
+  via: effectiveSettings
+- from: NdaTriage
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: NdaTriage
+  to: Playbook
+  type: belongs_to
+  via: playbookId
+- from: NdaTriage
+  to: NdaTriageCriterion
+  type: has_many
+  via: criteria
+- from: NdaTriageCreateRequest
+  to: Playbook
+  type: belongs_to
+  via: playbookId
+- from: NdaTriageCriterion
+  to: NdaPlaybookAssessment
+  type: has_one
+  via: playbookAssessment
+- from: Operation
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: Operation
+  to: OperationResource
+  type: has_one
+  via: resource
+- from: Operation
+  to: OperationError
+  type: has_one
+  via: error
+- from: Operation
+  to: OperationProgress
+  type: has_one
+  via: progress
+- from: Page_Chat_
+  to: Chat
+  type: has_many
+  via: data
+- from: Page_Chat_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_ChronologyEvent_
+  to: ChronologyEvent
+  type: has_many
+  via: data
+- from: Page_ChronologyEvent_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_Client_
+  to: Client
+  type: has_many
+  via: data
+- from: Page_Client_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_ComparisonHunk_
+  to: ComparisonHunk
+  type: has_many
+  via: data
+- from: Page_ComparisonHunk_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_Comparison_
+  to: Comparison
+  type: has_many
+  via: data
+- from: Page_Comparison_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_Document_
+  to: Document
+  type: has_many
+  via: data
+- from: Page_Document_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_DraftCategory_
+  to: DraftCategory
+  type: has_many
+  via: data
+- from: Page_DraftCategory_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_DraftSummary_
+  to: DraftSummary
+  type: has_many
+  via: data
+- from: Page_DraftSummary_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_DraftVersion_
+  to: DraftVersion
+  type: has_many
+  via: data
+- from: Page_DraftVersion_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_FactSet_
+  to: FactSet
+  type: has_many
+  via: data
+- from: Page_FactSet_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_Fact_
+  to: Fact
+  type: has_many
+  via: data
+- from: Page_Fact_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_Folder_
+  to: Folder
+  type: has_many
+  via: data
+- from: Page_Folder_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_MatrixCell_
+  to: MatrixCell
+  type: has_many
+  via: data
+- from: Page_MatrixCell_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_MatrixSummary_
+  to: MatrixSummary
+  type: has_many
+  via: data
+- from: Page_MatrixSummary_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_MatterSummary_
+  to: MatterSummary
+  type: has_many
+  via: data
+- from: Page_MatterSummary_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_Matter_
+  to: Matter
+  type: has_many
+  via: data
+- from: Page_Matter_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_Message_
+  to: Message
+  type: has_many
+  via: data
+- from: Page_Message_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_Operation_
+  to: Operation
+  type: has_many
+  via: data
+- from: Page_Operation_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_PlaybookTemplate_
+  to: PlaybookTemplate
+  type: has_many
+  via: data
+- from: Page_PlaybookTemplate_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_Playbook_
+  to: Playbook
+  type: has_many
+  via: data
+- from: Page_Playbook_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_Review_
+  to: Review
+  type: has_many
+  via: data
+- from: Page_Review_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_Skill_
+  to: Skill
+  type: has_many
+  via: data
+- from: Page_Skill_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_Template_
+  to: Template
+  type: has_many
+  via: data
+- from: Page_Template_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_UploadSummary_
+  to: UploadSummary
+  type: has_many
+  via: data
+- from: Page_UploadSummary_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_WorkflowDefinition_
+  to: WorkflowDefinition
+  type: has_many
+  via: data
+- from: Page_WorkflowDefinition_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: Page_WorkflowRun_
+  to: WorkflowRun
+  type: has_many
+  via: data
+- from: Page_WorkflowRun_
+  to: Pagination
+  type: has_one
+  via: pagination
+- from: PlaybookExtractionCreateRequest
+  to: Document
+  type: belongs_to
+  via: documentId
+- from: PlaybookPosition
+  to: EscalationCondition
+  type: has_many
+  via: escalationConditions
+- from: ResearchConfig
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: Review
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: Review
+  to: Playbook
+  type: belongs_to
+  via: playbookId
+- from: Review
+  to: ReviewApprovalGate
+  type: has_one
+  via: approvalGate
+- from: Review
+  to: ReviewLiabilityExposure
+  type: has_one
+  via: liabilityExposure
+- from: Review
+  to: ReviewCounterpartyMatch
+  type: has_one
+  via: counterpartyMatch
+- from: Review
+  to: ReviewClause
+  type: has_many
+  via: clauses
+- from: Review
+  to: ReviewRedline
+  type: has_many
+  via: redlines
+- from: Review
+  to: ReviewNegotiationPriority
+  type: has_many
+  via: negotiationPriorities
+- from: Review
+  to: ReviewFlag
+  type: has_many
+  via: flags
+- from: Review
+  to: ReviewDeepMeta
+  type: has_one
+  via: deep
+- from: ReviewApprovalGate
+  to: ReviewApprovalReason
+  type: has_many
+  via: reasons
+- from: ReviewCreateRequest
+  to: Playbook
+  type: belongs_to
+  via: playbookId
+- from: ReviewCreateRequest
+  to: ReviewDealContext
+  type: has_one
+  via: dealContext
+- from: ReviewExport
+  to: ReviewApprovalGate
+  type: has_one
+  via: approvalGate
+- from: SimilarDocuments
+  to: WebResult
+  type: has_many
+  via: results
+- from: SummaryCitation
+  to: Document
+  type: belongs_to
+  via: documentId
+- from: SummaryClaim
+  to: SummaryCitation
+  type: has_many
+  via: citations
+- from: TemplateDetail
+  to: TemplateVariable
+  type: has_many
+  via: variables
+- from: TemplateDetail
+  to: DraftSection
+  type: has_many
+  via: sections
+- from: TemplateFromDocumentRequest
+  to: Document
+  type: belongs_to
+  via: documentId
+- from: TemplateRun
+  to: Template
+  type: belongs_to
+  via: templateId
+- from: TemplateRun
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: TemplateRun
+  to: Draft
+  type: belongs_to
+  via: draftId
+- from: TemplateRun
+  to: TemplateSlot
+  type: has_many
+  via: slots
+- from: UploadCompleteRequest
+  to: CompletedPart
+  type: has_many
+  via: parts
+- from: UploadInitiateRequest
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: UploadInitiateRequest
+  to: Folder
+  type: belongs_to
+  via: folderId
+- from: UploadSession
+  to: UploadPartLink
+  type: has_many
+  via: parts
+- from: UploadSummary
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: Verification
+  to: Message
+  type: belongs_to
+  via: messageId
+- from: Verification
+  to: VerifiedClaim
+  type: has_many
+  via: claims
+- from: WebSearchResults
+  to: WebResult
+  type: has_many
+  via: results
+- from: WorkflowDefinition
+  to: WorkflowDocumentSlot
+  type: has_many
+  via: documentSlots
+- from: WorkflowDefinition
+  to: WorkflowInputField
+  type: has_many
+  via: inputs
+- from: WorkflowDefinition
+  to: WorkflowArtifactSpec
+  type: has_many
+  via: artifacts
+- from: WorkflowRun
+  to: Matter
+  type: belongs_to
+  via: matterId
+- from: WorkflowRun
+  to: WorkflowArtifact
+  type: has_many
+  via: artifacts
+- from: WorkflowRunDocument
+  to: Document
+  type: belongs_to
+  via: documentId
+- from: WorkflowRunRequest
+  to: WorkflowRunDocument
+  type: has_many
+  via: documents

@@ -1,0 +1,1666 @@
+openapi: 3.2.0
+info:
+  title: Vaquill Ai Documents API
+  version: 1.0.0
+  description: 'Operations tagged Documents across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.vaquill.ai/workspace
+  description: Vaquill Legal Workspace API (production)
+- url: /workspace
+  description: Vaquill Legal Workspace API (relative to the mount)
+security:
+- WorkspaceAuth: []
+tags:
+- name: Documents
+  description: 'Files in a matter: their metadata, their ingested text, and the original bytes. A document is only usable by retrieval, drafting and review once its status is `succeeded`.'
+paths:
+  /v1/matters/{matterId}/documents:
+    get:
+      tags:
+      - Documents
+      summary: List documents in a matter
+      description: 'Every document in this matter, newest first, one page at a time.
+
+
+        The matter is RESOLVED here rather than merely decoded, unlike the by-id
+
+        routes below. Those authorize through the document row, whose organization
+
+        predicate answers 404 for a matter this organization does not own. A list
+
+        has no such row: filtering by `matter_id` alone answered 200 with an empty
+
+        page for another organization''s matter, which leaks nothing and is still
+
+        wrong, because every other matter-nested list answers `matter-not-found` and
+
+        a caller cannot tell "not yours" from "empty".'
+      operationId: documents.list
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: How many rows to return, 1 to 200. Defaults to 50.
+          default: 50
+          title: Limit
+        description: How many rows to return, 1 to 200. Defaults to 50.
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+          default: 0
+          title: Offset
+        description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+      - name: folderId
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Narrow the list to one folder inside the matter. Omit for every document in the matter. There is no way to ask for only the unfiled documents.
+          title: Folderid
+        description: Narrow the list to one folder inside the matter. Omit for every document in the matter. There is no way to ask for only the unfiled documents.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_Document_'
+              example:
+                data:
+                - id: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  folderId: fld_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  filename: msa-acme-v3.docx
+                  contentType: application/pdf
+                  fileSize: 248193
+                  pageCount: 14
+                  chunkCount: 37
+                  sourceType: api
+                  status: succeeded
+                  isEncrypted: false
+                  createdAt: '2026-08-19T14:32:10Z'
+                  updatedAt: '2026-08-19T14:32:10Z'
+                  processedAt: '2026-08-19T14:32:10Z'
+                pagination:
+                  limit: 50
+                  offset: 0
+                  total: 128
+                  hasMore: false
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/documents/{documentId}:
+    get:
+      tags:
+      - Documents
+      summary: Get a document
+      description: 'One document''s metadata and ingestion status.
+
+
+        `status` is the five-value public vocabulary, not a document-specific one:
+
+        the document is only visible to retrieval, drafting and review once it reads
+
+        `succeeded`. `pageCount` is the number to size a review or matrix run
+
+        against, and is absent until ingestion has read the file.'
+      operationId: documents.get
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: documentId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Documentid
+        description: '`doc_` identifier of the document. Take it from the matter''s document list, or from the operation that completed its upload.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+              example:
+                id: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                folderId: fld_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                filename: msa-acme-v3.docx
+                contentType: application/pdf
+                fileSize: 248193
+                pageCount: 14
+                chunkCount: 37
+                sourceType: api
+                status: succeeded
+                isEncrypted: false
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+                processedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      tags:
+      - Documents
+      summary: Delete a document
+      description: 'Remove a document from the matter, its vectors and its stored file.
+
+
+        The row goes synchronously, because that is what the customer''s next read
+
+        observes; storage and vectors are swept by the same Celery task the web app
+
+        dispatches, so neither surface leaves residue the other would not.
+
+
+        This reaches further than the document itself. Deleting one also removes its
+
+        extracted text and versions, its highlights and flags, its obligations and
+
+        summary, its chronology entries in this matter, and its ROW in every
+
+        document matrix it appears in, which changes the shape of a finished grid.
+
+        There is no undo, and a repeated delete answers `404`. If a delete timed
+
+        out, treat a subsequent `404` as success.'
+      operationId: documents.delete
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: documentId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Documentid
+        description: '`doc_` identifier of the document. Take it from the matter''s document list, or from the operation that completed its upload.'
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    patch:
+      tags:
+      - Documents
+      summary: Move a document between folders
+      description: 'Move a document between folders.
+
+
+        `folderId` is the only field a document accepts. Send `null` to unfile it.
+
+        The folder must belong to your organization.
+
+
+        Filename and matter cannot be changed. Both are part of the stored file''s
+
+        identity, so changing either would leave the original unreadable; moving a
+
+        document to another matter is an upload into the new matter followed by a
+
+        delete from the old one.'
+      operationId: documents.update
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: documentId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Documentid
+        description: '`doc_` identifier of the document. Take it from the matter''s document list, or from the operation that completed its upload.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentUpdateRequest'
+            example:
+              folderId: fld_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+              example:
+                id: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                folderId: fld_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                filename: msa-acme-v3.docx
+                contentType: application/pdf
+                fileSize: 248193
+                pageCount: 14
+                chunkCount: 37
+                sourceType: api
+                status: succeeded
+                isEncrypted: false
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+                processedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/documents/{documentId}/text:
+    get:
+      tags:
+      - Documents
+      summary: Get a document's extracted text
+      description: 'The document''s text, reassembled from exactly what retrieval sees.
+
+
+        Rebuilt from the ingested chunks rather than re-extracted from the original,
+
+        so this is what drafting and review actually read. Check `truncated` before
+
+        treating the text as complete, and compare `chunkCount` against the
+
+        document''s own to tell a partial read from a whole one.'
+      operationId: documents.text
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: documentId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Documentid
+        description: '`doc_` identifier of the document. Take it from the matter''s document list, or from the operation that completed its upload.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentText'
+              example:
+                documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                text: Neither party shall be liable for indirect or consequential damages.
+                chunkCount: 37
+                truncated: false
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/documents/{documentId}/download:
+    get:
+      tags:
+      - Documents
+      summary: Download a document's original file
+      description: 'The original file, streamed and decrypted if it was stored encrypted.
+
+
+        Authorization happens on THIS request, which is what makes the handoff''s
+
+        "re-authorize at signing time" requirement structural rather than something
+
+        to remember: a credential revoked a second ago cannot reach this handler,
+
+        and there is no URL left behind that could.'
+      operationId: documents.download
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: documentId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Documentid
+        description: '`doc_` identifier of the document. Take it from the matter''s document list, or from the operation that completed its upload.'
+      responses:
+        '200':
+          description: The file, streamed.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+              example: value
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/documents/{documentId}/summary:
+    get:
+      tags:
+      - Documents
+      summary: Get a document's summary
+      description: 'The summary stored for this document, if one has been generated.
+
+
+        A READ. It never generates: a summary is a map-reduce over every chunk of
+
+        the document, and this API does not start work behind a `GET`. Generate one
+
+        in the app, then read it here.
+
+
+        `404 summary-not-found` means the document exists and has never been
+
+        summarized, which is deliberately a different answer from `404
+
+        document-not-found`. When a document holds more than one summary this
+
+        returns the most recently regenerated, and `length` says which it is.'
+      operationId: documents.summary
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: documentId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Documentid
+        description: '`doc_` identifier of the document. Take it from the matter''s document list, or from the operation that completed its upload.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentSummary'
+              example:
+                documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                overview: A Master Services Agreement between Acme Corporation and the Supplier, signed 19 August 2026, covering platform implementation and ongoing support for an initial two-year term. Fees are invoiced monthly in arrears and payable within 30 days. Supplier liability is capped at the fees paid in the preceding twelve months, with uncapped carve-outs for confidentiality breaches and third-party IP indemnity. The agreement is governed by Delaware law and either party may terminate for convenience on 90 days' written notice.
+                sections:
+                - title: Master Services Agreement
+                  content: UEsDBBQABgAIAAAAIQ...
+                documentCategory: contract
+                pageCount: 14
+                length: medium
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+components:
+  schemas:
+    Page_Document_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Document'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[Document]
+    DocumentUpdateRequest:
+      properties:
+        folderId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Folderid
+          description: '`fld_` identifier of the folder to file this document under. Must belong to your organization. Send null to unfile it. Filename and matter cannot be changed: both are part of the stored object''s identity.'
+          examples:
+          - fld_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: false
+      type: object
+      title: DocumentUpdateRequest
+      description: 'Move a document between folders. That is the whole of it.
+
+
+        The web app''s `PATCH /documents/{id}` also accepts `filename`, `matterId`
+
+        and `metadata`, and none of the three can be published here.
+
+
+        `filename` and `matterId` are both INSIDE the R2 object key.
+
+        `r2_storage._generate_file_key` composes
+
+        `orgs/{org}/matters/{matter}/docs/{doc}/{filename}`, and both
+
+        `r2_storage.download_document` and `adapters/document_content._object_key`
+
+        REGENERATE that key from the row rather than reading a stored path. So
+
+        changing either one makes the original permanently unreadable, with no error
+
+        at write time and no error until somebody asks for the file. The web app has
+
+        that defect today; publishing the fields here would inherit it, and a moved
+
+        document is a copy-then-delete job rather than a PATCH.
+
+
+        `metadata` is free-form JSONB whose keys the ingest pipeline owns:
+
+        `{"handwritten": ...}` is written by `upload_store._insert_placeholder` and
+
+        read back by the finalize task. Publishing it lets a customer overwrite a
+
+        key a worker depends on.'
+    OperationStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: OperationStatus
+      description: 'The public five. There is no sixth, and there are no synonyms.
+
+
+        Internal vocabularies spell terminal success `completed`, `ready`,
+
+        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+
+        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+
+        `app.workspace_api.adapters.status_map`, which refuses to guess.'
+    DocumentSummary:
+      properties:
+        documentId:
+          type: string
+          title: Documentid
+          description: '`doc_` identifier of the document this summarizes.'
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        overview:
+          type: string
+          title: Overview
+          description: The whole-document summary, a few paragraphs of prose. Empty string when the summary was stored with sections only.
+          examples:
+          - A Master Services Agreement between Acme Corporation and the Supplier, signed 19 August 2026, covering platform implementation and ongoing support for an initial two-year term. Fees are invoiced monthly in arrears and payable within 30 days. Supplier liability is capped at the fees paid in the preceding twelve months, with uncapped carve-outs for confidentiality breaches and third-party IP indemnity. The agreement is governed by Delaware law and either party may terminate for convenience on 90 days' written notice.
+        sections:
+          items:
+            $ref: '#/components/schemas/SummarySection'
+          type: array
+          title: Sections
+          description: Section-by-section summaries, in document order. Empty when the document was short enough to summarize in one pass.
+        documentCategory:
+          type: string
+          title: Documentcategory
+          description: How the summarizer classified the document, for example `contract` or `general`. Published as a plain string; do not branch on it without a fallback.
+          examples:
+          - contract
+        pageCount:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Pagecount
+          description: Pages the summarizer read. Absent on older rows.
+          examples:
+          - 14
+        length:
+          type: string
+          title: Length
+          description: 'Which length this summary was produced at: `short`, `medium` or `long`. Published as a plain string for the same reason as `documentCategory`.'
+          examples:
+          - medium
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the summary was produced (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        updatedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Updatedat
+          description: When the summary was last regenerated (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - documentId
+      - overview
+      - documentCategory
+      - length
+      - createdAt
+      title: DocumentSummary
+      description: What was persisted the last time this document was summarized.
+    Document:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `doc_` followed by 32 hex characters.
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        matterId:
+          type: string
+          title: Matterid
+          description: '`mat_` identifier of the matter this document lives in.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        folderId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Folderid
+          description: '`fld_` identifier of the folder it is filed under. Absent when unfiled.'
+          examples:
+          - fld_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        filename:
+          type: string
+          title: Filename
+          description: Original filename as uploaded, including its extension.
+          examples:
+          - msa-acme-v3.docx
+        contentType:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Contenttype
+          description: IANA media type detected at upload, for example `application/pdf`.
+          examples:
+          - application/pdf
+        fileSize:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Filesize
+          description: Size of the stored original in bytes.
+          examples:
+          - 248193
+        pageCount:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Pagecount
+          description: Pages the pipeline read. Absent or zero until ingestion has read the file. This is the number to size a review or matrix run against.
+          examples:
+          - 14
+        chunkCount:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Chunkcount
+          description: How many retrieval chunks the document was split into. Absent until ingestion finishes.
+          examples:
+          - 37
+        sourceType:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourcetype
+          description: How the document entered the workspace. `api` for everything created through this surface; rows made in the web app carry `upload`, `email`, `workflow` or `chat_artifact`. Published as a plain string, so do not branch on it without a fallback.
+          examples:
+          - api
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: Ingestion status, using the same five public values as an operation. Retrieval, drafting and review can only see the document once this is `succeeded`.
+          examples:
+          - succeeded
+        isEncrypted:
+          type: boolean
+          title: Isencrypted
+          description: Whether the stored original is encrypted at rest with a per-document key. This is why downloads stream bytes rather than handing back a storage URL.
+          default: false
+          examples:
+          - false
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the document row was created (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        updatedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Updatedat
+          description: When the document was last modified (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        processedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Processedat
+          description: When ingestion finished (RFC 3339). Absent while the document is still processing.
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - matterId
+      - filename
+      - status
+      - createdAt
+      title: Document
+      description: 'One file in a matter, and how far its ingestion got.
+
+
+        `status` is the FIVE-value public vocabulary, not the four-label
+
+        `document_status` Postgres enum. A document''s status is the status of the
+
+        job that ingested it, and publishing `completed` here beside `succeeded` on
+
+        the operation that produced it would make a customer map two spellings of
+
+        one event. `adapters/status_map` does the translation and refuses anything
+
+        it has not been told about, so a new enum label fails loudly in CI rather
+
+        than leaking a sixth value.'
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
+          examples:
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
+
+
+        `total` is the count of rows matching the filter, not the count returned,
+
+        so a caller can size a job before running it.'
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
+    SummarySection:
+      properties:
+        title:
+          type: string
+          title: Title
+          description: Heading for this part of the summary.
+          default: ''
+          examples:
+          - Master Services Agreement
+        content:
+          type: string
+          title: Content
+          description: The summary text under this heading.
+          default: ''
+          examples:
+          - UEsDBBQABgAIAAAAIQ...
+      additionalProperties: false
+      type: object
+      title: SummarySection
+      description: 'One heading of the summary.
+
+
+        `content` is loose on purpose. `document_summaries.sections` is JSONB
+
+        written by a service this API does not own, and the shape has changed once
+
+        already; a closed model here would answer 500 for whoever owns the older
+
+        rows, which is the same reasoning that keeps every publisher-controlled
+
+        vocabulary on this surface a plain `str` outbound.'
+    Problem:
+      type: object
+      title: Problem
+      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: true
+    DocumentText:
+      properties:
+        documentId:
+          type: string
+          title: Documentid
+          description: '`doc_` identifier of the document this text came from.'
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        text:
+          type: string
+          title: Text
+          description: The document's full text, reassembled from the ingested chunks. This is exactly what retrieval, drafting and review saw, not a fresh extraction.
+          examples:
+          - Neither party shall be liable for indirect or consequential damages.
+        chunkCount:
+          type: integer
+          title: Chunkcount
+          description: How many chunks were reassembled. Compare against the document's `chunkCount` to tell a partial read from a complete one.
+          examples:
+          - 37
+        truncated:
+          type: boolean
+          title: Truncated
+          description: True when the text was cut at the published ceiling. Always check it before quoting the text as complete.
+          default: false
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - documentId
+      - text
+      - chunkCount
+      title: DocumentText
+      description: 'The reassembled text of a document.
+
+
+        Reassembled from the ingested chunks rather than re-extracted from the
+
+        original, so what a customer reads here is exactly what retrieval, drafting
+
+        and review saw. Re-extracting would be a second implementation that could
+
+        silently disagree with the one the product actually uses.'
+  securitySchemes:
+    WorkspaceAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: vq_ws_*
+      description: 'Workspace credential issued from the automation console at `/automation`. Send it as `Authorization: Bearer vq_ws_...`. This is NOT a Data API key: a `vq_key_` credential is refused here and names the other product in the error.'
+externalDocs:
+  description: Getting started guide and error reference
+  url: https://vaquill.ai/docs/workspace-api
+x-refined-from:
+- vaquill-ai-workspace-openapi.json
+- vaquill-ai-workspace-openapi.yml

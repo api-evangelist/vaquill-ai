@@ -1,0 +1,347 @@
+openapi: 3.2.0
+info:
+  title: Vaquill Ai Credits API
+  version: 1.0.0
+  contact:
+    name: Vaquill API Support
+    url: https://www.vaquill.ai
+    email: support@vaquill.ai
+  license:
+    name: Proprietary
+    url: https://www.vaquill.ai/terms
+  termsOfService: https://www.vaquill.ai/terms
+  description: 'Operations tagged Credits across 2 of this provider''s published API definitions: vaquill-ai-openapi.json, vaquill-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.vaquill.ai
+  description: Production
+security:
+- ApiKeyAuth: []
+- ApiKeyHeader: []
+- ApiKeyQuery: []
+tags:
+- name: Credits
+  description: 'Your own credit balance: what is spendable right now, where it came from, and what is about to expire.
+
+
+    Free and never charged, so it is safe to poll for low-balance alerting or to pre-flight a batch job.'
+paths:
+  /api/v1/credits/balance:
+    get:
+      tags:
+      - Credits
+      summary: Get your credit balance
+      description: 'Returns the credits this API key''s account can spend right now.
+
+
+        **Free.** This endpoint is never charged, so you can poll it to drive alerting
+
+        or a pre-flight check without the check itself costing you anything. It is rate
+
+        limited like every other key-authenticated route.
+
+
+        **Authentication:** any valid `vq_key_` key. No particular scope is required.
+
+
+        ## What the number means
+
+
+        `creditsRemaining` is derived from your live credit buckets under the same
+
+        expiry rule the billing path applies, so it is what a call would actually be
+
+        allowed to spend, not a cached figure that a nightly job later corrects.
+
+
+        It is the same field name metered responses use, so you can read `creditsRemaining`
+
+        the same way everywhere.
+
+
+        ## Not all credits behave alike
+
+
+        Read `bySource` before assuming a balance is durable. `subscription` credits are
+
+        use-it-or-lose-it and are forfeited at the end of the period, while `payg`
+
+        credits you purchased burn last and persist. `nextExpiry` tells you what is
+
+        about to be forfeited and when, which is the one thing a balance alone cannot.
+
+
+        ## Two separate ceilings
+
+
+        Credits are how MUCH you may spend; `rateLimit` is how FAST you may call. They
+
+        are independent, so a healthy balance does not exempt you from throttling and
+
+        staying under the rate limit does not pay for a call.
+
+
+        `rateLimit` has your plan applied and lets you size a client before issuing a
+
+        request. Every response also carries `X-RateLimit-Limit`, `X-RateLimit-Remaining`
+
+        and `X-RateLimit-Reset` for the per-minute window, plus `X-RateLimit-Limit-Day`
+
+        and `X-RateLimit-Remaining-Day` for the daily backstop; those report the same
+
+        ceilings with your live headroom.
+
+
+        ## Example
+
+
+        ```bash
+
+        curl https://api.vaquill.ai/api/v1/credits/balance \
+
+        -H "Authorization: Bearer $VAQUILL_API_KEY"
+
+        ```
+
+
+        ```json
+
+        {
+
+        "creditsRemaining": 103039.0,
+
+        "usdRemaining": 1030.39,
+
+        "bySource": [
+
+        { "source": "payg", "credits": 102539.0 },
+
+        { "source": "subscription", "credits": 500.0 }
+
+        ],
+
+        "nextExpiry": { "at": "2026-10-01T00:00:00Z", "credits": 500.0 },
+
+        "plan": "business",
+
+        "totalPurchased": 150000.0,
+
+        "totalConsumed": 46961.0,
+
+        "asOf": "2026-09-19T12:34:56Z"
+
+        }
+
+        ```'
+      operationId: get_credit_balance_api_v1_credits_balance_get
+      responses:
+        '200':
+          description: Current spendable balance for the calling key's account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalCreditBalanceResponse'
+              example:
+                creditsRemaining: 103039.0
+                usdRemaining: 1030.39
+                bySource:
+                - source: comp
+                  credits: 20000.0
+                - source: payg
+                  credits: 64699.0
+                - source: subscription
+                  credits: 18340.0
+                nextExpiry:
+                  at: '2026-10-12T13:56:31Z'
+                  credits: 18340.0
+                plan: business
+                totalPurchased: 143960.0
+                totalConsumed: 48471.0
+                rateLimit:
+                  perMinute: 150
+                  perHour: 2500
+                  perDay: 10000
+                asOf: '2026-09-19T12:34:56Z'
+        '401':
+          description: Missing, malformed or unrecognised API key. Note this endpoint accepts ONLY a `vq_key_` API key; a dashboard session token is rejected here.
+          content:
+            application/json:
+              example:
+                detail: Invalid token
+        '429':
+          description: Request-rate ceiling exceeded. Retry after the `Retry-After` header. Being throttled says nothing about your balance.
+          content:
+            application/json:
+              example:
+                detail: Rate limit exceeded. Try again in 42 seconds.
+    servers:
+    - url: https://api.vaquill.ai
+      description: Production
+components:
+  schemas:
+    CreditRateLimit:
+      properties:
+        perMinute:
+          type: integer
+          title: Perminute
+          description: Requests allowed per minute on this key, plan multiplier already applied.
+          examples:
+          - 150
+        perHour:
+          type: integer
+          title: Perhour
+          description: Requests allowed per hour on this key.
+          examples:
+          - 2000
+        perDay:
+          type: integer
+          title: Perday
+          description: Requests allowed per day on this key.
+          examples:
+          - 10000
+      type: object
+      required:
+      - perMinute
+      - perHour
+      - perDay
+      title: CreditRateLimit
+      description: 'Request-rate ceilings in force for the calling key.
+
+
+        A SECOND, independent ceiling alongside credits, and the two are unrelated:
+
+        you can hold credits and still be throttled, or sit far under these limits
+
+        and be refused for an empty balance.'
+    CreditSourceBreakdown:
+      properties:
+        source:
+          type: string
+          title: Source
+          description: 'Where the credits came from. `bonus` (signup grant), `subscription` (plan allowance, use-it-or-lose-it), `payg` (purchased packs) and `comp` (complimentary) exist today, and this list is not closed: read the values rather than matching on a fixed set.'
+          examples:
+          - payg
+        credits:
+          type: number
+          title: Credits
+          description: Credits remaining in this source. 1 credit = $0.01.
+          examples:
+          - 1030.43
+      type: object
+      required:
+      - source
+      - credits
+      title: CreditSourceBreakdown
+      description: Live credits held under one funding source.
+    ExternalCreditBalanceResponse:
+      properties:
+        creditsRemaining:
+          type: number
+          title: Creditsremaining
+          description: 'Credits you can actually spend right now. Deliberately the same field name that metered responses return, so one name means one thing across the API.
+
+
+            Derived from your live credit buckets under the same expiry rule the billing path applies, so it never promises credits a call would refuse to spend.'
+          examples:
+          - 103039.0
+        usdRemaining:
+          type: number
+          title: Usdremaining
+          description: '`creditsRemaining` in USD, at the published conversion rate (1 credit = $0.01). Provided so you do not have to hardcode the rate; `GET /api/v1/api-credits/pricing` is its source of truth.'
+          examples:
+          - 1030.39
+        bySource:
+          items:
+            $ref: '#/components/schemas/CreditSourceBreakdown'
+          type: array
+          title: Bysource
+          description: '`creditsRemaining` split by funding source, and it always sums to it. Worth reading because the sources do not behave alike: `subscription` credits are use-it-or-lose-it at the period end, while `payg` credits you bought are durable and burn last.'
+        nextExpiry:
+          anyOf:
+          - $ref: '#/components/schemas/CreditExpiry'
+          - type: 'null'
+          description: The soonest expiry across your credits, or `null` if none of them expire. Poll this to avoid silently forfeiting an allowance.
+        plan:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Plan
+          description: Active API subscription tier, or `null` on pay-as-you-go. Also determines your rate-limit multiplier. Briefly cached, so a subscription change made seconds ago may not be reflected yet; `creditsRemaining` is always live.
+          examples:
+          - business
+        totalPurchased:
+          type: number
+          title: Totalpurchased
+          description: Lifetime credits added to this account.
+          examples:
+          - 150000.0
+        totalConsumed:
+          type: number
+          title: Totalconsumed
+          description: Lifetime credits spent by this account.
+          examples:
+          - 46961.0
+        rateLimit:
+          anyOf:
+          - $ref: '#/components/schemas/CreditRateLimit'
+          - type: 'null'
+          description: 'How fast this key may call, as opposed to how much it may spend. The two ceilings are independent: holding credits does not exempt you from these, and staying under these does not pay for a call.
+
+
+            These are the ceilings themselves, with your plan already applied, so you can size a client BEFORE issuing a request. The `X-RateLimit-*` headers on every response report the same ceilings plus your live headroom, and the two agree.'
+        asOf:
+          type: string
+          format: date-time
+          title: Asof
+          description: When this balance was computed. The value is live, not cached, so this is the instant the buckets were read.
+      type: object
+      required:
+      - creditsRemaining
+      - usdRemaining
+      - totalPurchased
+      - totalConsumed
+      - asOf
+      title: ExternalCreditBalanceResponse
+      description: Spendable credit balance for the calling API key's account.
+    CreditExpiry:
+      properties:
+        at:
+          type: string
+          format: date-time
+          title: At
+          description: UTC instant at which the next credits expire.
+          examples:
+          - '2026-10-01T00:00:00Z'
+        credits:
+          type: number
+          title: Credits
+          description: Credits that expire at that instant. They stop being spendable immediately at `at`, not when the nightly sweep records it.
+          examples:
+          - 500.0
+      type: object
+      required:
+      - at
+      - credits
+      title: CreditExpiry
+      description: The soonest expiry, and what dies with it.
+  securitySchemes:
+    ApiKeyAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: vq_key_*
+      description: 'API key issued from the developer dashboard. Pass as `Authorization: Bearer vq_key_...` (preferred).'
+    ApiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: 'The same API key as a bare header value: `X-API-Key: vq_key_...`. Equivalent to the Bearer form.'
+    ApiKeyQuery:
+      type: apiKey
+      in: query
+      name: api_key
+      description: 'The same API key as a query parameter: `?api_key=vq_key_...`. Use only where you cannot set a header. A URL can end up in proxy and server logs, browser history and shared links, so prefer either header form, and rotate a key that has leaked.'
+externalDocs:
+  description: Full API Reference
+  url: https://www.vaquill.ai/docs/api-reference/
+x-refined-from:
+- vaquill-ai-openapi.json
+- vaquill-ai-openapi.yml

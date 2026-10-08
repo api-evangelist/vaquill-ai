@@ -1,0 +1,132 @@
+generated: '2026-10-07'
+method: searched
+source: https://www.vaquill.ai/docs/workspace-api/authentication
+docs: https://www.vaquill.ai/docs/workspace-api/authentication
+name: Vaquill scopes
+model: 'Workspace API credential scopes in the form resource:action (not OAuth: carried by a vq_ws_ bearer credential minted in the automation
+  console). The hosted MCP OAuth server separately supports one scope, offline_access.'
+scope_count_stated: 37 of them, across 133 operations (measured from the route registry on 2026-09-06)
+scopes:
+- name: clients:read
+  description: Read clients
+  surface: workspace-api
+- name: clients:write
+  description: Create and update clients (write implies read on the same resource)
+  surface: workspace-api
+- name: matters:read
+  description: Read matters
+  surface: workspace-api
+- name: matters:write
+  description: Create and update matters (write implies read on the same resource)
+  surface: workspace-api
+- name: documents:read
+  description: Read documents
+  surface: workspace-api
+- name: documents:write
+  description: Create and update documents (write implies read on the same resource)
+  surface: workspace-api
+- name: documents:download
+  description: Download original documents bytes
+  surface: workspace-api
+- name: drafting:read
+  description: Read drafting
+  surface: workspace-api
+- name: drafting:run
+  description: Start billable drafting work (run does not imply read)
+  surface: workspace-api
+- name: review:read
+  description: Read review
+  surface: workspace-api
+- name: review:run
+  description: Start billable review work (run does not imply read)
+  surface: workspace-api
+- name: compare:read
+  description: Read compare
+  surface: workspace-api
+- name: compare:run
+  description: Start billable compare work (run does not imply read)
+  surface: workspace-api
+- name: playbooks:read
+  description: Read playbooks
+  surface: workspace-api
+- name: playbooks:write
+  description: Create and update playbooks (write implies read on the same resource)
+  surface: workspace-api
+- name: playbooks:run
+  description: Start billable playbooks work (run does not imply read)
+  surface: workspace-api
+- name: matrices:read
+  description: Read matrices
+  surface: workspace-api
+- name: matrices:write
+  description: Create and update matrices (write implies read on the same resource)
+  surface: workspace-api
+- name: matrices:run
+  description: Start billable matrices work (run does not imply read)
+  surface: workspace-api
+- name: workflows:read
+  description: Read workflows
+  surface: workspace-api
+- name: workflows:write
+  description: Create and update workflows (write implies read on the same resource)
+  surface: workspace-api
+- name: workflows:run
+  description: Start billable workflows work (run does not imply read)
+  surface: workspace-api
+- name: research:read
+  description: Read research
+  surface: workspace-api
+- name: research:run
+  description: Start billable research work (run does not imply read)
+  surface: workspace-api
+- name: nda:read
+  description: Read nda
+  surface: workspace-api
+- name: nda:run
+  description: Start billable nda work (run does not imply read)
+  surface: workspace-api
+- name: compliance:read
+  description: Read compliance
+  surface: workspace-api
+- name: compliance:run
+  description: Start billable compliance work (run does not imply read)
+  surface: workspace-api
+- name: facts:read
+  description: Read facts
+  surface: workspace-api
+- name: facts:run
+  description: Start billable facts work (run does not imply read)
+  surface: workspace-api
+- name: summaries:read
+  description: Read summaries
+  surface: workspace-api
+- name: summaries:run
+  description: Start billable summaries work (run does not imply read)
+  surface: workspace-api
+- name: chronology:read
+  description: Read chronology
+  surface: workspace-api
+- name: chronology:write
+  description: Create and update chronology (write implies read on the same resource)
+  surface: workspace-api
+- name: exports:create
+  description: Create exports
+  surface: workspace-api
+- name: exports:read
+  description: Read exports
+  surface: workspace-api
+- name: operations:read
+  description: Read operations
+  surface: workspace-api
+- name: offline_access
+  description: Refresh-token access for the hosted MCP connector (OAuth 2.1 at https://mcp.vaquill.ai/mcp)
+  surface: mcp-oauth
+  source: well-known/mcp.vaquill.ai-oauth-authorization-server.json
+accepted_but_inert:
+- credentials:rotate
+- webhooks:read
+- webhooks:write
+notes:
+- Write implies read on the same resource; run does not.
+- chronology:read/write are separate from matters:* on purpose; nda:* and compliance:* are separate from review:*.
+- A 403 insufficient-scope problem names the scopes needed.

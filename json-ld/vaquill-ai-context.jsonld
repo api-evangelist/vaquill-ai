@@ -1,0 +1,1630 @@
+{
+  "@context": {
+    "@vocab": "https://vaquill.ai/schema#",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "vaquill": "https://vaquill.ai/schema#",
+    "ActAmendmentsResponse": "vaquill:ActAmendmentsResponse",
+    "actId": {
+      "@id": "vaquill:actId",
+      "@type": "xsd:string"
+    },
+    "resolvedFrom": {
+      "@id": "vaquill:resolvedFrom"
+    },
+    "title": {
+      "@id": "vaquill:title",
+      "@type": "xsd:string"
+    },
+    "totalFootnotes": {
+      "@id": "vaquill:totalFootnotes",
+      "@type": "xsd:integer"
+    },
+    "footnotes": {
+      "@id": "vaquill:footnotes",
+      "@container": "@list"
+    },
+    "typeCounts": {
+      "@id": "vaquill:typeCounts"
+    },
+    "page": {
+      "@id": "vaquill:page",
+      "@type": "xsd:integer"
+    },
+    "pageSize": {
+      "@id": "vaquill:pageSize",
+      "@type": "xsd:integer"
+    },
+    "hasMore": {
+      "@id": "vaquill:hasMore",
+      "@type": "xsd:boolean"
+    },
+    "meta": {
+      "@id": "vaquill:meta",
+      "@type": "@id"
+    },
+    "ActCitedByResponse": "vaquill:ActCitedByResponse",
+    "citation": {
+      "@id": "vaquill:citation"
+    },
+    "citers": {
+      "@id": "vaquill:citers",
+      "@container": "@list"
+    },
+    "total": {
+      "@id": "vaquill:total",
+      "@type": "xsd:integer"
+    },
+    "totalIsExact": {
+      "@id": "vaquill:totalIsExact",
+      "@type": "xsd:boolean"
+    },
+    "returned": {
+      "@id": "vaquill:returned",
+      "@type": "xsd:integer"
+    },
+    "truncated": {
+      "@id": "vaquill:truncated",
+      "@type": "xsd:boolean"
+    },
+    "matchBasis": {
+      "@id": "vaquill:matchBasis",
+      "@type": "xsd:string"
+    },
+    "note": {
+      "@id": "vaquill:note"
+    },
+    "ActDefinitionsResponse": "vaquill:ActDefinitionsResponse",
+    "terms": {
+      "@id": "vaquill:terms",
+      "@container": "@list"
+    },
+    "definitionSections": {
+      "@id": "vaquill:definitionSections",
+      "@container": "@list"
+    },
+    "totalDefinitionSections": {
+      "@id": "vaquill:totalDefinitionSections",
+      "@type": "xsd:integer"
+    },
+    "ActFilterValue": "vaquill:ActFilterValue",
+    "value": {
+      "@id": "vaquill:value",
+      "@type": "xsd:string"
+    },
+    "count": {
+      "@id": "vaquill:count",
+      "@type": "xsd:integer"
+    },
+    "ActFiltersData": "vaquill:ActFiltersData",
+    "categories": {
+      "@id": "vaquill:categories",
+      "@container": "@list"
+    },
+    "states": {
+      "@id": "vaquill:states",
+      "@container": "@list"
+    },
+    "departments": {
+      "@id": "vaquill:departments",
+      "@container": "@list"
+    },
+    "ActFiltersResponse": "vaquill:ActFiltersResponse",
+    "data": {
+      "@id": "vaquill:data",
+      "@type": "@id"
+    },
+    "ActListItem": "vaquill:ActListItem",
+    "year": {
+      "@id": "vaquill:year"
+    },
+    "category": {
+      "@id": "vaquill:category"
+    },
+    "state": {
+      "@id": "vaquill:state"
+    },
+    "department": {
+      "@id": "vaquill:department"
+    },
+    "actNumber": {
+      "@id": "vaquill:actNumber"
+    },
+    "actStatus": {
+      "@id": "vaquill:actStatus"
+    },
+    "enactmentDate": {
+      "@id": "vaquill:enactmentDate"
+    },
+    "enactmentDateRaw": {
+      "@id": "vaquill:enactmentDateRaw"
+    },
+    "sectionCount": {
+      "@id": "vaquill:sectionCount"
+    },
+    "ActListResponse": "vaquill:ActListResponse",
+    "results": {
+      "@id": "vaquill:results",
+      "@container": "@list"
+    },
+    "ActMeta": "vaquill:ActMeta",
+    "processingTimeMs": {
+      "@id": "vaquill:processingTimeMs",
+      "@type": "xsd:decimal"
+    },
+    "creditsConsumed": {
+      "@id": "vaquill:creditsConsumed",
+      "@type": "xsd:decimal"
+    },
+    "ActReferencesResponse": "vaquill:ActReferencesResponse",
+    "sectionNumber": {
+      "@id": "vaquill:sectionNumber"
+    },
+    "acts": {
+      "@id": "vaquill:acts",
+      "@container": "@list"
+    },
+    "sections": {
+      "@id": "vaquill:sections",
+      "@container": "@list"
+    },
+    "totalActs": {
+      "@id": "vaquill:totalActs",
+      "@type": "xsd:integer"
+    },
+    "totalSections": {
+      "@id": "vaquill:totalSections",
+      "@type": "xsd:integer"
+    },
+    "ActSearchData": "vaquill:ActSearchData",
+    "totalReturned": {
+      "@id": "vaquill:totalReturned",
+      "@type": "xsd:integer"
+    },
+    "ActSearchMeta": "vaquill:ActSearchMeta",
+    "creditsRemaining": {
+      "@id": "vaquill:creditsRemaining",
+      "@type": "xsd:decimal"
+    },
+    "totalPages": {
+      "@id": "vaquill:totalPages",
+      "@type": "xsd:integer"
+    },
+    "ActSearchRequest": "vaquill:ActSearchRequest",
+    "query": {
+      "@id": "vaquill:query",
+      "@type": "xsd:string"
+    },
+    "excludeRepealed": {
+      "@id": "vaquill:excludeRepealed",
+      "@type": "xsd:boolean"
+    },
+    "isSubordinate": {
+      "@id": "vaquill:isSubordinate"
+    },
+    "provisionType": {
+      "@id": "vaquill:provisionType"
+    },
+    "sectionType": {
+      "@id": "vaquill:sectionType"
+    },
+    "legalSubject": {
+      "@id": "vaquill:legalSubject"
+    },
+    "matchType": {
+      "@id": "vaquill:matchType",
+      "@type": "xsd:string"
+    },
+    "yearFrom": {
+      "@id": "vaquill:yearFrom"
+    },
+    "yearTo": {
+      "@id": "vaquill:yearTo"
+    },
+    "actTitle": {
+      "@id": "vaquill:actTitle"
+    },
+    "ActSearchResponse": "vaquill:ActSearchResponse",
+    "ActSearchResult": "vaquill:ActSearchResult",
+    "sectionTitle": {
+      "@id": "vaquill:sectionTitle"
+    },
+    "chapter": {
+      "@id": "vaquill:chapter"
+    },
+    "chapterTitle": {
+      "@id": "vaquill:chapterTitle"
+    },
+    "jurisdiction": {
+      "@id": "vaquill:jurisdiction"
+    },
+    "actsReferenced": {
+      "@id": "vaquill:actsReferenced"
+    },
+    "content": {
+      "@id": "vaquill:content",
+      "@type": "xsd:string"
+    },
+    "longTitle": {
+      "@id": "vaquill:longTitle"
+    },
+    "pdfUrl": {
+      "@id": "vaquill:pdfUrl"
+    },
+    "textUrl": {
+      "@id": "vaquill:textUrl"
+    },
+    "sourceUrl": {
+      "@id": "vaquill:sourceUrl"
+    },
+    "relevanceScore": {
+      "@id": "vaquill:relevanceScore"
+    },
+    "sourceUrlNote": {
+      "@id": "vaquill:sourceUrlNote"
+    },
+    "ActSection": "vaquill:ActSection",
+    "subSection": {
+      "@id": "vaquill:subSection"
+    },
+    "titleRegional": {
+      "@id": "vaquill:titleRegional"
+    },
+    "part": {
+      "@id": "vaquill:part"
+    },
+    "partTitle": {
+      "@id": "vaquill:partTitle"
+    },
+    "ministry": {
+      "@id": "vaquill:ministry"
+    },
+    "sectionStatus": {
+      "@id": "vaquill:sectionStatus"
+    },
+    "parent": {
+      "@id": "vaquill:parent"
+    },
+    "goodLawStatus": {
+      "@id": "vaquill:goodLawStatus"
+    },
+    "amendmentCount": {
+      "@id": "vaquill:amendmentCount"
+    },
+    "lastAmendedYear": {
+      "@id": "vaquill:lastAmendedYear"
+    },
+    "lastAmendedDate": {
+      "@id": "vaquill:lastAmendedDate"
+    },
+    "amendmentYears": {
+      "@id": "vaquill:amendmentYears"
+    },
+    "limitationPeriods": {
+      "@id": "vaquill:limitationPeriods"
+    },
+    "effectiveDates": {
+      "@id": "vaquill:effectiveDates"
+    },
+    "definedTerms": {
+      "@id": "vaquill:definedTerms"
+    },
+    "sectionsReferenced": {
+      "@id": "vaquill:sectionsReferenced"
+    },
+    "wordCount": {
+      "@id": "vaquill:wordCount"
+    },
+    "shape": {
+      "@id": "vaquill:shape",
+      "@type": "@id"
+    },
+    "provenance": {
+      "@id": "vaquill:provenance",
+      "@type": "@id"
+    },
+    "ActSectionBodyResponse": "vaquill:ActSectionBodyResponse",
+    "text": {
+      "@id": "vaquill:text"
+    },
+    "available": {
+      "@id": "vaquill:available",
+      "@type": "xsd:boolean"
+    },
+    "currency": {
+      "@id": "vaquill:currency"
+    },
+    "bodyProvenance": {
+      "@id": "vaquill:bodyProvenance"
+    },
+    "ActSectionHistoryResponse": "vaquill:ActSectionHistoryResponse",
+    "events": {
+      "@id": "vaquill:events",
+      "@container": "@list"
+    },
+    "offset": {
+      "@id": "vaquill:offset",
+      "@type": "xsd:integer"
+    },
+    "coverage": {
+      "@id": "vaquill:coverage",
+      "@type": "@id"
+    },
+    "asOf": {
+      "@id": "vaquill:asOf"
+    },
+    "ActSectionResponse": "vaquill:ActSectionResponse",
+    "section": {
+      "@id": "vaquill:section",
+      "@type": "@id"
+    },
+    "ActStatusResponse": "vaquill:ActStatusResponse",
+    "goodLawReason": {
+      "@id": "vaquill:goodLawReason",
+      "@type": "xsd:string"
+    },
+    "publisherStatus": {
+      "@id": "vaquill:publisherStatus"
+    },
+    "servedStatus": {
+      "@id": "vaquill:servedStatus",
+      "@type": "xsd:string"
+    },
+    "delegationType": {
+      "@id": "vaquill:delegationType"
+    },
+    "parentActName": {
+      "@id": "vaquill:parentActName"
+    },
+    "commencementInfo": {
+      "@id": "vaquill:commencementInfo"
+    },
+    "territorialExtent": {
+      "@id": "vaquill:territorialExtent"
+    },
+    "dateOfAssent": {
+      "@id": "vaquill:dateOfAssent"
+    },
+    "dateOfAssentRaw": {
+      "@id": "vaquill:dateOfAssentRaw"
+    },
+    "repeals": {
+      "@id": "vaquill:repeals"
+    },
+    "supersededBy": {
+      "@id": "vaquill:supersededBy"
+    },
+    "subordinateCount": {
+      "@id": "vaquill:subordinateCount"
+    },
+    "repealClaim": {
+      "@id": "vaquill:repealClaim"
+    },
+    "retirement": {
+      "@id": "vaquill:retirement"
+    },
+    "currencyNote": {
+      "@id": "vaquill:currencyNote"
+    },
+    "ActStructureResponse": "vaquill:ActStructureResponse",
+    "nodes": {
+      "@id": "vaquill:nodes",
+      "@container": "@list"
+    },
+    "hasHierarchy": {
+      "@id": "vaquill:hasHierarchy",
+      "@type": "xsd:boolean"
+    },
+    "ActSubordinateResponse": "vaquill:ActSubordinateResponse",
+    "children": {
+      "@id": "vaquill:children",
+      "@container": "@list"
+    },
+    "ActTextResponse": "vaquill:ActTextResponse",
+    "htmlUrl": {
+      "@id": "vaquill:htmlUrl"
+    },
+    "chunksCount": {
+      "@id": "vaquill:chunksCount",
+      "@type": "xsd:integer"
+    },
+    "issuedDate": {
+      "@id": "vaquill:issuedDate"
+    },
+    "currencyStatus": {
+      "@id": "vaquill:currencyStatus",
+      "@type": "xsd:string"
+    },
+    "AmendmentEvent": "vaquill:AmendmentEvent",
+    "effectId": {
+      "@id": "vaquill:effectId",
+      "@type": "xsd:string"
+    },
+    "action": {
+      "@id": "vaquill:action"
+    },
+    "amendingAct": {
+      "@id": "vaquill:amendingAct"
+    },
+    "amendingActKind": {
+      "@id": "vaquill:amendingActKind"
+    },
+    "amendingActYear": {
+      "@id": "vaquill:amendingActYear"
+    },
+    "amendingSection": {
+      "@id": "vaquill:amendingSection"
+    },
+    "effectiveDate": {
+      "@id": "vaquill:effectiveDate"
+    },
+    "effectiveDateSource": {
+      "@id": "vaquill:effectiveDateSource",
+      "@type": "xsd:string"
+    },
+    "originalText": {
+      "@id": "vaquill:originalText"
+    },
+    "publisherNote": {
+      "@id": "vaquill:publisherNote"
+    },
+    "appliedStatus": {
+      "@id": "vaquill:appliedStatus",
+      "@type": "xsd:string"
+    },
+    "appliedNote": {
+      "@id": "vaquill:appliedNote"
+    },
+    "ApiCreditCostResponse": "vaquill:ApiCreditCostResponse",
+    "endpoint": {
+      "@id": "vaquill:endpoint",
+      "@type": "xsd:string"
+    },
+    "operation": {
+      "@id": "vaquill:operation",
+      "@type": "xsd:string"
+    },
+    "credits": {
+      "@id": "vaquill:credits",
+      "@type": "xsd:decimal"
+    },
+    "usdCost": {
+      "@id": "vaquill:usdCost",
+      "@type": "xsd:decimal"
+    },
+    "description": {
+      "@id": "vaquill:description",
+      "@type": "xsd:string"
+    },
+    "regions": {
+      "@id": "vaquill:regions",
+      "@container": "@list"
+    },
+    "ApiCreditPricingResponse": "vaquill:ApiCreditPricingResponse",
+    "dollarPerCredit": {
+      "@id": "vaquill:dollarPerCredit",
+      "@type": "xsd:decimal"
+    },
+    "minCredits": {
+      "@id": "vaquill:minCredits",
+      "@type": "xsd:decimal"
+    },
+    "maxCredits": {
+      "@id": "vaquill:maxCredits",
+      "@type": "xsd:decimal"
+    },
+    "costs": {
+      "@id": "vaquill:costs",
+      "@container": "@list"
+    },
+    "ApiDetailError": "vaquill:ApiDetailError",
+    "detail": {
+      "@id": "vaquill:detail",
+      "@type": "xsd:string"
+    },
+    "errors": {
+      "@id": "vaquill:errors"
+    },
+    "ApiFieldError": "vaquill:ApiFieldError",
+    "loc": {
+      "@id": "vaquill:loc",
+      "@container": "@list"
+    },
+    "msg": {
+      "@id": "vaquill:msg",
+      "@type": "xsd:string"
+    },
+    "type": {
+      "@id": "vaquill:type",
+      "@type": "xsd:string"
+    },
+    "AsOfAnswer": "vaquill:AsOfAnswer",
+    "requested": {
+      "@id": "vaquill:requested",
+      "@type": "xsd:string"
+    },
+    "inForceByDate": {
+      "@id": "vaquill:inForceByDate",
+      "@type": "xsd:integer"
+    },
+    "afterDate": {
+      "@id": "vaquill:afterDate",
+      "@type": "xsd:integer"
+    },
+    "undated": {
+      "@id": "vaquill:undated",
+      "@type": "xsd:integer"
+    },
+    "textReflectsEvents": {
+      "@id": "vaquill:textReflectsEvents",
+      "@type": "xsd:integer"
+    },
+    "isBounded": {
+      "@id": "vaquill:isBounded",
+      "@type": "xsd:boolean"
+    },
+    "CategoryLegend": "vaquill:CategoryLegend",
+    "meaning": {
+      "@id": "vaquill:meaning",
+      "@type": "xsd:string"
+    },
+    "Citation": "vaquill:Citation",
+    "citationShort": {
+      "@id": "vaquill:citationShort"
+    },
+    "displayPath": {
+      "@id": "vaquill:displayPath"
+    },
+    "breadcrumb": {
+      "@id": "vaquill:breadcrumb"
+    },
+    "CitedByRow": "vaquill:CitedByRow",
+    "CorrespondingProvisionItem": "vaquill:CorrespondingProvisionItem",
+    "oldAct": {
+      "@id": "vaquill:oldAct",
+      "@type": "xsd:string"
+    },
+    "oldSection": {
+      "@id": "vaquill:oldSection",
+      "@type": "xsd:string"
+    },
+    "newAct": {
+      "@id": "vaquill:newAct",
+      "@type": "xsd:string"
+    },
+    "newSection": {
+      "@id": "vaquill:newSection",
+      "@type": "xsd:string"
+    },
+    "subject": {
+      "@id": "vaquill:subject",
+      "@type": "xsd:string"
+    },
+    "CorrespondingProvisionsResponse": "vaquill:CorrespondingProvisionsResponse",
+    "provisions": {
+      "@id": "vaquill:provisions",
+      "@container": "@list"
+    },
+    "CoverageCount": "vaquill:CoverageCount",
+    "passages": {
+      "@id": "vaquill:passages",
+      "@type": "xsd:integer"
+    },
+    "CoverageData": "vaquill:CoverageData",
+    "totals": {
+      "@id": "vaquill:totals",
+      "@type": "@id"
+    },
+    "depth": {
+      "@id": "vaquill:depth",
+      "@type": "@id"
+    },
+    "byCategory": {
+      "@id": "vaquill:byCategory",
+      "@container": "@list"
+    },
+    "byJurisdiction": {
+      "@id": "vaquill:byJurisdiction",
+      "@container": "@list"
+    },
+    "categoryLegend": {
+      "@id": "vaquill:categoryLegend",
+      "@container": "@list"
+    },
+    "byRegulator": {
+      "@id": "vaquill:byRegulator",
+      "@container": "@list"
+    },
+    "byStatus": {
+      "@id": "vaquill:byStatus",
+      "@container": "@list"
+    },
+    "caveats": {
+      "@id": "vaquill:caveats"
+    },
+    "CoverageDepth": "vaquill:CoverageDepth",
+    "actsWithText": {
+      "@id": "vaquill:actsWithText",
+      "@type": "xsd:integer"
+    },
+    "actsWithAmendmentEvents": {
+      "@id": "vaquill:actsWithAmendmentEvents",
+      "@type": "xsd:integer"
+    },
+    "actsWithRepealClaim": {
+      "@id": "vaquill:actsWithRepealClaim",
+      "@type": "xsd:integer"
+    },
+    "actsWithStructure": {
+      "@id": "vaquill:actsWithStructure",
+      "@type": "xsd:integer"
+    },
+    "actsWithCitation": {
+      "@id": "vaquill:actsWithCitation",
+      "@type": "xsd:integer"
+    },
+    "actsWithSourceUrl": {
+      "@id": "vaquill:actsWithSourceUrl",
+      "@type": "xsd:integer"
+    },
+    "actsClaimingAmendmentsWithoutEvents": {
+      "@id": "vaquill:actsClaimingAmendmentsWithoutEvents",
+      "@type": "xsd:integer"
+    },
+    "CoverageResponse": "vaquill:CoverageResponse",
+    "CoverageTotals": "vaquill:CoverageTotals",
+    "actsRetired": {
+      "@id": "vaquill:actsRetired",
+      "@type": "xsd:integer"
+    },
+    "measuredOn": {
+      "@id": "vaquill:measuredOn",
+      "@type": "xsd:string"
+    },
+    "CreditExpiry": "vaquill:CreditExpiry",
+    "at": {
+      "@id": "vaquill:at",
+      "@type": "xsd:dateTime"
+    },
+    "CreditRateLimit": "vaquill:CreditRateLimit",
+    "perMinute": {
+      "@id": "vaquill:perMinute",
+      "@type": "xsd:integer"
+    },
+    "perHour": {
+      "@id": "vaquill:perHour",
+      "@type": "xsd:integer"
+    },
+    "perDay": {
+      "@id": "vaquill:perDay",
+      "@type": "xsd:integer"
+    },
+    "CreditSourceBreakdown": "vaquill:CreditSourceBreakdown",
+    "source": {
+      "@id": "vaquill:source",
+      "@type": "xsd:string"
+    },
+    "DefinedTerm": "vaquill:DefinedTerm",
+    "term": {
+      "@id": "vaquill:term",
+      "@type": "xsd:string"
+    },
+    "ExternalCreditBalanceResponse": "vaquill:ExternalCreditBalanceResponse",
+    "usdRemaining": {
+      "@id": "vaquill:usdRemaining",
+      "@type": "xsd:decimal"
+    },
+    "bySource": {
+      "@id": "vaquill:bySource",
+      "@container": "@list"
+    },
+    "nextExpiry": {
+      "@id": "vaquill:nextExpiry"
+    },
+    "plan": {
+      "@id": "vaquill:plan"
+    },
+    "totalPurchased": {
+      "@id": "vaquill:totalPurchased",
+      "@type": "xsd:decimal"
+    },
+    "totalConsumed": {
+      "@id": "vaquill:totalConsumed",
+      "@type": "xsd:decimal"
+    },
+    "rateLimit": {
+      "@id": "vaquill:rateLimit"
+    },
+    "FootnoteItem": "vaquill:FootnoteItem",
+    "footnoteId": {
+      "@id": "vaquill:footnoteId"
+    },
+    "footnoteText": {
+      "@id": "vaquill:footnoteText",
+      "@type": "xsd:string"
+    },
+    "footnoteType": {
+      "@id": "vaquill:footnoteType",
+      "@type": "xsd:string"
+    },
+    "byAct": {
+      "@id": "vaquill:byAct"
+    },
+    "effectiveDateRaw": {
+      "@id": "vaquill:effectiveDateRaw"
+    },
+    "HTTPValidationError": "vaquill:HTTPValidationError",
+    "HistoryCoverage": "vaquill:HistoryCoverage",
+    "publisherClaimsAmendments": {
+      "@id": "vaquill:publisherClaimsAmendments",
+      "@type": "xsd:boolean"
+    },
+    "structuredEventsHeld": {
+      "@id": "vaquill:structuredEventsHeld",
+      "@type": "xsd:integer"
+    },
+    "eventsWithDate": {
+      "@id": "vaquill:eventsWithDate",
+      "@type": "xsd:integer"
+    },
+    "IdentifierResolution": "vaquill:IdentifierResolution",
+    "input": {
+      "@id": "vaquill:input",
+      "@type": "xsd:string"
+    },
+    "sectionInput": {
+      "@id": "vaquill:sectionInput"
+    },
+    "via": {
+      "@id": "vaquill:via",
+      "@container": "@list"
+    },
+    "subProvision": {
+      "@id": "vaquill:subProvision"
+    },
+    "JurisdictionCoverage": "vaquill:JurisdictionCoverage",
+    "code": {
+      "@id": "vaquill:code",
+      "@type": "xsd:string"
+    },
+    "Meta": "vaquill:Meta",
+    "ParentAct": "vaquill:ParentAct",
+    "name": {
+      "@id": "vaquill:name",
+      "@type": "xsd:string"
+    },
+    "resolved": {
+      "@id": "vaquill:resolved",
+      "@type": "xsd:boolean"
+    },
+    "ParsedPinpoint": "vaquill:ParsedPinpoint",
+    "unit": {
+      "@id": "vaquill:unit"
+    },
+    "subProvisions": {
+      "@id": "vaquill:subProvisions",
+      "@container": "@list"
+    },
+    "actToken": {
+      "@id": "vaquill:actToken"
+    },
+    "pinpoint": {
+      "@id": "vaquill:pinpoint"
+    },
+    "Provenance": "vaquill:Provenance",
+    "ReferencedAct": "vaquill:ReferencedAct",
+    "ReferencedSection": "vaquill:ReferencedSection",
+    "RepealClaim": "vaquill:RepealClaim",
+    "repealedBy": {
+      "@id": "vaquill:repealedBy"
+    },
+    "repealedByYear": {
+      "@id": "vaquill:repealedByYear"
+    },
+    "sourceHandle": {
+      "@id": "vaquill:sourceHandle"
+    },
+    "commencementVerified": {
+      "@id": "vaquill:commencementVerified",
+      "@type": "xsd:boolean"
+    },
+    "ResolveBatchRequest": "vaquill:ResolveBatchRequest",
+    "citations": {
+      "@id": "vaquill:citations",
+      "@container": "@list"
+    },
+    "asAtDate": {
+      "@id": "vaquill:asAtDate",
+      "@type": "xsd:date"
+    },
+    "ResolveCandidate": "vaquill:ResolveCandidate",
+    "ResolveItem": "vaquill:ResolveItem",
+    "status": {
+      "@id": "vaquill:status",
+      "@type": "xsd:string"
+    },
+    "candidates": {
+      "@id": "vaquill:candidates",
+      "@container": "@list"
+    },
+    "reason": {
+      "@id": "vaquill:reason"
+    },
+    "parsed": {
+      "@id": "vaquill:parsed",
+      "@type": "@id"
+    },
+    "duplicatesCollapsed": {
+      "@id": "vaquill:duplicatesCollapsed",
+      "@type": "xsd:integer"
+    },
+    "ResolveResponse": "vaquill:ResolveResponse",
+    "resolvedCount": {
+      "@id": "vaquill:resolvedCount",
+      "@type": "xsd:integer"
+    },
+    "Retirement": "vaquill:Retirement",
+    "duplicateOf": {
+      "@id": "vaquill:duplicateOf"
+    },
+    "observedOn": {
+      "@id": "vaquill:observedOn"
+    },
+    "SectionShape": "vaquill:SectionShape",
+    "hasProviso": {
+      "@id": "vaquill:hasProviso"
+    },
+    "hasExplanation": {
+      "@id": "vaquill:hasExplanation"
+    },
+    "hasIllustration": {
+      "@id": "vaquill:hasIllustration"
+    },
+    "hasNonObstante": {
+      "@id": "vaquill:hasNonObstante"
+    },
+    "hasSavingClause": {
+      "@id": "vaquill:hasSavingClause"
+    },
+    "hasPenalty": {
+      "@id": "vaquill:hasPenalty"
+    },
+    "StructureNode": "vaquill:StructureNode",
+    "kind": {
+      "@id": "vaquill:kind",
+      "@type": "xsd:string"
+    },
+    "identifier": {
+      "@id": "vaquill:identifier"
+    },
+    "label": {
+      "@id": "vaquill:label"
+    },
+    "SubordinateRow": "vaquill:SubordinateRow",
+    "ValidationError": "vaquill:ValidationError",
+    "ctx": {
+      "@id": "vaquill:ctx"
+    },
+    "AsOfProvenance": "vaquill:AsOfProvenance",
+    "engine": {
+      "@id": "vaquill:engine",
+      "@type": "xsd:string"
+    },
+    "existed": {
+      "@id": "vaquill:existed",
+      "@type": "xsd:boolean"
+    },
+    "basisChangeId": {
+      "@id": "vaquill:basisChangeId"
+    },
+    "observedFrom": {
+      "@id": "vaquill:observedFrom"
+    },
+    "resolvedEditionYear": {
+      "@id": "vaquill:resolvedEditionYear"
+    },
+    "scheduledEditionYear": {
+      "@id": "vaquill:scheduledEditionYear"
+    },
+    "editionsObserved": {
+      "@id": "vaquill:editionsObserved"
+    },
+    "outOfCoverageReason": {
+      "@id": "vaquill:outOfCoverageReason"
+    },
+    "BodyFigure": "vaquill:BodyFigure",
+    "figureId": {
+      "@id": "vaquill:figureId",
+      "@type": "xsd:string"
+    },
+    "caption": {
+      "@id": "vaquill:caption"
+    },
+    "alt": {
+      "@id": "vaquill:alt"
+    },
+    "url": {
+      "@id": "vaquill:url"
+    },
+    "width": {
+      "@id": "vaquill:width"
+    },
+    "height": {
+      "@id": "vaquill:height"
+    },
+    "mimeType": {
+      "@id": "vaquill:mimeType"
+    },
+    "order": {
+      "@id": "vaquill:order",
+      "@type": "xsd:integer"
+    },
+    "offsetMarkdown": {
+      "@id": "vaquill:offsetMarkdown"
+    },
+    "offsetPlain": {
+      "@id": "vaquill:offsetPlain"
+    },
+    "BodyTable": "vaquill:BodyTable",
+    "tableId": {
+      "@id": "vaquill:tableId",
+      "@type": "xsd:string"
+    },
+    "rows": {
+      "@id": "vaquill:rows",
+      "@type": "xsd:integer"
+    },
+    "cols": {
+      "@id": "vaquill:cols",
+      "@type": "xsd:integer"
+    },
+    "CitationOutsideFilters": "vaquill:CitationOutsideFilters",
+    "corpusType": {
+      "@id": "vaquill:corpusType"
+    },
+    "excludedBy": {
+      "@id": "vaquill:excludedBy",
+      "@container": "@list"
+    },
+    "CodeSectionAffected": "vaquill:CodeSectionAffected",
+    "sectionAsPrinted": {
+      "@id": "vaquill:sectionAsPrinted",
+      "@type": "xsd:string"
+    },
+    "actionAsPrinted": {
+      "@id": "vaquill:actionAsPrinted"
+    },
+    "codeAsPrinted": {
+      "@id": "vaquill:codeAsPrinted"
+    },
+    "actSectionAsPrinted": {
+      "@id": "vaquill:actSectionAsPrinted"
+    },
+    "CreateWatchRequest": "vaquill:CreateWatchRequest",
+    "channel": {
+      "@id": "vaquill:channel",
+      "@type": "xsd:string"
+    },
+    "webhookUrl": {
+      "@id": "vaquill:webhookUrl"
+    },
+    "webhookSecret": {
+      "@id": "vaquill:webhookSecret"
+    },
+    "emailAddress": {
+      "@id": "vaquill:emailAddress"
+    },
+    "scope": {
+      "@id": "vaquill:scope"
+    },
+    "webhookAuth": {
+      "@id": "vaquill:webhookAuth"
+    },
+    "EnactmentCoverage": "vaquill:EnactmentCoverage",
+    "sessionsHeld": {
+      "@id": "vaquill:sessionsHeld",
+      "@container": "@list"
+    },
+    "EnactmentSession": "vaquill:EnactmentSession",
+    "FrRelatedDocument": "vaquill:FrRelatedDocument",
+    "documentType": {
+      "@id": "vaquill:documentType"
+    },
+    "publicationDate": {
+      "@id": "vaquill:publicationDate"
+    },
+    "SectionEnactment": "vaquill:SectionEnactment",
+    "sessionLawId": {
+      "@id": "vaquill:sessionLawId",
+      "@type": "xsd:string"
+    },
+    "href": {
+      "@id": "vaquill:href",
+      "@type": "xsd:string"
+    },
+    "sessionCode": {
+      "@id": "vaquill:sessionCode"
+    },
+    "approvedDate": {
+      "@id": "vaquill:approvedDate"
+    },
+    "basis": {
+      "@id": "vaquill:basis",
+      "@type": "xsd:string"
+    },
+    "matchQuality": {
+      "@id": "vaquill:matchQuality",
+      "@type": "xsd:string"
+    },
+    "identityConfidence": {
+      "@id": "vaquill:identityConfidence",
+      "@type": "xsd:string"
+    },
+    "textStatus": {
+      "@id": "vaquill:textStatus",
+      "@type": "xsd:string"
+    },
+    "enactmentOutcome": {
+      "@id": "vaquill:enactmentOutcome"
+    },
+    "SectionEnactmentsResponse": "vaquill:SectionEnactmentsResponse",
+    "supported": {
+      "@id": "vaquill:supported",
+      "@type": "xsd:boolean"
+    },
+    "enactments": {
+      "@id": "vaquill:enactments",
+      "@container": "@list"
+    },
+    "SectionIdentifierResolution": "vaquill:SectionIdentifierResolution",
+    "subsection": {
+      "@id": "vaquill:subsection"
+    },
+    "SessionLawBatchLaw": "vaquill:SessionLawBatchLaw",
+    "lawId": {
+      "@id": "vaquill:lawId"
+    },
+    "citableAs": {
+      "@id": "vaquill:citableAs"
+    },
+    "session": {
+      "@id": "vaquill:session",
+      "@type": "@id"
+    },
+    "series": {
+      "@id": "vaquill:series",
+      "@type": "xsd:string"
+    },
+    "instrumentType": {
+      "@id": "vaquill:instrumentType",
+      "@type": "xsd:string"
+    },
+    "number": {
+      "@id": "vaquill:number"
+    },
+    "billKey": {
+      "@id": "vaquill:billKey"
+    },
+    "billNumber": {
+      "@id": "vaquill:billNumber"
+    },
+    "numberingYear": {
+      "@id": "vaquill:numberingYear"
+    },
+    "shortTitle": {
+      "@id": "vaquill:shortTitle"
+    },
+    "approvedDateDerived": {
+      "@id": "vaquill:approvedDateDerived",
+      "@type": "xsd:boolean"
+    },
+    "effectiveFirst": {
+      "@id": "vaquill:effectiveFirst"
+    },
+    "effectiveLast": {
+      "@id": "vaquill:effectiveLast"
+    },
+    "isLaw": {
+      "@id": "vaquill:isLaw"
+    },
+    "withheldReason": {
+      "@id": "vaquill:withheldReason"
+    },
+    "charCount": {
+      "@id": "vaquill:charCount"
+    },
+    "estimatedBodyPages": {
+      "@id": "vaquill:estimatedBodyPages"
+    },
+    "textSha256": {
+      "@id": "vaquill:textSha256"
+    },
+    "versionNo": {
+      "@id": "vaquill:versionNo"
+    },
+    "amendatoryMarkup": {
+      "@id": "vaquill:amendatoryMarkup"
+    },
+    "markupConvention": {
+      "@id": "vaquill:markupConvention"
+    },
+    "documentKind": {
+      "@id": "vaquill:documentKind"
+    },
+    "licenseNote": {
+      "@id": "vaquill:licenseNote"
+    },
+    "updatedAt": {
+      "@id": "vaquill:updatedAt"
+    },
+    "citationAsPrinted": {
+      "@id": "vaquill:citationAsPrinted"
+    },
+    "vetoStatusAsPrinted": {
+      "@id": "vaquill:vetoStatusAsPrinted"
+    },
+    "pageCount": {
+      "@id": "vaquill:pageCount"
+    },
+    "otherDates": {
+      "@id": "vaquill:otherDates",
+      "@container": "@list"
+    },
+    "codeSectionsAffected": {
+      "@id": "vaquill:codeSectionsAffected",
+      "@container": "@list"
+    },
+    "sources": {
+      "@id": "vaquill:sources",
+      "@container": "@list"
+    },
+    "publisher": {
+      "@id": "vaquill:publisher"
+    },
+    "body": {
+      "@id": "vaquill:body"
+    },
+    "bodyPageEnd": {
+      "@id": "vaquill:bodyPageEnd"
+    },
+    "bodyTotalChars": {
+      "@id": "vaquill:bodyTotalChars"
+    },
+    "bodyHasMore": {
+      "@id": "vaquill:bodyHasMore"
+    },
+    "bodyNextCursor": {
+      "@id": "vaquill:bodyNextCursor"
+    },
+    "SessionLawBatchMiss": "vaquill:SessionLawBatchMiss",
+    "didYouMean": {
+      "@id": "vaquill:didYouMean",
+      "@container": "@list"
+    },
+    "defaultSessionLawId": {
+      "@id": "vaquill:defaultSessionLawId"
+    },
+    "jurisdictions": {
+      "@id": "vaquill:jurisdictions"
+    },
+    "candidateCount": {
+      "@id": "vaquill:candidateCount"
+    },
+    "sessionCoverage": {
+      "@id": "vaquill:sessionCoverage"
+    },
+    "SessionLawBatchRequest": "vaquill:SessionLawBatchRequest",
+    "ids": {
+      "@id": "vaquill:ids",
+      "@container": "@list"
+    },
+    "includeBody": {
+      "@id": "vaquill:includeBody",
+      "@type": "xsd:boolean"
+    },
+    "SessionLawBatchResponse": "vaquill:SessionLawBatchResponse",
+    "laws": {
+      "@id": "vaquill:laws",
+      "@container": "@list"
+    },
+    "notFound": {
+      "@id": "vaquill:notFound",
+      "@container": "@list"
+    },
+    "deduped": {
+      "@id": "vaquill:deduped",
+      "@type": "xsd:integer"
+    },
+    "SessionLawBodyResponse": "vaquill:SessionLawBodyResponse",
+    "pageStart": {
+      "@id": "vaquill:pageStart"
+    },
+    "pageEnd": {
+      "@id": "vaquill:pageEnd"
+    },
+    "totalChars": {
+      "@id": "vaquill:totalChars"
+    },
+    "pagePrice": {
+      "@id": "vaquill:pagePrice",
+      "@type": "xsd:integer"
+    },
+    "estimatedRemainingCredits": {
+      "@id": "vaquill:estimatedRemainingCredits"
+    },
+    "nextCursor": {
+      "@id": "vaquill:nextCursor"
+    },
+    "SessionLawChange": "vaquill:SessionLawChange",
+    "id": {
+      "@id": "vaquill:id",
+      "@type": "xsd:integer"
+    },
+    "detectedAt": {
+      "@id": "vaquill:detectedAt",
+      "@type": "xsd:string"
+    },
+    "SessionLawChangesResponse": "vaquill:SessionLawChangesResponse",
+    "changes": {
+      "@id": "vaquill:changes",
+      "@container": "@list"
+    },
+    "cursor": {
+      "@id": "vaquill:cursor"
+    },
+    "SessionLawCitationCandidate": "vaquill:SessionLawCitationCandidate",
+    "isDefault": {
+      "@id": "vaquill:isDefault",
+      "@type": "xsd:boolean"
+    },
+    "SessionLawCitationMatch": "vaquill:SessionLawCitationMatch",
+    "SessionLawDate": "vaquill:SessionLawDate",
+    "date": {
+      "@id": "vaquill:date"
+    },
+    "dateAsPrinted": {
+      "@id": "vaquill:dateAsPrinted"
+    },
+    "kindAsPrinted": {
+      "@id": "vaquill:kindAsPrinted"
+    },
+    "scopeAsPrinted": {
+      "@id": "vaquill:scopeAsPrinted"
+    },
+    "SessionLawDenominator": "vaquill:SessionLawDenominator",
+    "derivation": {
+      "@id": "vaquill:derivation",
+      "@type": "xsd:string"
+    },
+    "SessionLawDetailSession": "vaquill:SessionLawDetailSession",
+    "coverageStatus": {
+      "@id": "vaquill:coverageStatus"
+    },
+    "SessionLawJurisdictionCoverage": "vaquill:SessionLawJurisdictionCoverage",
+    "sessions": {
+      "@id": "vaquill:sessions",
+      "@container": "@list"
+    },
+    "sessionCount": {
+      "@id": "vaquill:sessionCount",
+      "@type": "xsd:integer"
+    },
+    "completeSessionCount": {
+      "@id": "vaquill:completeSessionCount",
+      "@type": "xsd:integer"
+    },
+    "servedCount": {
+      "@id": "vaquill:servedCount",
+      "@type": "xsd:integer"
+    },
+    "instrumentTypes": {
+      "@id": "vaquill:instrumentTypes"
+    },
+    "earliestApprovedDate": {
+      "@id": "vaquill:earliestApprovedDate"
+    },
+    "latestApprovedDate": {
+      "@id": "vaquill:latestApprovedDate"
+    },
+    "SessionLawListCoverage": "vaquill:SessionLawListCoverage",
+    "partialSessions": {
+      "@id": "vaquill:partialSessions",
+      "@container": "@list"
+    },
+    "message": {
+      "@id": "vaquill:message",
+      "@type": "xsd:string"
+    },
+    "SessionLawListResponse": "vaquill:SessionLawListResponse",
+    "SessionLawNotFoundError": "vaquill:SessionLawNotFoundError",
+    "SessionLawProvenance": "vaquill:SessionLawProvenance",
+    "textMethod": {
+      "@id": "vaquill:textMethod"
+    },
+    "pagesWithText": {
+      "@id": "vaquill:pagesWithText"
+    },
+    "volume": {
+      "@id": "vaquill:volume"
+    },
+    "SessionLawPublisher": "vaquill:SessionLawPublisher",
+    "legislatureNumber": {
+      "@id": "vaquill:legislatureNumber"
+    },
+    "sessionLastYear": {
+      "@id": "vaquill:sessionLastYear"
+    },
+    "printedPageStart": {
+      "@id": "vaquill:printedPageStart"
+    },
+    "printedPageEnd": {
+      "@id": "vaquill:printedPageEnd"
+    },
+    "documentKindAsPrinted": {
+      "@id": "vaquill:documentKindAsPrinted"
+    },
+    "publisherIds": {
+      "@id": "vaquill:publisherIds",
+      "@container": "@list"
+    },
+    "otherCitations": {
+      "@id": "vaquill:otherCitations",
+      "@container": "@list"
+    },
+    "publisherFields": {
+      "@id": "vaquill:publisherFields"
+    },
+    "publisherFieldsOmitted": {
+      "@id": "vaquill:publisherFieldsOmitted",
+      "@container": "@list"
+    },
+    "SessionLawPublisherId": "vaquill:SessionLawPublisherId",
+    "SessionLawResolution": "vaquill:SessionLawResolution",
+    "matchedForm": {
+      "@id": "vaquill:matchedForm"
+    },
+    "SessionLawResponse": "vaquill:SessionLawResponse",
+    "SessionLawSearchParsed": "vaquill:SessionLawSearchParsed",
+    "phrases": {
+      "@id": "vaquill:phrases",
+      "@container": "@list"
+    },
+    "citationTokens": {
+      "@id": "vaquill:citationTokens",
+      "@container": "@list"
+    },
+    "billNumbers": {
+      "@id": "vaquill:billNumbers",
+      "@container": "@list"
+    },
+    "SessionLawSearchPassage": "vaquill:SessionLawSearchPassage",
+    "seq": {
+      "@id": "vaquill:seq",
+      "@type": "xsd:integer"
+    },
+    "ownStart": {
+      "@id": "vaquill:ownStart",
+      "@type": "xsd:integer"
+    },
+    "ownEnd": {
+      "@id": "vaquill:ownEnd",
+      "@type": "xsd:integer"
+    },
+    "heading": {
+      "@id": "vaquill:heading"
+    },
+    "snippet": {
+      "@id": "vaquill:snippet",
+      "@type": "xsd:string"
+    },
+    "highlights": {
+      "@id": "vaquill:highlights",
+      "@container": "@list"
+    },
+    "bodyHref": {
+      "@id": "vaquill:bodyHref",
+      "@type": "xsd:string"
+    },
+    "SessionLawSearchRequest": "vaquill:SessionLawSearchRequest",
+    "approvedFrom": {
+      "@id": "vaquill:approvedFrom",
+      "@type": "xsd:date"
+    },
+    "approvedTo": {
+      "@id": "vaquill:approvedTo",
+      "@type": "xsd:date"
+    },
+    "limit": {
+      "@id": "vaquill:limit",
+      "@type": "xsd:integer"
+    },
+    "SessionLawSearchResponse": "vaquill:SessionLawSearchResponse",
+    "SessionLawSearchResult": "vaquill:SessionLawSearchResult",
+    "matchedBy": {
+      "@id": "vaquill:matchedBy",
+      "@container": "@list"
+    },
+    "passage": {
+      "@id": "vaquill:passage"
+    },
+    "SessionLawSession": "vaquill:SessionLawSession",
+    "SessionLawSessionCoverage": "vaquill:SessionLawSessionCoverage",
+    "withheldCount": {
+      "@id": "vaquill:withheldCount",
+      "@type": "xsd:integer"
+    },
+    "notHeldCount": {
+      "@id": "vaquill:notHeldCount",
+      "@type": "xsd:integer"
+    },
+    "registryCount": {
+      "@id": "vaquill:registryCount",
+      "@type": "xsd:integer"
+    },
+    "collectedCount": {
+      "@id": "vaquill:collectedCount",
+      "@type": "xsd:integer"
+    },
+    "denominator": {
+      "@id": "vaquill:denominator"
+    },
+    "openGaps": {
+      "@id": "vaquill:openGaps",
+      "@type": "xsd:integer"
+    },
+    "measuredAt": {
+      "@id": "vaquill:measuredAt"
+    },
+    "SessionLawSource": "vaquill:SessionLawSource",
+    "sourceIndex": {
+      "@id": "vaquill:sourceIndex",
+      "@type": "xsd:integer"
+    },
+    "role": {
+      "@id": "vaquill:role"
+    },
+    "fetchedAt": {
+      "@id": "vaquill:fetchedAt"
+    },
+    "contentType": {
+      "@id": "vaquill:contentType"
+    },
+    "sha256": {
+      "@id": "vaquill:sha256"
+    },
+    "byteLength": {
+      "@id": "vaquill:byteLength"
+    },
+    "hostClass": {
+      "@id": "vaquill:hostClass"
+    },
+    "SessionLawSummary": "vaquill:SessionLawSummary",
+    "SessionLawVolume": "vaquill:SessionLawVolume",
+    "boundaryHeading": {
+      "@id": "vaquill:boundaryHeading"
+    },
+    "StatuteBodyResponse": "vaquill:StatuteBodyResponse",
+    "html": {
+      "@id": "vaquill:html"
+    },
+    "plain": {
+      "@id": "vaquill:plain"
+    },
+    "sourceCredit": {
+      "@id": "vaquill:sourceCredit"
+    },
+    "notes": {
+      "@id": "vaquill:notes"
+    },
+    "markdown": {
+      "@id": "vaquill:markdown"
+    },
+    "tables": {
+      "@id": "vaquill:tables"
+    },
+    "figures": {
+      "@id": "vaquill:figures"
+    },
+    "hasTables": {
+      "@id": "vaquill:hasTables"
+    },
+    "hasFigures": {
+      "@id": "vaquill:hasFigures"
+    },
+    "subsections": {
+      "@id": "vaquill:subsections"
+    },
+    "StatuteChangeEvent": "vaquill:StatuteChangeEvent",
+    "changeKind": {
+      "@id": "vaquill:changeKind",
+      "@type": "xsd:string"
+    },
+    "displayCitation": {
+      "@id": "vaquill:displayCitation"
+    },
+    "hasDiff": {
+      "@id": "vaquill:hasDiff",
+      "@type": "xsd:boolean"
+    },
+    "StatuteChangesResponse": "vaquill:StatuteChangesResponse",
+    "StatuteCitedByResponse": "vaquill:StatuteCitedByResponse",
+    "StatuteCountRequest": "vaquill:StatuteCountRequest",
+    "article": {
+      "@id": "vaquill:article"
+    },
+    "titleNumber": {
+      "@id": "vaquill:titleNumber"
+    },
+    "StatuteCountResponse": "vaquill:StatuteCountResponse",
+    "isExact": {
+      "@id": "vaquill:isExact",
+      "@type": "xsd:boolean"
+    },
+    "StatuteCrossStateNeighbor": "vaquill:StatuteCrossStateNeighbor",
+    "similarity": {
+      "@id": "vaquill:similarity",
+      "@type": "xsd:decimal"
+    },
+    "StatuteCrossStateResponse": "vaquill:StatuteCrossStateResponse",
+    "neighbors": {
+      "@id": "vaquill:neighbors",
+      "@container": "@list"
+    },
+    "statesCovered": {
+      "@id": "vaquill:statesCovered",
+      "@type": "xsd:integer"
+    },
+    "rankingDegraded": {
+      "@id": "vaquill:rankingDegraded",
+      "@type": "xsd:boolean"
+    },
+    "StatuteDefinitionTerm": "vaquill:StatuteDefinitionTerm",
+    "definition": {
+      "@id": "vaquill:definition",
+      "@type": "xsd:string"
+    },
+    "marker": {
+      "@id": "vaquill:marker"
+    },
+    "StatuteDefinitionsResponse": "vaquill:StatuteDefinitionsResponse",
+    "definitionsSection": {
+      "@id": "vaquill:definitionsSection"
+    },
+    "StatuteNeighborsResponse": "vaquill:StatuteNeighborsResponse",
+    "previous": {
+      "@id": "vaquill:previous",
+      "@container": "@list"
+    },
+    "next": {
+      "@id": "vaquill:next",
+      "@container": "@list"
+    },
+    "container": {
+      "@id": "vaquill:container"
+    },
+    "StatuteResolveBatchItem": "vaquill:StatuteResolveBatchItem",
+    "inputCitation": {
+      "@id": "vaquill:inputCitation",
+      "@type": "xsd:string"
+    },
+    "citationOutsideFilters": {
+      "@id": "vaquill:citationOutsideFilters"
+    },
+    "matchedCorpus": {
+      "@id": "vaquill:matchedCorpus"
+    },
+    "sessionLaw": {
+      "@id": "vaquill:sessionLaw"
+    }
+  },
+  "@type": "schema:Dataset",
+  "schema:name": "Vaquill AI API JSON-LD context",
+  "schema:description": "A JSON-LD @context for the objects Vaquill AI's own API contract declares: one class per component schema, one property per declared field, typed from the contract. Derived by script (derive-json-ld.py, 2026-10-07) from openapi/vaquill-ai-india-openapi.yml, openapi/vaquill-ai-openapi.yml, openapi/vaquill-ai-workspace-openapi.yml.",
+  "dcterms:created": "2026-10-07",
+  "dcterms:source": [
+    "openapi/vaquill-ai-india-openapi.yml",
+    "openapi/vaquill-ai-openapi.yml",
+    "openapi/vaquill-ai-workspace-openapi.yml"
+  ]
+}

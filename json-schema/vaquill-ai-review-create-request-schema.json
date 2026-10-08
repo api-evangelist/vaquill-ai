@@ -1,0 +1,275 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/vaquill-ai/main/json-schema/vaquill-ai-review-create-request-schema.json",
+  "title": "ReviewCreateRequest",
+  "description": "Start a review of one contract against one playbook.\n\n`contractType` and `userSide` are the internal enums by REFERENCE rather than\nby copy. They are the taxonomy the whole product is built on, guarded in both\ndirections by `app/tests/unit/test_contract_type_taxonomy.py`, and a second\nhand-maintained copy here would be a fourth layer for that guard to police.\nWidening the taxonomy widens this API additively, which is correct.",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/vaquill-ai-workspace-openapi.yml#/components/schemas/ReviewCreateRequest",
+  "properties": {
+    "documentText": {
+      "type": "string",
+      "maxLength": 200000,
+      "minLength": 100,
+      "title": "Documenttext",
+      "description": "The full contract text to review, 100 to 200,000 characters. Text rather than a document id: a review reads one contract end to end and the caller usually has it in hand."
+    },
+    "contractType": {
+      "$ref": "#/$defs/ContractType",
+      "description": "What kind of contract this is. Determines which playbook and which default positions resolve."
+    },
+    "userSide": {
+      "$ref": "#/$defs/UserSide",
+      "description": "Which side of the deal you are on. The review argues for this side."
+    },
+    "playbookId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Playbookid",
+      "description": "`pbk_` identifier of the playbook to review against. Omit to run against the built-in default positions for `jurisdiction`, which is a real answer rather than a degraded one."
+    },
+    "jurisdiction": {
+      "type": "string",
+      "pattern": "^([A-Z]{2}|INTL)$",
+      "title": "Jurisdiction",
+      "description": "Two-letter uppercase jurisdiction code, or `INTL`. Selects the default positions when no playbook is named.",
+      "default": "US"
+    },
+    "focusAreas": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1
+          },
+          "type": "array",
+          "maxItems": 50
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Focusareas",
+      "description": "Narrow the review to these areas of concern. Omit to review the whole contract."
+    },
+    "reviewInstructions": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 2000
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Reviewinstructions",
+      "description": "Extra instructions for this review only, layered on top of the playbook."
+    },
+    "markupLevel": {
+      "type": "string",
+      "enum": [
+        "light",
+        "standard",
+        "firm"
+      ],
+      "title": "Markuplevel",
+      "description": "How aggressively to mark up. `light` flags only escalation triggers, `standard` marks up gaps to the preferred position, `firm` hard-lines every deviation.",
+      "default": "standard"
+    },
+    "paperSide": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "own",
+            "counterparty"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Paperside",
+      "description": "Whose paper this is. `own` defends your drafted positions; `counterparty` marks up their form assertively. Orthogonal to `userSide`. Omit if unknown, which costs only prompt specificity."
+    },
+    "round": {
+      "type": "integer",
+      "maximum": 10.0,
+      "minimum": 1.0,
+      "title": "Round",
+      "description": "Negotiation round. 2 and above tells the reviewer the counterparty has already responded, so it proposes minimal edits toward the fallback rather than restating the preferred position.",
+      "default": 1
+    },
+    "priorRoundText": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 200000
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Priorroundtext",
+      "description": "Your last sent version, at round 2 and above, so the reviewer can compute a real diff instead of guessing what changed and undoing settled language."
+    },
+    "counterpartyResponseText": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 200000
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Counterpartyresponsetext",
+      "description": "The counterparty's response, when it differs from `documentText`. Most callers paste the response straight into `documentText`, in which case leave this out."
+    },
+    "dealContext": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReviewDealContext"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Deal attributes the playbook's conditional escalation rules evaluate."
+    },
+    "depth": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "deep"
+      ],
+      "title": "Depth",
+      "description": "`standard` runs the first-pass review. `deep` additionally re-drafts every flagged clause with the deep model, grounds each quote against the contract, drops first-pass false positives and stamps a sign-off level, so each redline's `grounding` is a fact rather than a default. It takes several times as long and verifies at most 40 flagged clauses. `focusAreas`, `reviewInstructions`, `markupLevel`, `round`, `priorRoundText` and `counterpartyResponseText` are not supported at this depth and are refused rather than ignored.",
+      "default": "standard"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "documentText",
+    "contractType",
+    "userSide"
+  ],
+  "$defs": {
+    "ContractType": {
+      "type": "string",
+      "enum": [
+        "saas",
+        "professional_services",
+        "msa",
+        "sow",
+        "consulting",
+        "license",
+        "sale",
+        "partnership",
+        "procurement",
+        "vendor_agreement",
+        "reseller_distribution",
+        "supply",
+        "lease",
+        "loan",
+        "eula",
+        "terms_of_service",
+        "baa",
+        "order_form",
+        "nda",
+        "dpa",
+        "ip_assignment",
+        "employment",
+        "executive_employment",
+        "independent_contractor",
+        "offer_letter",
+        "severance_agreement",
+        "non_compete",
+        "asset_purchase",
+        "stock_purchase",
+        "merger_agreement",
+        "shareholders_agreement",
+        "operating_agreement",
+        "safe",
+        "term_sheet",
+        "settlement_agreement",
+        "engagement_letter",
+        "protective_order",
+        "joint_defense",
+        "other"
+      ],
+      "title": "ContractType",
+      "description": "Contract types a playbook can encode negotiation positions for.\n\nA playbook is a set of clause-level negotiation positions, so this list\ncovers contracts you negotiate clause-by-clause. Documents you only\n*generate* (litigation pleadings, notices) live in `DraftCategory`\n(`app/models/drafting_schemas.py`), NOT here.\n\nEach value backs a `legal_playbooks.contract_type` row, so adding one\nrequires a DB migration to extend the CHECK constraint (see\n`20260502160000_expand_playbook_contract_type_dpa_vendor_ip.sql`,\n`20260612130000_expand_playbook_contract_type_msa_sale_sow_consulting.sql`,\nand `20260702120000_expand_playbook_contract_type_gc_litigation.sql`).\nKept in sync with the FE `ContractType` union + `CONTRACT_TYPE_LABELS`\n(`frontend/src/types/legal-tools.ts`); the drift-guard in\n`app/tests/unit/test_contract_type_taxonomy.py` asserts all three layers\nboth ways and fails fast if they diverge."
+    },
+    "ReviewDealContext": {
+      "properties": {
+        "contractValue": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0.0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Contractvalue",
+          "description": "Total deal value, used by playbook escalation rules that key on it. Omit if unknown: a rule referencing a value you did not supply simply does not fire, which is the fail-safe direction."
+        },
+        "governingLaw": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Governinglaw",
+          "description": "Governing law of the deal, used by playbook escalation rules that key on it."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "title": "ReviewDealContext",
+      "description": "Deal attributes the playbook's conditional escalation rules evaluate.\n\nEverything is optional and stays optional. A rule referencing an attribute\nthe caller did not supply simply does not fire, which is the fail-safe\ndirection: a missing contract value must not escalate a clause to GC on the\nstrength of a number nobody provided."
+    },
+    "UserSide": {
+      "type": "string",
+      "enum": [
+        "vendor",
+        "customer",
+        "licensor",
+        "licensee",
+        "partner",
+        "supplier",
+        "reseller",
+        "employer",
+        "employee",
+        "buyer",
+        "seller",
+        "company",
+        "investor",
+        "lender",
+        "borrower",
+        "disclosing_party",
+        "receiving_party",
+        "plaintiff",
+        "defendant",
+        "other"
+      ],
+      "title": "UserSide",
+      "description": "Which side the reviewer represents.\n\nKept in sync with the FE `UserSide` union + `USER_SIDE_LABELS`\n(`frontend/src/types/legal-tools.ts`) by the drift-guard in\n`app/tests/unit/test_contract_type_taxonomy.py`. Request-only enum (no DB\nCHECK), so widening it needs no migration; that guard also fails if a\n`user_side` CHECK ever appears, because this sentence would then be wrong."
+    }
+  }
+}

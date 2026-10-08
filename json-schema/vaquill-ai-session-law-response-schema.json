@@ -1,0 +1,1021 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/vaquill-ai/main/json-schema/vaquill-ai-session-law-response-schema.json",
+  "title": "SessionLawResponse",
+  "description": "Response for `GET /us/session-laws/{sessionLawId}`.",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/vaquill-ai-openapi.yml#/components/schemas/SessionLawResponse",
+  "properties": {
+    "processingTimeMs": {
+      "type": "number",
+      "title": "Processingtimems",
+      "description": "Server-side time for this request in milliseconds, excluding network transit. Not billed on.",
+      "default": 0.0
+    },
+    "creditsConsumed": {
+      "type": "integer",
+      "title": "Creditsconsumed",
+      "description": "Credits actually charged for this call, never the list price. It includes the `/us/statutes/resolve` fee when a citation was sent where an id goes. 0 when the call was not charged or was refunded (a body that answers `available: false`).",
+      "default": 0
+    },
+    "sessionLawId": {
+      "type": "string",
+      "title": "Sessionlawid",
+      "description": "Permanent identifier of the law, the key to use everywhere. Shape `SSL_{state}_{session code}_{series}[_Y{numberingYear}]_{C<chapter>|B<billKey>}`. It never changes: a correction to our reading of a law keeps the old id working. Pass it to `GET /us/session-laws/{sessionLawId}`."
+    },
+    "lawId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Lawid",
+      "description": "The law's identifier in the open us1 scheme. Null until its identity is confirmed by a second source and the us1 state shape is minted, so it is null on every state law today. Use `sessionLawId`, which is always present."
+    },
+    "jurisdiction": {
+      "type": "string",
+      "title": "Jurisdiction",
+      "description": "Lowercase two-letter code of the state, `dc` or `pr`. Federal acts are not served by this family: they are on `/us/statutes/section`."
+    },
+    "citation": {
+      "type": "string",
+      "title": "Citation",
+      "description": "The act's citation as its publisher prints it, falling back to `{session label}, ch. {number}` when none is printed. It is NOT unique: many states print a bare `CHAPTER 1` every session. Key on `sessionLawId`."
+    },
+    "citableAs": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Citableas",
+      "description": "The law cited the way a lawyer writes it, from the state's own form: `Minn. Laws 2025, ch. 1`, `2025 Fla. Laws ch. 3`, `Ill. Pub. Act 104-0001`, `S.L. 2025-12` (North Carolina), `Stats. 2025, ch. 12` (California), `Ohio S.B. 1 (2025)` for a state that numbers no chapters. A law in a special or extraordinary session carries it (`Minn. Laws 2025, 1st Spec. Sess., ch. 1`). Every value is read back through the grammar that `GET /us/session-laws/{sessionLawId}` accepts a citation in, and must name this law; one that would not is null, never guessed. Null where the state's form is not known, for a series with no standard form (resolutions, memorials), or for a law with neither a chapter nor a bill key. Where a regular and a special session each have a chapter 1, the bare form is the regular session's law and resolves with that law flagged as the default; the special session's carries its session. Distinct from `citation`, which is the publisher's printed form."
+    },
+    "citationShort": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Citationshort",
+      "description": "A compact label for tables and badges: `MN ch. 1 (2025)`, `IL P.A. 104-0001`, `OH S.B. 1 (2025)`. Not a form to send back: use `citableAs` or the `sessionLawId`. Null exactly when `citableAs` is null."
+    },
+    "session": {
+      "$ref": "#/$defs/SessionLawDetailSession",
+      "description": "The legislative session the law was enacted in, and whether we hold all of it (`coverageStatus`)."
+    },
+    "series": {
+      "type": "string",
+      "title": "Series",
+      "description": "The numbering series the law belongs to within its session. Most states have one, `general`. Others number acts, resolutions or local laws separately (`public`, `act`, `acts`, `law`, `public_act`, `resolve`, `resolution_chapter`, `local`, ...). An open list that grows as jurisdictions load. Filter with `series` on the list."
+    },
+    "instrumentType": {
+      "type": "string",
+      "title": "Instrumenttype",
+      "description": "What kind of measure this is: `act`, `joint_resolution`, `concurrent_resolution`, `resolution`, `resolve`, `memorial` or `other`. An open list. A resolution that was numbered and published among the session laws is included, with `isLaw` saying whether it binds as law."
+    },
+    "number": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Number",
+      "description": "The chapter or act number exactly as printed, as a string. It is not always an integer: `1`, `2025-12` (Florida), `104-0001` (Illinois), `1A`. Null where the state does not number its acts (see `billKey`)."
+    },
+    "billKey": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Billkey",
+      "description": "Normalised bill identifier (chamber and type letters plus the number) that stands in for a chapter number in states that do not number their acts (Missouri, Ohio, Nebraska). `House Bill 2` is `HB2`. Null whenever `number` is set. Part of the `sessionLawId` as `B<billKey>`."
+    },
+    "billNumber": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Billnumber",
+      "description": "The bill the act originated as, as the publisher prints it. Matches as a citation on `GET /us/session-laws/{sessionLawId}`."
+    },
+    "numberingYear": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Numberingyear",
+      "description": "The year of the numbering sequence the chapter number belongs to, where the state numbers by year (Minnesota, Florida, Texas). It appears in the `sessionLawId` as `_Y2025`. A chapter number is only unique within a session and numbering year: Minnesota's regular and first special sessions of 2025 each have a Chapter 1. Null where one sequence runs across the session (Louisiana)."
+    },
+    "title": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Title",
+      "description": "The act's long title as printed, usually beginning `An act relating to`. It names the code sections the act amends in prose."
+    },
+    "shortTitle": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Shorttitle",
+      "description": "The act's short title when the publisher gives one (Ohio, New York, the District of Columbia and a few others do), otherwise null."
+    },
+    "approvedDate": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Approveddate",
+      "description": "Date the governor (or the equivalent authority) approved the act, ISO 8601. Never an effective date: an act is usually in force on a different day, which is `effectiveDates`. Null when the publisher prints no approval date. Where the registry holds none but the publisher's own dated label on `otherDates` names the governor's signature, it is filled from that label and `approvedDateDerived` is true. The `approvedFrom` and `approvedTo` filters do NOT match a derived date: they read the registry's own approval date."
+    },
+    "approvedDateDerived": {
+      "type": "boolean",
+      "title": "Approveddatederived",
+      "description": "True only when `approvedDate` was not held as an approval date and we filled it from a dated label printed on the act (today South Dakota's `Signed by the Governor`, listed under `otherDates`), on an act whose `enactmentOutcome` is `signed` or `line_item_veto`. False when `approvedDate` is null or is the registry's own. We never read a `presented` or `passed` date as an approval, nor a signing label on an act that became law without signature.",
+      "default": false
+    },
+    "effectiveFirst": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Effectivefirst",
+      "description": "Earliest of the act's effective dates we hold. Null when we hold none: a date the publisher does not print, or prints as a relative rule (`the day following final enactment`), is not guessed. The full list is `effectiveDates` on `GET /us/session-laws/{sessionLawId}`."
+    },
+    "effectiveLast": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Effectivelast",
+      "description": "Latest of the act's effective dates we hold. Equal to `effectiveFirst` for an act with one date; null when we hold none."
+    },
+    "enactmentOutcome": {
+      "type": "string",
+      "title": "Enactmentoutcome",
+      "description": "How the measure became, or failed to become, law. `signed`; `became_law_without_signature`; `veto_overridden`; `line_item_veto` (signed with some items vetoed); `vetoed` and `pocket_veto` (not law); `not_presented` (no governor action recorded, usual for resolutions); `approved_by_voters`; `unknown` (the publisher does not say)."
+    },
+    "isLaw": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Islaw",
+      "description": "True for an act that is law. False for a numbered measure that is not: a vetoed bill, a pocket veto. Null when `enactmentOutcome` does not settle it (`not_presented`, `unknown`)."
+    },
+    "textStatus": {
+      "type": "string",
+      "enum": [
+        "held",
+        "withheld",
+        "not_held",
+        "pending"
+      ],
+      "title": "Textstatus",
+      "description": "Whether we serve this law's text. `held`: the text is served by `/us/session-laws/{sessionLawId}/body`. `withheld`: we hold the text but a measured defect keeps it from being served, and `withheldReason` says what. `not_held`: we know the act exists and do not hold its text. `pending`: collected and not yet verified."
+    },
+    "withheldReason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Withheldreason",
+      "description": "Present only when `textStatus` is `withheld`: a plain sentence saying what is wrong with the text we hold and what would release it. Free text, not an enum: show it, do not branch on it. The record itself (dates, sources, title) is still served and still correct."
+    },
+    "charCount": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Charcount",
+      "description": "Length of the law's full text in characters, the same as `totalChars` on the body. Null when there is no text. It is reported for a withheld law too (a fact about the text we hold), though that text is not served."
+    },
+    "estimatedBodyPages": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Estimatedbodypages",
+      "description": "How many body pages the text takes: `charCount` divided by the page size (30,000 characters), rounded up. Pages are cut back to a paragraph break, so a long act can run a few percent over. Null unless `textStatus` is `held`: there is nothing to read. Reading a whole law costs `estimatedBodyPages` times the price of one body page (6 credits per page on `GET /us/session-laws/{sessionLawId}/body`). Ohio's 2025 budget act (HB 96) is 9,571,132 characters, about 320 pages or 1,920 credits to read in full; most acts are a page or two."
+    },
+    "textSha256": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Textsha256",
+      "description": "SHA-256 (hex) of the full text of this law. It changes only when the text does, so it is the cheap way to tell whether a copy you hold is current. Body pages carry the same value."
+    },
+    "versionNo": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Versionno",
+      "description": "Revision counter of our record of this law: 1 for the first collection, higher after a re-collection changed the text or the metadata. Not a legislative version."
+    },
+    "amendatoryMarkup": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Amendatorymarkup",
+      "description": "Whether the language an amending act strikes and inserts survives in the text. `preserved`: it is in `text`, in the convention `markupConvention` names. `lost`: the publisher printed it and our text does not keep it, so deleted words can read as law: check the source before quoting. `absent`: the act carries no such markup that we found. `not_applicable`: there is no text to carry it."
+    },
+    "markupConvention": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Markupconvention",
+      "description": "How preserved markup is written, set only when `amendatoryMarkup` is `preserved`. `wdiff`: deleted language is `[-like this-]` and inserted language `{+like this+}`. `publisher_literal`: the publisher's own words are left as printed (Minnesota prints `new text begin` / `new text end` and `deleted text begin` / `deleted text end` markers). `mixed`: both in one text."
+    },
+    "documentKind": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Documentkind",
+      "description": "What kind of document the text was taken from: `session_law_print` (the publisher's printed chapter), `enrolled_bill`, `slip_law`, `volume_extract` (carved out of a bound volume) or `other`. An open list. Null when there is no text."
+    },
+    "identityConfidence": {
+      "type": "string",
+      "title": "Identityconfidence",
+      "description": "How firmly the law's identity (session and number) is established. `single_source`: read from one publisher source, which is every state law at launch. `confirmed`: agreed by a second independent source, the level at which a `lawId` can be minted. `inferred`: derived by us rather than printed. `disputed`: sources disagree. The `sessionLawId` is the same at every level."
+    },
+    "licenseNote": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Licensenote",
+      "description": "What the law's licence class is and what it means for reuse, in a plain sentence: `Government public: published by a government body with no restrictive terms, so the text may be reused, including commercially.` Every law served with text is of a class that permits reuse; a note saying otherwise describes a record whose text is held back. Free text to show, not an enum to branch on: branch on `textStatus`."
+    },
+    "updatedAt": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Updatedat",
+      "description": "When this law's record last changed in our registry, ISO 8601 UTC with a `+00:00` offset, the same form as the statutes routes. Use it with `updatedSince` on the list to sync only what changed."
+    },
+    "citationAsPrinted": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Citationasprinted",
+      "description": "The citation exactly as the publisher prints it. Null when none is printed."
+    },
+    "vetoStatusAsPrinted": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Vetostatusasprinted",
+      "description": "The publisher's own words on the governor's action. `enactmentOutcome` is our normalised reading of it."
+    },
+    "pageCount": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Pagecount",
+      "description": "Pages in the source document when it is a PDF. Null for HTML sources."
+    },
+    "sourceUrl": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Sourceurl",
+      "description": "The official page or file the act's text was collected from, on a government publisher's host: the first `sources` entry whose `role` is `text` and whose `hostClass` is `gov`. Open it to verify the text against the publisher. Null when we hold no such source (a law we know exists and have not collected) or when the text source is not a government host. Present on a withheld law too: the official copy is always where to go when we hold the text back."
+    },
+    "effectiveDates": {
+      "items": {
+        "$ref": "#/$defs/SessionLawDate"
+      },
+      "type": "array",
+      "title": "Effectivedates",
+      "description": "Every effective date the publisher prints for the act, in printed order. Always a list, never null; empty when none is held. Empty does NOT mean the act is not in force: a date printed as a rule (`the day following final enactment`) or not printed in the publisher's metadata is not guessed, and the approval date is never substituted for it. An act can take effect in parts, so a date may carry a `scopeAsPrinted`."
+    },
+    "otherDates": {
+      "items": {
+        "$ref": "#/$defs/SessionLawDate"
+      },
+      "type": "array",
+      "title": "Otherdates",
+      "description": "Every other date printed on the act, each with its `kind`: the approval date, filing dates and the publisher's own milestones (presentment to the governor)."
+    },
+    "codeSectionsAffected": {
+      "items": {
+        "$ref": "#/$defs/CodeSectionAffected"
+      },
+      "type": "array",
+      "title": "Codesectionsaffected",
+      "description": "The code sections the publisher's own table lists the act as affecting, as printed. Always a list. Empty when the publisher prints no such table, which is common: the title still names sections in prose. We do not read sections out of the act text into this list."
+    },
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/SessionLawSource"
+      },
+      "type": "array",
+      "title": "Sources",
+      "description": "The publisher documents the record was collected from, with the hash and fetch time of each: the audit trail from this response back to the official copy."
+    },
+    "publisher": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SessionLawPublisher"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "What the publisher itself printed or published about the act, beyond the dates and citation above: its own structured fields verbatim (`publisherFields`: the bill's action history, committees, sponsors, and vote counts where the publisher gives them), its own identifiers, the legislature number and the printed pages. Omitted, not null, when it cannot be read or we only know the act exists."
+    },
+    "provenance": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SessionLawProvenance"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "How we came by the text (the extraction method, the bound volume it was cut from) and the collector's own `caveats` on the record. Omitted, not null, when it cannot be read or we only know the act exists."
+    },
+    "resolvedFrom": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SessionLawResolution"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Present only when your input did not match an id as sent: it says what was matched and how. Null when you sent an exact id."
+    }
+  },
+  "type": "object",
+  "required": [
+    "sessionLawId",
+    "jurisdiction",
+    "citation",
+    "session",
+    "series",
+    "instrumentType",
+    "enactmentOutcome",
+    "textStatus",
+    "identityConfidence"
+  ],
+  "$defs": {
+    "CodeSectionAffected": {
+      "properties": {
+        "sectionAsPrinted": {
+          "type": "string",
+          "title": "Sectionasprinted",
+          "description": "The code section the act changes, as the publisher's table prints it. Not normalised and not linked to an `actId` on `/us/statutes`."
+        },
+        "actionAsPrinted": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actionasprinted",
+          "description": "What the act does to that section, in the publisher's own words or abbreviation (`AMD` amended, `ADD`, `REP`, ...)."
+        },
+        "codeAsPrinted": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Codeasprinted",
+          "description": "The code the section belongs to, as printed."
+        },
+        "actSectionAsPrinted": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actsectionasprinted",
+          "description": "The section of the act itself that makes the change."
+        }
+      },
+      "type": "object",
+      "required": [
+        "sectionAsPrinted"
+      ],
+      "title": "CodeSectionAffected",
+      "description": "A code section the publisher lists the act as affecting."
+    },
+    "SessionLawDate": {
+      "properties": {
+        "kind": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Kind",
+          "description": "What the date is, on `otherDates`: `approved`, `filed` or `other` (`kindAsPrinted` carries the publisher's label for `other`). Null on `effectiveDates`, where every entry is an effective date."
+        },
+        "date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Date",
+          "description": "The date as ISO 8601 when the printed text could be read as one. Null when the publisher's wording is not a calendar date."
+        },
+        "dateAsPrinted": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dateasprinted",
+          "description": "The date exactly as the publisher wrote it, including any time of day."
+        },
+        "kindAsPrinted": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Kindasprinted",
+          "description": "The publisher's own label for what the date is, when it prints one."
+        },
+        "scopeAsPrinted": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scopeasprinted",
+          "description": "What the date applies to when it is not the whole act, as printed: an act can take effect in parts. Null when the date applies to the act as a whole."
+        }
+      },
+      "type": "object",
+      "title": "SessionLawDate",
+      "description": "One printed date on a session law."
+    },
+    "SessionLawDetailSession": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code",
+          "description": "Session code, `{year}{type}{ordinal}`. `type` is `R` regular, `S` special, `X` extraordinary, `F` fiscal, `V` veto, `U` unknown. A regular session has no ordinal (`2025R`); a numbered special session carries it (`2025S1`, the first special session of 2025); a lettered one carries its letter (`2025SC`, Florida's Special Session C). `year` is the year the publisher numbers the session by, which for a period spanning two years is the first (District of Columbia Council Period 25 is `2023R`). Pass it as `session` to `GET /us/session-laws/list`."
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Label",
+          "description": "The session's canonical label, as the publisher names it."
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Type",
+          "description": "`regular`, `special`, `extraordinary`, `fiscal`, `veto` or `unknown`."
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Year",
+          "description": "The year the session convened, the same year `code` starts with."
+        },
+        "coverageStatus": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "complete",
+                "partial"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Coveragestatus",
+          "description": "Whether we hold every law of this session. `complete`: every law the publisher lists for the session is accounted for, so a law absent from the list does not exist. `partial`: the collection of the session stopped short, so a law that is not found may exist, and this law's neighbours may be missing. The same verdict, with the counts behind it, is in the `sessionLaws` block on `GET /us/statutes/coverage`. Omitted when it cannot be read."
+        }
+      },
+      "type": "object",
+      "required": [
+        "code"
+      ],
+      "title": "SessionLawDetailSession",
+      "description": "The session block of a single law: the session, and whether we hold all of it."
+    },
+    "SessionLawProvenance": {
+      "properties": {
+        "textMethod": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Textmethod",
+          "description": "How the text was extracted from the publisher's document: `pdf_text_layer`, `html`, `xml`, `docx`, `doc`, or `none` when no text was extracted. An open list. `none` is the same fact as `textStatus: not_held` for a collected law."
+        },
+        "pagesWithText": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pageswithtext",
+          "description": "For a PDF, how many of its `pageCount` pages had a text layer to read. A figure below `pageCount` means some pages (a signature page, a scanned stamp) contributed no text. Null for a source that has no pages."
+        },
+        "volume": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SessionLawVolume"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Present only when the act's text was cut out of a bound volume of the session's laws rather than published on its own: the volume and the pages. Null otherwise."
+        },
+        "caveats": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Caveats",
+          "description": "The collector's own remarks on this record, one string each, verbatim and in order. Most say something about the act or its text that a reader should know: where the chapter number came from when the act does not print one, that the publisher prints no strike-through so there is no amendatory markup to carry, that an effective date is the publisher's wording rather than a calendar date, that the text layer has kerning damage. Some are working notes about how the record was assembled and are published as written; they are free text for a person to read, not a vocabulary to branch on, and their wording can change. Notes that only describe how a page was fetched or decoded are not included. `[]` when there are none."
+        }
+      },
+      "type": "object",
+      "title": "SessionLawProvenance",
+      "description": "How the text of an act was obtained, and what the collector noted about the record."
+    },
+    "SessionLawPublisher": {
+      "properties": {
+        "legislatureNumber": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Legislaturenumber",
+          "description": "The number of the legislature that enacted the act, as the publisher counts them (Minnesota's 94th Legislature, Alaska's 34th). Null where the publisher does not number its legislatures on the act's own pages; a gap in what we hold, not a fact about the act."
+        },
+        "sessionLastYear": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sessionlastyear",
+          "description": "The last calendar year of the session the act belongs to, for a session that spans two (the District of Columbia's Council Period 25 runs 2023 to 2024, California's regular session 2025 to 2026). Equal to `session.year` for a session inside one year."
+        },
+        "printedPageStart": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Printedpagestart",
+          "description": "The page number printed on the act's first page in the publisher's bound volume, as printed and therefore a string (`1`, `ix`, `42A`). Not the physical page of a PDF: see `provenance.volume`. Null where the act is not printed in a volume."
+        },
+        "printedPageEnd": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Printedpageend",
+          "description": "The page number printed on the act's last page, as printed. Null as above."
+        },
+        "documentKindAsPrinted": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Documentkindasprinted",
+          "description": "The label the publisher's own document carries for what kind of text it is, exactly as printed: `Enrolled version` (Texas), `As Adopted`, `Pamphlet Law` (New Jersey), `As Enacted`, `slip copy of this session law`. Our normalised reading of it is `documentKind`. Null where the document prints none."
+        },
+        "publisherIds": {
+          "items": {
+            "$ref": "#/$defs/SessionLawPublisherId"
+          },
+          "type": "array",
+          "title": "Publisherids",
+          "description": "The identifiers the publisher itself gives the act, in the order it presents them: South Carolina's ratification number, California's `bill_id`, the District of Columbia's act and bill numbers, Maryland's `BillNumber`. Useful for joining to the publisher's own site or data. Which identifiers exist differs by state. Empty when the publisher exposes none."
+        },
+        "otherCitations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Othercitations",
+          "description": "Other citations the publisher prints for the same act, each exactly as printed: `Act No. 1` beside `CHAPTER 1`, `A.L.2025, c.1`, `70 DCR 1863`, `D.C. Act 25-5`. They are accepted as citations on `GET /us/session-laws/{sessionLawId}`. Empty when the publisher prints one form only."
+        },
+        "publisherFields": {
+          "additionalProperties": true,
+          "type": "object",
+          "title": "Publisherfields",
+          "description": "The publisher's own structured fields for this act, as the publisher states them and otherwise untouched: an object whose keys, nesting and values are the publisher's own words. The keys DIFFER BY STATE and are not normalised or renamed: Texas gives the bill's full action history with journal page numbers (`Actions`), Maryland the committees and the reading and hearing dates in each chamber, North Carolina and New Mexico a history that can carry vote counts, most states little more than the bill number and a sponsor. What a given state supplies is whatever its publisher printed; do not assume any key exists, and do not read a missing key as a fact about the act. Votes in particular are present only where a publisher printed them. A few values are the publisher's own HTML: treat every string as untrusted text and never render it unescaped. `{}` when the publisher printed no such fields. A value too large to serve is left out and its key named in `publisherFieldsOmitted`."
+        },
+        "publisherFieldsOmitted": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Publisherfieldsomitted",
+          "description": "Keys of `publisherFields` that exist on the record but were too large to serve inline (past 64 KiB of JSON the largest values are left out, whole, never cut). Typically a publisher's full-bill HTML copy, whose text is on the body route in any case. Empty when nothing was left out, which is almost always."
+        }
+      },
+      "type": "object",
+      "title": "SessionLawPublisher",
+      "description": "What the publisher itself printed or published about an act, beyond the record's dates and citation."
+    },
+    "SessionLawPublisherId": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "The publisher's own label for the identifier, exactly as it prints or exposes it, so it is not a vocabulary: `RAT#` (South Carolina), `bill_id` (California), `num type=\"act\"` (District of Columbia), `BillNumber` (Maryland), `L.D.` (Maine)."
+        },
+        "value": {
+          "type": "string",
+          "title": "Value",
+          "description": "The identifier's value as the publisher gives it, always a string: `5`, `202520260SB26`, `25-5`, `HB0001`."
+        }
+      },
+      "type": "object",
+      "required": [
+        "name",
+        "value"
+      ],
+      "title": "SessionLawPublisherId",
+      "description": "An identifier the publisher itself gives an act."
+    },
+    "SessionLawResolution": {
+      "properties": {
+        "input": {
+          "type": "string",
+          "title": "Input",
+          "description": "What you sent in the path, exactly."
+        },
+        "sessionLawId": {
+          "type": "string",
+          "title": "Sessionlawid",
+          "description": "The id it resolved to. Send this next time to skip resolution and its fee."
+        },
+        "via": {
+          "type": "string",
+          "enum": [
+            "normalized_id",
+            "citation"
+          ],
+          "title": "Via",
+          "description": "`citation`: your input was a citation and matched exactly one law's citation form. `normalized_id`: your input was an id carrying surrounding whitespace, quotes or a trailing period, which were removed."
+        },
+        "matchedForm": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Matchedform",
+          "description": "Which of the law's citation forms your input matched: `as_printed` (its printed citation), `bill` (its bill number) or `other_as_printed` (another printed form). Null for `normalized_id`."
+        }
+      },
+      "type": "object",
+      "required": [
+        "input",
+        "sessionLawId",
+        "via"
+      ],
+      "title": "SessionLawResolution",
+      "description": "How a citation sent in place of a `sessionLawId` was matched."
+    },
+    "SessionLawSource": {
+      "properties": {
+        "sourceIndex": {
+          "type": "integer",
+          "title": "Sourceindex",
+          "description": "Position of this source in the law's source list, starting at 0."
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Role",
+          "description": "What this document supplied: `text` (the act itself), `identity` (the publisher page that lists and numbers the session's laws), `metadata` (dates, veto and status tables), `code_sections` or `certified_image`."
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Url",
+          "description": "The publisher's URL for this document, as we fetched it."
+        },
+        "fetchedAt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Fetchedat",
+          "description": "When we fetched the document, ISO 8601 UTC with a `+00:00` offset."
+        },
+        "contentType": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Contenttype",
+          "description": "The document's media type as the publisher served it."
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sha256",
+          "description": "SHA-256 (hex) of the exact bytes we fetched and archived."
+        },
+        "byteLength": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bytelength",
+          "description": "Size of the fetched document in bytes."
+        },
+        "hostClass": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Hostclass",
+          "description": "`gov` when the document comes from a government publisher (including an official publisher on a non-`.gov` host), otherwise `other`."
+        }
+      },
+      "type": "object",
+      "required": [
+        "sourceIndex"
+      ],
+      "title": "SessionLawSource",
+      "description": "A document the record was collected from."
+    },
+    "SessionLawVolume": {
+      "properties": {
+        "url": {
+          "type": "string",
+          "title": "Url",
+          "description": "The publisher's URL of the whole volume (a PDF of every act of the session) that this act's text was cut from. A government host."
+        },
+        "pageStart": {
+          "type": "integer",
+          "title": "Pagestart",
+          "description": "First physical page of the act in that volume, counted from 1 at the first page of the file. Not the page number printed on the page: see `publisher.printedPageStart` for that."
+        },
+        "pageEnd": {
+          "type": "integer",
+          "title": "Pageend",
+          "description": "Last physical page of the act in that volume, the same counting as `pageStart`."
+        },
+        "boundaryHeading": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Boundaryheading",
+          "description": "The heading in the volume at which the act's text begins, which is how the cut was found. Null when none is recorded."
+        }
+      },
+      "type": "object",
+      "required": [
+        "url",
+        "pageStart",
+        "pageEnd"
+      ],
+      "title": "SessionLawVolume",
+      "description": "The bound volume an act's text was cut out of."
+    }
+  }
+}

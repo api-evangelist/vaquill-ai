@@ -1,0 +1,2284 @@
+openapi: 3.2.0
+info:
+  title: Vaquill Ai Chronology API
+  version: 1.0.0
+  description: 'Operations tagged Chronology across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.vaquill.ai/workspace
+  description: Vaquill Legal Workspace API (production)
+- url: /workspace
+  description: Vaquill Legal Workspace API (relative to the mount)
+security:
+- WorkspaceAuth: []
+tags:
+- name: Chronology
+  description: The dated events across a matter's documents, as one timeline, with duplicate and date-conflict flags.
+paths:
+  /v1/matters/{matterId}/chronology/events:
+    get:
+      tags:
+      - Chronology
+      summary: List chronology events
+      description: 'The matter''s events, OLDEST first, filtered however you ask.
+
+
+        `eventDate` ascending by default, which is the opposite of every other list on
+
+        this surface and is deliberate: a chronology sorted newest-first is a
+
+        chronology nobody can read. Pass `sortOrder=desc` for the other direction.
+
+
+        `eventType`, `category` and `significance` come back as plain strings. The
+
+        columns behind them carry no constraint, so production holds values this API
+
+        would refuse on a write; read them, do not switch on a closed list.
+
+
+        `primaryOnly=true` collapses duplicate events to one per group, which is what
+
+        the product''s own timeline does.'
+      operationId: chronologyEvents.list
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: dateFrom
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Only events on or after this date.
+          title: Datefrom
+        description: Only events on or after this date.
+      - name: dateTo
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Only events on or before this date.
+          title: Dateto
+        description: Only events on or before this date.
+      - name: eventTypes
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: array
+            items:
+              enum:
+              - signed
+              - executed
+              - filed
+              - served
+              - effective
+              - expired
+              - terminated
+              - notice_sent
+              - notice_received
+              - payment
+              - hearing
+              - meeting
+              - judgment
+              - order
+              - correspondence
+              - amended
+              - enacted
+              - published
+              - decided
+              - incident
+              - referenced
+              - founded
+              - incorporated
+              - appointed
+              - resigned
+              - acquired
+              - launched
+              - awarded
+              - approved
+              - registered
+              - commenced
+              - completed
+              - transferred
+              - invested
+              - dissolved
+              - announced
+              - renewed
+              - other
+              type: string
+          - type: 'null'
+          description: Only these event types. Omit for all of them.
+          title: Eventtypes
+        description: Only these event types. Omit for all of them.
+      - name: categories
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: array
+            items:
+              enum:
+              - contract_event
+              - court_filing
+              - correspondence
+              - payment_financial
+              - deadline_notice
+              - meeting_hearing
+              - legislative
+              - case_law
+              - historical
+              - corporate
+              - regulatory
+              - employment
+              - milestone
+              - other
+              type: string
+          - type: 'null'
+          description: Only these swim lanes.
+          title: Categories
+        description: Only these swim lanes.
+      - name: significance
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: array
+            items:
+              enum:
+              - high
+              - medium
+              - low
+              type: string
+          - type: 'null'
+          description: Only these significance levels.
+          title: Significance
+        description: Only these significance levels.
+      - name: documentId
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Only events extracted from this `doc_` document.
+          title: Documentid
+        description: Only events extracted from this `doc_` document.
+      - name: isAiExtracted
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: True for extracted events only, false for hand-entered ones only.
+          title: Isaiextracted
+        description: True for extracted events only, false for hand-entered ones only.
+      - name: minConfidence
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: number
+            maximum: 1.0
+            minimum: 0.0
+          - type: 'null'
+          description: Only extracted events at or above this confidence. Note that a manual event has no confidence at all and is excluded by any value here.
+          title: Minconfidence
+        description: Only extracted events at or above this confidence. Note that a manual event has no confidence at all and is excluded by any value here.
+      - name: searchQuery
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+          description: Substring match on title or description.
+          examples:
+          - termination notice
+          title: Searchquery
+        description: Substring match on title or description.
+      - name: party
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+          description: Only events naming this party exactly.
+          examples:
+          - Acme Corporation
+          title: Party
+        description: Only events naming this party exactly.
+      - name: primaryOnly
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Collapse duplicate events to one per group. Events that are in no duplicate group are always kept.
+          default: false
+          title: Primaryonly
+        description: Collapse duplicate events to one per group. Events that are in no duplicate group are always kept.
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: How many events to return.
+          default: 50
+          title: Limit
+        description: How many events to return.
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: How many to skip first.
+          default: 0
+          title: Offset
+        description: How many to skip first.
+      - name: sortBy
+        in: query
+        required: false
+        schema:
+          enum:
+          - event_date
+          - created_at
+          - significance
+          - title
+          type: string
+          description: Which field to order by.
+          default: event_date
+          title: Sortby
+        description: Which field to order by.
+      - name: sortOrder
+        in: query
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+          description: Ascending by default, because a timeline reads forward in time.
+          default: asc
+          title: Sortorder
+        description: Ascending by default, because a timeline reads forward in time.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_ChronologyEvent_'
+              example:
+                data:
+                - id: evt_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  documentName: value
+                  eventDate: '2026-08-19'
+                  eventDateEnd: '2026-08-19'
+                  eventDateApproximate: false
+                  eventType: signed
+                  category: commercial
+                  significance: high
+                  title: Master Services Agreement
+                  description: Master services agreement with Acme for the 2026 platform rollout.
+                  parties:
+                  - value
+                  tags:
+                  - saas
+                  - buyer-side
+                  sourceText: value
+                  sourcePageNumber: 1
+                  isAiExtracted: false
+                  confidenceScore: 1.0
+                  isPrimaryInGroup: false
+                  createdAt: '2026-08-19T14:32:10Z'
+                  updatedAt: '2026-08-19T14:32:10Z'
+                pagination:
+                  limit: 50
+                  offset: 0
+                  total: 128
+                  hasMore: false
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    post:
+      tags:
+      - Chronology
+      summary: Create a chronology event
+      description: 'Add an event by hand. 201 with the stored event.
+
+
+        Created events are recorded as not AI-extracted and carry no confidence, which
+
+        is what keeps them distinguishable from the pipeline''s output forever.
+
+        `documentId` is optional; when given it must name a document in THIS matter.'
+      operationId: chronologyEvents.create
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChronologyEventCreateRequest'
+            example:
+              eventDate: '2026-08-19'
+              eventDateEnd: '2026-08-19'
+              eventDateApproximate: false
+              eventType: signed
+              category: contract_event
+              title: Master Services Agreement
+              description: Master services agreement with Acme for the 2026 platform rollout.
+              parties:
+              - value
+              tags:
+              - saas
+              - buyer-side
+              significance: high
+              documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+              sourcePageNumber: 1
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChronologyEvent'
+              example:
+                id: evt_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                documentName: value
+                eventDate: '2026-08-19'
+                eventDateEnd: '2026-08-19'
+                eventDateApproximate: false
+                eventType: signed
+                category: commercial
+                significance: high
+                title: Master Services Agreement
+                description: Master services agreement with Acme for the 2026 platform rollout.
+                parties:
+                - value
+                tags:
+                - saas
+                - buyer-side
+                sourceText: value
+                sourcePageNumber: 1
+                isAiExtracted: false
+                confidenceScore: 1.0
+                isPrimaryInGroup: false
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/chronology/events/{eventId}:
+    patch:
+      tags:
+      - Chronology
+      summary: Update a chronology event
+      description: 'Correct an event. Omitted fields are left alone.
+
+
+        A PATCH, so send only what changes. An explicit null clears `description` or
+
+        `eventDateEnd`; every other field is backed by a NOT NULL column and a null
+
+        for one is refused by name. `documentId` is not patchable: which document an
+
+        event came from is provenance, and re-pointing it would make an extracted
+
+        event claim a source it was never read from.'
+      operationId: chronologyEvents.update
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: eventId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Eventid
+        description: '`evt_` identifier of one chronology event. Take it from the matter''s chronology.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChronologyEventUpdateRequest'
+            example:
+              eventDate: '2026-08-19'
+              eventDateEnd: '2026-08-19'
+              eventDateApproximate: false
+              eventType: signed
+              category: contract_event
+              title: Master Services Agreement
+              description: Master services agreement with Acme for the 2026 platform rollout.
+              parties:
+              - value
+              tags:
+              - saas
+              - buyer-side
+              significance: high
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChronologyEvent'
+              example:
+                id: evt_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                documentName: value
+                eventDate: '2026-08-19'
+                eventDateEnd: '2026-08-19'
+                eventDateApproximate: false
+                eventType: signed
+                category: commercial
+                significance: high
+                title: Master Services Agreement
+                description: Master services agreement with Acme for the 2026 platform rollout.
+                parties:
+                - value
+                tags:
+                - saas
+                - buyer-side
+                sourceText: value
+                sourcePageNumber: 1
+                isAiExtracted: false
+                confidenceScore: 1.0
+                isPrimaryInGroup: false
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      tags:
+      - Chronology
+      summary: Delete a chronology event
+      description: 'Remove an event from the timeline. 204, and a second delete is a 404.
+
+
+        A soft delete: the row stops being served everywhere and is not destroyed.
+
+        Note that this is not the only way an event disappears. Deleting the DOCUMENT
+
+        an event was extracted from hard-deletes every event derived from it, through
+
+        a cascade that goes past this soft delete entirely and leaves no record.'
+      operationId: chronologyEvents.delete
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: eventId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Eventid
+        description: '`evt_` identifier of one chronology event. Take it from the matter''s chronology.'
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/chronology/extraction-status:
+    get:
+      tags:
+      - Chronology
+      summary: Get chronology extraction status
+      description: 'How far automatic extraction has got across the matter.
+
+
+        This is the completion signal for a capability that publishes no operation:
+
+        poll a document''s `document.ingest` operation to know the document landed,
+
+        then read this to know its events are in.
+
+
+        Per-document `status` is published verbatim (`pending`, `in_progress`,
+
+        `completed`, `failed`, `skipped`) rather than as one of the five operation
+
+        statuses. There is no operation here to be consistent with, and mapping
+
+        `in_progress` would add a sixth spelling of "running" to the contract.'
+      operationId: chronology.extractionStatus
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChronologyExtractionStatus'
+              example:
+                documents:
+                - documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  documentName: value
+                  status: completed
+                  eventsExtracted: 1
+                totalDocuments: 1
+                completedDocuments: 1
+                pendingDocuments: 1
+                failedDocuments: 1
+                isExtractionComplete: false
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/chronology/exports:
+    post:
+      tags:
+      - Chronology
+      summary: Export the chronology as CSV, PDF or DOCX
+      description: 'Render the filtered timeline to CSV, PDF or DOCX and return the bytes.
+
+
+        A POST, and the filters are a field on the body rather than eleven query
+
+        parameters: they are the SAME filters the list accepts, read by the same code,
+
+        so one cannot go missing here.
+
+
+        **It never truncates.** Over the event ceiling it answers 413 carrying `limit`
+
+        and `requested`, so you can narrow the date range rather than receiving a
+
+        partial file you would have no way to detect. `eventCount` on the response is
+
+        exactly what the file contains.'
+      operationId: chronology.export
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChronologyExportRequest'
+            example:
+              format: csv
+              filters:
+                dateFrom: '2026-08-19'
+                dateTo: '2026-08-19'
+                eventTypes:
+                - signed
+                categories:
+                - contract_event
+                significance:
+                - high
+                documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                isAiExtracted: false
+                minConfidence: 1.0
+                searchQuery: value
+                party: value
+                primaryOnly: false
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChronologyExport'
+              example:
+                format: docx
+                filename: msa-acme-v3.docx
+                sizeBytes: 248193
+                content: UEsDBBQABgAIAAAAIQ...
+                eventCount: 1
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+components:
+  schemas:
+    ChronologyFilters:
+      properties:
+        dateFrom:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Datefrom
+          description: Only events on or after this date.
+          examples:
+          - '2026-08-19'
+        dateTo:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Dateto
+          description: Only events on or before this date.
+          examples:
+          - '2026-08-19'
+        eventTypes:
+          anyOf:
+          - items:
+              type: string
+              enum:
+              - signed
+              - executed
+              - filed
+              - served
+              - effective
+              - expired
+              - terminated
+              - notice_sent
+              - notice_received
+              - payment
+              - hearing
+              - meeting
+              - judgment
+              - order
+              - correspondence
+              - amended
+              - enacted
+              - published
+              - decided
+              - incident
+              - referenced
+              - founded
+              - incorporated
+              - appointed
+              - resigned
+              - acquired
+              - launched
+              - awarded
+              - approved
+              - registered
+              - commenced
+              - completed
+              - transferred
+              - invested
+              - dissolved
+              - announced
+              - renewed
+              - other
+            type: array
+          - type: 'null'
+          title: Eventtypes
+          description: Only these event types. Omit for all of them.
+          examples:
+          - - signed
+        categories:
+          anyOf:
+          - items:
+              type: string
+              enum:
+              - contract_event
+              - court_filing
+              - correspondence
+              - payment_financial
+              - deadline_notice
+              - meeting_hearing
+              - legislative
+              - case_law
+              - historical
+              - corporate
+              - regulatory
+              - employment
+              - milestone
+              - other
+            type: array
+          - type: 'null'
+          title: Categories
+          description: Only these swim lanes.
+          examples:
+          - - contract_event
+        significance:
+          anyOf:
+          - items:
+              type: string
+              enum:
+              - high
+              - medium
+              - low
+            type: array
+          - type: 'null'
+          title: Significance
+          description: Only these significance levels.
+          examples:
+          - - high
+        documentId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Documentid
+          description: Only events extracted from this `doc_` document.
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        isAiExtracted:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Isaiextracted
+          description: True for extracted events only, false for hand-entered ones only.
+          examples:
+          - false
+        minConfidence:
+          anyOf:
+          - type: number
+            maximum: 1.0
+            minimum: 0.0
+          - type: 'null'
+          title: Minconfidence
+          description: Only extracted events at or above this confidence. Note that a manual event has no confidence at all and is excluded by any value here.
+          examples:
+          - 1.0
+        searchQuery:
+          anyOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+          title: Searchquery
+          description: Substring match on title or description.
+          examples:
+          - termination notice
+        party:
+          anyOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+          title: Party
+          description: Only events naming this party exactly.
+          examples:
+          - Acme Corporation
+        primaryOnly:
+          type: boolean
+          title: Primaryonly
+          description: Collapse duplicate events to one per group. Events that are in no duplicate group are always kept.
+          default: false
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      title: ChronologyFilters
+      description: 'Which events to include.
+
+
+        ONE model, two call sites: the list takes it as a query model and the export
+
+        takes it as a field on its body. That is deliberate, and it is why the export
+
+        is a POST. The web app''s export accepts eleven filter parameters and honours
+
+        every one of them; two separately-declared filter sets is how one of them
+
+        quietly stops being honoured on the export, which nobody notices until a
+
+        customer files a chronology that includes events they excluded.'
+    DocumentExtractionState:
+      properties:
+        documentId:
+          type: string
+          title: Documentid
+          description: The `doc_` document.
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        documentName:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Documentname
+          description: Its filename.
+          examples:
+          - msa-acme-v3.docx
+        status:
+          type: string
+          title: Status
+          description: '`pending`, `in_progress`, `completed`, `failed` or `skipped`. Deliberately NOT one of the five operation statuses: this is per-document bookkeeping under a capability that publishes no operation, and mapping it would put a sixth spelling of ''running'' into the contract.'
+          examples:
+          - completed
+        eventsExtracted:
+          type: integer
+          title: Eventsextracted
+          description: How many events came out of this document.
+          examples:
+          - 1
+      additionalProperties: false
+      type: object
+      required:
+      - documentId
+      - status
+      - eventsExtracted
+      title: DocumentExtractionState
+      description: Where one document's chronology extraction got to.
+    Page_ChronologyEvent_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/ChronologyEvent'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[ChronologyEvent]
+    ChronologyExtractionStatus:
+      properties:
+        documents:
+          items:
+            $ref: '#/components/schemas/DocumentExtractionState'
+          type: array
+          title: Documents
+          description: Per-document state, for every document extraction has touched.
+        totalDocuments:
+          type: integer
+          title: Totaldocuments
+          description: Finished documents in the matter.
+          examples:
+          - 1
+        completedDocuments:
+          type: integer
+          title: Completeddocuments
+          description: Documents whose extraction succeeded.
+          examples:
+          - 1
+        pendingDocuments:
+          type: integer
+          title: Pendingdocuments
+          description: Documents still waiting, including ones extraction has not reached yet and therefore has no per-document row for.
+          examples:
+          - 1
+        failedDocuments:
+          type: integer
+          title: Faileddocuments
+          description: Documents whose extraction failed.
+          examples:
+          - 1
+        isExtractionComplete:
+          type: boolean
+          title: Isextractioncomplete
+          description: True when nothing is outstanding and the matter had something to extract.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - documents
+      - totalDocuments
+      - completedDocuments
+      - pendingDocuments
+      - failedDocuments
+      - isExtractionComplete
+      title: ChronologyExtractionStatus
+      description: How far the automatic extraction has got across the whole matter.
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
+          examples:
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
+
+
+        `total` is the count of rows matching the filter, not the count returned,
+
+        so a caller can size a job before running it.'
+    ChronologyExportRequest:
+      properties:
+        format:
+          type: string
+          enum:
+          - csv
+          - pdf
+          - docx
+          title: Format
+          description: '`csv` for a spreadsheet, `pdf` or `docx` for a filed document.'
+          examples:
+          - csv
+        filters:
+          $ref: '#/components/schemas/ChronologyFilters'
+          description: Same fields as the list. Omit for the whole timeline.
+      additionalProperties: false
+      type: object
+      required:
+      - format
+      title: ChronologyExportRequest
+      description: 'A POST, because the filters live in the body.
+
+
+        The export honours exactly the filters the list accepts, and it refuses
+
+        rather than truncating: over the ceiling you get a 413 carrying `limit` and
+
+        `requested` so you can narrow the date range. The web app''s export silently
+
+        stops at 50,000 events with no flag on the response, which hands a customer a
+
+        file they believe is complete.'
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
+    ChronologyEventUpdateRequest:
+      properties:
+        eventDate:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Eventdate
+          description: When it happened.
+          examples:
+          - '2026-08-19'
+        eventDateEnd:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Eventdateend
+          description: The end of a date range. Send null to clear it.
+          examples:
+          - '2026-08-19'
+        eventDateApproximate:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Eventdateapproximate
+          description: True when the date is an estimate rather than a record.
+          examples:
+          - false
+        eventType:
+          anyOf:
+          - type: string
+            enum:
+            - signed
+            - executed
+            - filed
+            - served
+            - effective
+            - expired
+            - terminated
+            - notice_sent
+            - notice_received
+            - payment
+            - hearing
+            - meeting
+            - judgment
+            - order
+            - correspondence
+            - amended
+            - enacted
+            - published
+            - decided
+            - incident
+            - referenced
+            - founded
+            - incorporated
+            - appointed
+            - resigned
+            - acquired
+            - launched
+            - awarded
+            - approved
+            - registered
+            - commenced
+            - completed
+            - transferred
+            - invested
+            - dissolved
+            - announced
+            - renewed
+            - other
+          - type: 'null'
+          title: Eventtype
+          description: What happened.
+          examples:
+          - signed
+        category:
+          anyOf:
+          - type: string
+            enum:
+            - contract_event
+            - court_filing
+            - correspondence
+            - payment_financial
+            - deadline_notice
+            - meeting_hearing
+            - legislative
+            - case_law
+            - historical
+            - corporate
+            - regulatory
+            - employment
+            - milestone
+            - other
+          - type: 'null'
+          title: Category
+          description: Which swim lane it joins.
+          examples:
+          - contract_event
+        title:
+          anyOf:
+          - type: string
+            maxLength: 500
+            minLength: 1
+          - type: 'null'
+          title: Title
+          description: A one-line description.
+          examples:
+          - Master Services Agreement
+        description:
+          anyOf:
+          - type: string
+            maxLength: 5000
+          - type: 'null'
+          title: Description
+          description: The longer account. Send null to clear it.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        parties:
+          anyOf:
+          - items:
+              type: string
+            type: array
+            maxItems: 50
+          - type: 'null'
+          title: Parties
+          description: Who was involved. Replaces the whole list.
+          examples:
+          - - value
+        tags:
+          anyOf:
+          - items:
+              type: string
+            type: array
+            maxItems: 30
+          - type: 'null'
+          title: Tags
+          description: Free-form labels. Replaces the whole list.
+          examples:
+          - - saas
+            - buyer-side
+        significance:
+          anyOf:
+          - type: string
+            enum:
+            - high
+            - medium
+            - low
+          - type: 'null'
+          title: Significance
+          description: '`high`, `medium` or `low`.'
+          examples:
+          - high
+      additionalProperties: false
+      type: object
+      title: ChronologyEventUpdateRequest
+      description: 'Fields to change. Omitted fields are left alone.
+
+
+        An explicit null clears `description` or `eventDateEnd`. Every other field
+
+        here is backed by a NOT NULL column, so a null for one is refused by name
+
+        rather than passed to the database.
+
+
+        `documentId` is deliberately not patchable: which document an event came from
+
+        is provenance, and re-pointing it would make an extracted event claim a source
+
+        it was never read from.'
+    ChronologyEventCreateRequest:
+      properties:
+        eventDate:
+          type: string
+          format: date
+          title: Eventdate
+          description: When it happened. Required; there is no undated event.
+          examples:
+          - '2026-08-19'
+        eventDateEnd:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Eventdateend
+          description: The end of a date range.
+          examples:
+          - '2026-08-19'
+        eventDateApproximate:
+          type: boolean
+          title: Eventdateapproximate
+          description: True when the date is your best estimate.
+          default: false
+          examples:
+          - false
+        eventType:
+          type: string
+          enum:
+          - signed
+          - executed
+          - filed
+          - served
+          - effective
+          - expired
+          - terminated
+          - notice_sent
+          - notice_received
+          - payment
+          - hearing
+          - meeting
+          - judgment
+          - order
+          - correspondence
+          - amended
+          - enacted
+          - published
+          - decided
+          - incident
+          - referenced
+          - founded
+          - incorporated
+          - appointed
+          - resigned
+          - acquired
+          - launched
+          - awarded
+          - approved
+          - registered
+          - commenced
+          - completed
+          - transferred
+          - invested
+          - dissolved
+          - announced
+          - renewed
+          - other
+          title: Eventtype
+          description: What happened.
+          default: other
+          examples:
+          - signed
+        category:
+          type: string
+          enum:
+          - contract_event
+          - court_filing
+          - correspondence
+          - payment_financial
+          - deadline_notice
+          - meeting_hearing
+          - legislative
+          - case_law
+          - historical
+          - corporate
+          - regulatory
+          - employment
+          - milestone
+          - other
+          title: Category
+          description: Which swim lane it joins.
+          default: other
+          examples:
+          - contract_event
+        title:
+          type: string
+          maxLength: 500
+          minLength: 1
+          title: Title
+          description: A one-line description.
+          examples:
+          - Master Services Agreement
+        description:
+          anyOf:
+          - type: string
+            maxLength: 5000
+          - type: 'null'
+          title: Description
+          description: The longer account, when there is one.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        parties:
+          items:
+            type: string
+          type: array
+          maxItems: 50
+          title: Parties
+          description: Who was involved, by name.
+          examples:
+          - - value
+        tags:
+          items:
+            type: string
+          type: array
+          maxItems: 30
+          title: Tags
+          description: Free-form labels of your own.
+          examples:
+          - - saas
+            - buyer-side
+        significance:
+          type: string
+          enum:
+          - high
+          - medium
+          - low
+          title: Significance
+          description: '`high`, `medium` or `low`.'
+          default: medium
+          examples:
+          - high
+        documentId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Documentid
+          description: Link the event to a `doc_` document in this matter. The reference is checked against your organization AND this matter before it is written.
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        sourcePageNumber:
+          anyOf:
+          - type: integer
+            minimum: 1.0
+          - type: 'null'
+          title: Sourcepagenumber
+          description: The page in that document this event comes from.
+          examples:
+          - 1
+      additionalProperties: false
+      type: object
+      required:
+      - eventDate
+      - title
+      title: ChronologyEventCreateRequest
+      description: 'A hand-entered event.
+
+
+        Created events are recorded as NOT ai-extracted and carry no confidence,
+
+        which is what keeps them distinguishable from the pipeline''s output forever.'
+    Problem:
+      type: object
+      title: Problem
+      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: true
+    ChronologyEvent:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: '`evt_` identifier.'
+          examples:
+          - evt_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        matterId:
+          type: string
+          title: Matterid
+          description: The `mat_` matter this event belongs to.
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        documentId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Documentid
+          description: The `doc_` document this event was extracted from, or null for an event somebody entered by hand.
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        documentName:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Documentname
+          description: That document's filename, resolved at read time.
+          examples:
+          - msa-acme-v3.docx
+        eventDate:
+          type: string
+          format: date
+          title: Eventdate
+          description: When it happened.
+          examples:
+          - '2026-08-19'
+        eventDateEnd:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Eventdateend
+          description: The end of the range, for an event that spans days.
+          examples:
+          - '2026-08-19'
+        eventDateApproximate:
+          type: boolean
+          title: Eventdateapproximate
+          description: True when the source dated this loosely ('early 2024').
+          examples:
+          - false
+        eventType:
+          type: string
+          title: Eventtype
+          description: 'What happened, for example `signed`, `filed` or `hearing`. Read it as an open string: the column carries no constraint, so production can hold a value this API would refuse on a write.'
+          examples:
+          - signed
+        category:
+          type: string
+          title: Category
+          description: The swim lane it groups into. Open, as `eventType` is.
+          examples:
+          - commercial
+        significance:
+          type: string
+          title: Significance
+          description: '`high`, `medium` or `low`. Open, as above.'
+          examples:
+          - high
+        title:
+          type: string
+          title: Title
+          description: A one-line description of the event.
+          examples:
+          - Master Services Agreement
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: The longer account, when there is one.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        parties:
+          items:
+            type: string
+          type: array
+          title: Parties
+          description: Who was involved.
+          examples:
+          - - value
+        tags:
+          items:
+            type: string
+          type: array
+          title: Tags
+          description: Free-form labels.
+          examples:
+          - - saas
+            - buyer-side
+        sourceText:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourcetext
+          description: The passage the event was extracted from. Locate this string in the document's text to find it; there is no offset to trust.
+          examples:
+          - This Master Services Agreement is entered into as of 19 August 2026 between Acme Corporation, a Delaware corporation, and the Supplier identified on the signature page.
+        sourcePageNumber:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Sourcepagenumber
+          description: The page the passage was found on, when it could be resolved.
+          examples:
+          - 1
+        isAiExtracted:
+          type: boolean
+          title: Isaiextracted
+          description: False for an event created through this API or typed into the product.
+          examples:
+          - false
+        confidenceScore:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Confidencescore
+          description: 0 to 1 for an extracted event, null for a manual one.
+          examples:
+          - 1.0
+        isPrimaryInGroup:
+          type: boolean
+          title: Isprimaryingroup
+          description: False when this event duplicates another and was not chosen as the representative. Pass `primaryOnly=true` to drop the non-primary copies.
+          examples:
+          - false
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the row was written.
+          examples:
+          - '2026-08-19T14:32:10Z'
+        updatedAt:
+          type: string
+          format: date-time
+          title: Updatedat
+          description: When it last changed.
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - matterId
+      - eventDate
+      - eventDateApproximate
+      - eventType
+      - category
+      - significance
+      - title
+      - isAiExtracted
+      - isPrimaryInGroup
+      - createdAt
+      - updatedAt
+      title: ChronologyEvent
+      description: One dated event on the matter's timeline.
+    ChronologyExport:
+      properties:
+        format:
+          type: string
+          title: Format
+          description: The format that was rendered.
+          examples:
+          - docx
+        filename:
+          type: string
+          title: Filename
+          description: A filename derived from the matter's own name.
+          examples:
+          - msa-acme-v3.docx
+        sizeBytes:
+          type: integer
+          title: Sizebytes
+          description: Decoded size, so you can check `content` round-tripped.
+          examples:
+          - 248193
+        content:
+          type: string
+          title: Content
+          description: The file, base64-encoded.
+          examples:
+          - UEsDBBQABgAIAAAAIQ...
+        eventCount:
+          type: integer
+          title: Eventcount
+          description: How many events the file contains. Never truncated.
+          examples:
+          - 1
+      additionalProperties: false
+      type: object
+      required:
+      - format
+      - filename
+      - sizeBytes
+      - content
+      - eventCount
+      title: ChronologyExport
+      description: A rendered timeline, returned as bytes rather than as a signed URL.
+  securitySchemes:
+    WorkspaceAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: vq_ws_*
+      description: 'Workspace credential issued from the automation console at `/automation`. Send it as `Authorization: Bearer vq_ws_...`. This is NOT a Data API key: a `vq_key_` credential is refused here and names the other product in the error.'
+externalDocs:
+  description: Getting started guide and error reference
+  url: https://vaquill.ai/docs/workspace-api
+x-refined-from:
+- vaquill-ai-workspace-openapi.json
+- vaquill-ai-workspace-openapi.yml

@@ -1,0 +1,74 @@
+generated: '2026-10-07'
+method: searched
+source: https://www.vaquill.ai/docs/api-guide/alerts
+name: Vaquill law-change alert webhooks
+description: Board watches deliver law-change notifications by email (every plan) or webhook (Business plan) when a corpus refresh completes.
+  No AsyncAPI document is published; this catalog is read from the alerts guide.
+asyncapi_published: false
+subscription:
+  create: create_watch_api_v1_watches_post
+  update: update_watch_api_v1_watches__watch_id__patch
+  delete: delete_watch_api_v1_watches__watch_id__delete
+  list: list_watches_api_v1_watches_get
+  test: test_watch_api_v1_watches__watch_id__test_post
+  channels:
+  - email
+  - webhook
+  - both
+  plan_gate: Webhook delivery requires the Business plan; creating or repointing a watch whose channel is webhook or both returns 403 on any other
+    plan.
+  uniqueness: one watch per (board, channel, scope); duplicates answer 409
+  caps: 3 watches outside Business, 100 on Business (429 beyond)
+events:
+- name: board.updated
+  description: A watched board (corpusType/state pair) changed in a corpus refresh; the payload carries a changes[] list of added, amended and
+    removed sections inside the watch scope, plus a scope field so a receiver can tell which watch fired.
+- name: board.test
+  description: One-off delivery fired by POST /watches/{watchId}/test; not persisted to delivery history.
+change_types:
+- added
+- amended
+- removed
+delivery:
+  method: POST
+  headers:
+    X-Vaquill-Event: board.updated | board.test
+    X-Vaquill-Signature: sha256=<hex>, present only when webhookSecret is set
+  signature:
+    algorithm: HMAC-SHA256 over the delivery body
+    header: X-Vaquill-Signature
+    secret: webhookSecret set on the watch; stored encrypted, never returned
+  outbound_auth:
+    field: webhookAuth
+    schemes:
+    - 'bearer (Authorization: Bearer <secret>)'
+    - 'basic (Authorization: Basic <secret>)'
+    - 'header (<headerName>: <secret>)'
+    - none
+    note: headerName cannot be Authorization, a transport header, or X-Vaquill-*; rejected with 400 at registration
+  dedup: deliveryId is stable per watch per refresh event, even across internal retries
+  retries: Internal retries occur (deliveryId is stable across them); the retry schedule and backoff are not published.
+  history: GET /watches/{watchId}/deliveries returns attempt number, status code, success and error, newest first; attempts are retained 90 days
+    (docs/api-guide/data-privacy)
+  polling_backstop: GET /watches/{watchId}/changes (cursor in meta.cursor) returns the same filtered changes without a delivery
+renumbering: If a section is renumbered its act_id changes; renumbering emits a removed event carrying the OLD act_id, so the watch fires once
+  on the way out.
+workspace_api: 'The Workspace API has no webhooks: outbound webhooks were cut and polling GET /v1/operations/{operationId} is the only completion
+  signal (docs/workspace-api/authentication).'
+payload:
+  content_type: application/json
+  fields:
+  - event
+  - corpusType
+  - state
+  - boardLabel
+  - rowsAdded
+  - rowsUpdated
+  - rowsDeleted
+  - refreshLogId
+  - changes[] {changeKind, actId, citation, title, ...}
+  - changesOverflowCount
+  - deliveryId
+  - firedAt
+  - scope
+  note: changes is capped at 10 items; changesOverflowCount is the true count beyond that. changeKind is added, amended or removed.

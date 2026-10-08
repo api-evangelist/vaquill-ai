@@ -1,0 +1,30 @@
+generated: '2026-10-07'
+method: searched
+source: https://www.vaquill.ai/docs/api-guide/changelog; https://www.vaquill.ai/docs/api-guide/pagination; https://www.vaquill.ai/docs/workspace-api/overview;
+  https://www.vaquill.ai/refund-policy
+name: Vaquill API lifecycle
+versioning:
+  scheme: URL path version (/api/v1 for the Legal Data API, /workspace/v1 for the Workspace API); OpenAPI info.version 1.0.0 on all three contracts
+  current: v1
+  changelog: https://www.vaquill.ai/docs/api-guide/changelog
+  changelog_style: dated entries (64 as of 2026-10-07), no numbered releases
+deprecation:
+  policy: No written deprecation or sunset policy was found on the docs site; no Deprecation/Sunset headers are documented.
+  deprecated_fields:
+  - field: total in POST /us/statutes/search responses
+    note: a deprecated alias for count, still returned for back-compatibility
+    source: https://www.vaquill.ai/docs/api-guide/pagination
+  deprecated_operations: []
+status_page: null
+status_page_note: No status page was found in the site nav, footer, sitemap or docs index (probed 2026-10-07).
+sla:
+  published: false
+  note: No uptime SLA is published; the refund policy grants a full refund when "A sustained outage prevents you from accessing the service for
+    more than 72 hours and we are unable to restore access".
+  source: https://www.vaquill.ai/refund-policy
+credential_lifecycle:
+  workspace_credentials: expiry required, maximum 180 days; 5 active per installation; no rotate operation
+  source: https://www.vaquill.ai/docs/workspace-api/authentication
+discontinuation:
+  note: '"If Vaquill AI discontinues the API, we will refund the unused balance of credits at the original purchase price."'
+  source: https://www.vaquill.ai/refund-policy

@@ -1,0 +1,344 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/vaquill-ai/main/json-schema/vaquill-ai-nda-triage-schema.json",
+  "title": "NdaTriage",
+  "description": "One NDA triage: its screen, or its progress toward one.",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/vaquill-ai-workspace-openapi.yml#/components/schemas/NdaTriage",
+  "properties": {
+    "id": {
+      "type": "string",
+      "title": "Id",
+      "description": "Public identifier, `ndt_` followed by 32 hex characters."
+    },
+    "matterId": {
+      "type": "string",
+      "title": "Matterid",
+      "description": "`mat_` identifier of the matter this triage belongs to."
+    },
+    "status": {
+      "$ref": "#/$defs/OperationStatus",
+      "description": "Triage status, using the same five public values as an operation. While `queued` or `running`, `criteria` is empty and the scalar fields are absent. That is the truthful shape of a screen that has not happened yet, not an error."
+    },
+    "classification": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Classification",
+      "description": "The screen's own verdict: `green` (standard approval), `yellow` (counsel review) or `red` (significant issues)."
+    },
+    "effectiveClassification": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Effectiveclassification",
+      "description": "The verdict after layering your playbook on top, which is the one to act on. A deal-breaker flips this to `red` even where the screen said `green`. Equal to `classification` when no playbook applied."
+    },
+    "summary": {
+      "type": "string",
+      "title": "Summary",
+      "description": "Overall assessment, in prose.",
+      "default": ""
+    },
+    "ndaType": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Ndatype",
+      "description": "Structure of the agreement: `mutual`, `unilateral_disclosing`, `unilateral_receiving`, or `unknown`."
+    },
+    "counterpartyName": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Counterpartyname",
+      "description": "Counterparty, echoed from the request."
+    },
+    "playbookId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Playbookid",
+      "description": "The playbook the triage actually ran against. Absent when it ran against the built-in defaults, so the two cases can be told apart after the fact."
+    },
+    "jurisdiction": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Jurisdiction",
+      "description": "Jurisdiction the default positions were drawn from."
+    },
+    "criteria": {
+      "items": {
+        "$ref": "#/$defs/NdaTriageCriterion"
+      },
+      "type": "array",
+      "title": "Criteria",
+      "description": "The ten screening criteria and their results."
+    },
+    "passCount": {
+      "type": "integer",
+      "title": "Passcount",
+      "description": "How many criteria passed.",
+      "default": 0
+    },
+    "warnCount": {
+      "type": "integer",
+      "title": "Warncount",
+      "description": "How many criteria drew a warning.",
+      "default": 0
+    },
+    "failCount": {
+      "type": "integer",
+      "title": "Failcount",
+      "description": "How many criteria failed.",
+      "default": 0
+    },
+    "keyIssues": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "title": "Keyissues",
+      "description": "The issues that need attention first."
+    },
+    "routingRecommendation": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Routingrecommendation",
+      "description": "What to do next, given the classification."
+    },
+    "estimatedTimeline": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Estimatedtimeline",
+      "description": "How long resolution is expected to take, for example `Same day`."
+    },
+    "missingCarveouts": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "title": "Missingcarveouts",
+      "description": "Standard carve-outs the NDA does not have. The one finding that cannot be expressed as a criterion result, because there is nothing there to assess."
+    },
+    "problematicProvisions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "title": "Problematicprovisions",
+      "description": "Provisions that do not belong in an NDA at all, for example a non-compete or an assignment of IP."
+    },
+    "parseWarning": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Parsewarning",
+      "description": "Set when the model's output only partly parsed, which means the screen may be incomplete. Present is the difference between routing on it and asking a human first."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Createdat",
+      "description": "When the triage was created (RFC 3339)."
+    },
+    "completedAt": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Completedat",
+      "description": "When the triage reached a terminal status (RFC 3339)."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "id",
+    "matterId",
+    "status",
+    "createdAt"
+  ],
+  "$defs": {
+    "NdaPlaybookAssessment": {
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "title": "Verdict",
+          "description": "How this criterion measures against the playbook: `meets_standard`, `within_acceptable_range`, `outside_range`, `deal_breaker_hit`, or `not_assessed` when the playbook has no entry for it."
+        },
+        "playbookPosition": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Playbookposition",
+          "description": "The standard position this criterion was measured against."
+        },
+        "deviationSummary": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Deviationsummary",
+          "description": "How this NDA differs from the standard, in one line. For example `Your standard: 5y term cap; this NDA: 10y`."
+        },
+        "triggeredEscalations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Triggeredescalations",
+          "description": "Which of the playbook's escalation triggers fired on this criterion."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "verdict"
+      ],
+      "title": "NdaPlaybookAssessment",
+      "description": "One criterion measured against the organization's own positions.\n\nComputed deterministically from the playbook, not by the model: the LLM\nknows what a market NDA looks like and only the playbook knows what this\nfirm will sign."
+    },
+    "NdaTriageCriterion": {
+      "properties": {
+        "criterionId": {
+          "type": "integer",
+          "title": "Criterionid",
+          "description": "Stable number of this criterion, 1 through 10."
+        },
+        "criterionName": {
+          "type": "string",
+          "title": "Criterionname",
+          "description": "What the criterion checks."
+        },
+        "status": {
+          "type": "string",
+          "title": "Status",
+          "description": "The screen's verdict on this criterion: `pass`, `warn`, `fail`, or `not_found` when the NDA is silent."
+        },
+        "findings": {
+          "type": "string",
+          "title": "Findings",
+          "description": "What the NDA actually says about this criterion."
+        },
+        "issues": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Issues",
+          "description": "Specific problems identified."
+        },
+        "recommendation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Recommendation",
+          "description": "What to do about this criterion."
+        },
+        "playbookAssessment": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NdaPlaybookAssessment"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Verdict against your playbook. Absent when no playbook applied to this criterion."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "criterionId",
+        "criterionName",
+        "status",
+        "findings"
+      ],
+      "title": "NdaTriageCriterion",
+      "description": "One of the ten screening criteria, and what the NDA said about it."
+    },
+    "OperationStatus": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "running",
+        "succeeded",
+        "failed",
+        "cancelled"
+      ],
+      "title": "OperationStatus",
+      "description": "The public five. There is no sixth, and there are no synonyms.\n\nInternal vocabularies spell terminal success `completed`, `ready`,\n`extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;\nqueued `pending`, `queued` and `draft`. All of that is collapsed here by\n`app.workspace_api.adapters.status_map`, which refuses to guess."
+    }
+  }
+}

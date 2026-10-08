@@ -1,0 +1,45 @@
+generated: '2026-10-07'
+method: searched
+source: https://www.vaquill.ai/docs/api-guide/errors
+name: Vaquill Legal Data API error codes
+format: JSON object with a detail field (string, or an array of {loc, msg, type} on 422)
+envelope:
+  field: detail
+problems:
+- status: 400
+  title: Bad Request
+  description: The request parsed but the API refused it (an unscopable board, a missing webhookUrl/emailAddress for the channel, a refused webhookUrl,
+    an illegal webhookAuth.headerName).
+  remediation: The detail string names the specific problem, so read it rather than retrying
+- status: 401
+  title: Unauthorized
+  description: Invalid or missing API key.
+  remediation: Check your API key and Authorization header; include the Bearer prefix
+- status: 402
+  title: Payment Required
+  description: Account out of credits or expired.
+  remediation: Check your account dashboard
+- status: 403
+  title: Forbidden
+  description: Your key lacks the required scope, or your plan does not include the feature. Webhook delivery is Business-only.
+  remediation: 'Use channel: "email" or upgrade'
+- status: 404
+  title: Not Found
+  description: Resource does not exist.
+  remediation: Check the id or citation
+- status: 409
+  title: Conflict
+  description: You already hold a watch on the same board, channel and scope.
+  remediation: List your watches with GET /watches and reuse the existing one
+- status: 422
+  title: Validation Error
+  description: 'Schema validation: a field is missing, or its type or range is wrong; the response carries the loc array.'
+  remediation: Check request body for missing or invalid fields
+- status: 429
+  title: Rate Limited
+  description: Per-key limit exceeded, or the plan watch cap (3 outside Business, 100 on Business).
+  remediation: Back off and retry with exponential backoff; honor Retry-After
+- status: 500
+  title: Internal Error
+  description: Server error.
+  remediation: Retry after a brief delay; contact support if it persists

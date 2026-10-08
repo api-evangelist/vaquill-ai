@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/vaquill-ai/main/json-schema/vaquill-ai-matter-schema.json",
+  "title": "Matter",
+  "description": "A matter as this API publishes it.",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/vaquill-ai-workspace-openapi.yml#/components/schemas/Matter",
+  "properties": {
+    "id": {
+      "type": "string",
+      "title": "Id",
+      "description": "Public identifier, `mat_` followed by 32 hex characters. This is the value that goes in every matter-nested path."
+    },
+    "name": {
+      "type": "string",
+      "title": "Name",
+      "description": "The matter's display name."
+    },
+    "clientId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Clientid",
+      "description": "`cli_` identifier of the client this matter belongs to, if one was set."
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Description",
+      "description": "Free-text description of the matter."
+    },
+    "instructions": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Instructions",
+      "description": "Standing instructions the customer wants applied to AI work on this matter. Carried into drafting and review prompts."
+    },
+    "status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status",
+      "description": "Lifecycle status. Usually `open`, `pending` or `closed`, but published as a plain string because production holds values no UI offers. Do not branch on it without a fallback."
+    },
+    "practiceArea": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Practicearea",
+      "description": "Practice area, for example `employment` or `real_estate`. Free text."
+    },
+    "matterType": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Mattertype",
+      "description": "Customer's own sub-classification of the matter. Free text."
+    },
+    "caseNumber": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Casenumber",
+      "description": "Docket or internal case reference."
+    },
+    "responsibleAttorneyName": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Responsibleattorneyname",
+      "description": "Name of the attorney responsible for the matter. The underlying user id is deliberately not published."
+    },
+    "openDate": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Opendate",
+      "description": "Date the matter opened (`YYYY-MM-DD`)."
+    },
+    "closeDate": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Closedate",
+      "description": "Date the matter closed (`YYYY-MM-DD`). Absent while it is open."
+    },
+    "billingType": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Billingtype",
+      "description": "Billing arrangement, normally one of `hourly`, `flat_fee`, `contingency` or `pro_bono`. Published as a plain string."
+    },
+    "billingRate": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Billingrate",
+      "description": "Billing rate in `billingCurrency`. Rendered as a JSON STRING, not a number, so the value stays exact."
+    },
+    "billingCurrency": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Billingcurrency",
+      "description": "ISO 4217 currency code for `billingRate`, for example `USD`."
+    },
+    "country": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Country",
+      "description": "ISO 3166-1 alpha-2 country code, for example `US`. Unlike a client's `country`, this is a validated code."
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Metadata",
+      "description": "Arbitrary JSON the customer stores against the matter. Vaquill never reads it."
+    },
+    "isDefault": {
+      "type": "boolean",
+      "title": "Isdefault",
+      "description": "True for the one matter minted at signup that unfiled work lands in. Read-only: exactly one exists per organization and this API cannot create or move it.",
+      "default": false
+    },
+    "createdAt": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Createdat",
+      "description": "When the matter was created (RFC 3339)."
+    },
+    "updatedAt": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Updatedat",
+      "description": "When the matter was last modified (RFC 3339)."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "id",
+    "name"
+  ]
+}

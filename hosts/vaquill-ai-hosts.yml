@@ -1,0 +1,118 @@
+generated: '2026-10-07'
+method: derived
+source: the pre-flight dossier, apis.yml pointers, spec servers, well-known, vendors -- nothing fetched here
+generator: derive-hosts.py
+summary:
+  hosts: 7
+  own: 5
+  other_domain: 1
+  platform: 1
+  roles:
+  - api
+  - other
+  - portal
+  - source
+  - website
+hosts:
+- host: api.market
+  found_by:
+  - docs-index
+  types: []
+  serves:
+  - docs
+  registrable_domain: api.market
+  role: api
+  relation: other-domain
+- host: api.vaquill.ai
+  found_by:
+  - apis[]
+  - probed
+  - site-links
+  - spec-found
+  - contract-discovery
+  - well-known
+  types: []
+  serves:
+  - api
+  - spec
+  registrable_domain: vaquill.ai
+  role: api
+  relation: own
+- host: app.vaquill.ai
+  found_by:
+  - pointer
+  - probed
+  - site-links
+  - contract-discovery
+  - well-known
+  - vendor-detect
+  types:
+  - DeveloperPortal
+  - SignUp
+  - Login
+  serves:
+  - cdn
+  vendor: cloudflare
+  registrable_domain: vaquill.ai
+  role: portal
+  relation: own
+- host: github.com
+  found_by:
+  - pointer
+  types:
+  - GitHubOrganization
+  serves: []
+  registrable_domain: github.com
+  role: source
+  relation: platform
+- host: statutes-us.vaquill.ai
+  found_by:
+  - probed
+  - site-links
+  - contract-discovery
+  - well-known
+  types: []
+  serves: []
+  registrable_domain: vaquill.ai
+  role: other
+  relation: own
+- host: vaquill.ai
+  found_by:
+  - probed
+  - site-links
+  - contract-discovery
+  - well-known
+  types: []
+  serves: []
+  registrable_domain: vaquill.ai
+  role: other
+  relation: own
+- host: www.vaquill.ai
+  found_by:
+  - pointer
+  - apis[]
+  - probed
+  - docs-index
+  - contract-discovery
+  - well-known
+  - vendor-detect
+  types:
+  - Website
+  - Documentation
+  - APIReference
+  - GettingStarted
+  - ChangeLog
+  - Pricing
+  - Blog
+  - Support
+  - Sandbox
+  - Security
+  - TermsOfService
+  - PrivacyPolicy
+  serves:
+  - docs
+  - hosting
+  vendor: vercel
+  registrable_domain: vaquill.ai
+  role: website
+  relation: own

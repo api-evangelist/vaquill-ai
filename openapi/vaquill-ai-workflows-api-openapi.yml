@@ -1,0 +1,1941 @@
+openapi: 3.2.0
+info:
+  title: Vaquill Ai Workflows API
+  version: 1.0.0
+  description: 'Operations tagged Workflows across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.vaquill.ai/workspace
+  description: Vaquill Legal Workspace API (production)
+- url: /workspace
+  description: Vaquill Legal Workspace API (relative to the mount)
+security:
+- WorkspaceAuth: []
+tags:
+- name: Workflows
+  description: Multi-step analyses from a fixed catalogue. Read a definition to learn what documents and inputs it takes, launch a run inside a matter, then download the artifacts it produces.
+paths:
+  /v1/workflows:
+    get:
+      tags:
+      - Workflows
+      summary: List available workflows
+      description: 'The workflows this API can run.
+
+
+        Paged through the same envelope as every other collection even though the
+
+        catalogue is small and in memory. A bare array would be the one endpoint a
+
+        customer had to special-case, and the day the catalogue outgrows one page
+
+        there would be no compatible way to say so.'
+      operationId: workflows.list
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: How many rows to return, 1 to 200. Defaults to 50.
+          default: 50
+          title: Limit
+        description: How many rows to return, 1 to 200. Defaults to 50.
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+          default: 0
+          title: Offset
+        description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_WorkflowDefinition_'
+              example:
+                data:
+                - id: contract-diligence
+                  title: Contract diligence review
+                  description: Master services agreement with Acme for the 2026 platform rollout.
+                  category: commercial
+                  practiceAreas:
+                  - commercial
+                  estimatedMinutesMin: 4
+                  estimatedMinutesMax: 9
+                  documentSlots:
+                  - role: subject
+                    label: Liability cap
+                    description: Master services agreement with Acme for the 2026 platform rollout.
+                    minCount: 1
+                    maxCount: 3
+                    required: false
+                  inputs:
+                  - key: redline
+                    label: Liability cap
+                    fieldType: string
+                    required: false
+                    options:
+                    - 'yes'
+                    - 'no'
+                    - not addressed
+                    placeholder: Acme Corporation
+                    helpText: The counterparty's full legal entity name.
+                  artifacts:
+                  - key: redline
+                    label: Liability cap
+                    contentType: application/pdf
+                    description: Master services agreement with Acme for the 2026 platform rollout.
+                  bestFor: A first pass over a counterparty's standard form.
+                  limitations:
+                  - Does not assess data-protection adequacy.
+                pagination:
+                  limit: 50
+                  offset: 0
+                  total: 128
+                  hasMore: false
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/workflows/{workflowId}/runs:
+    post:
+      tags:
+      - Workflows
+      summary: Run a workflow
+      description: 'Launch a run of one workflow definition inside this matter.
+
+
+        Answers `202` with an operation to poll. Read the definition first: it
+
+        declares which document roles it accepts and which inputs it requires, and
+
+        validating against that is cheaper than discovering the shape from `422`s.
+
+        Documents must already be in this matter. `estimatedMinutes` on the
+
+        definition is what to size the polling interval against.'
+      operationId: workflows.run
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: workflowId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Workflowid
+        description: Identifier of the workflow DEFINITION to run, from `GET /v1/workflows`. This names the catalogue entry, not a run of it.
+      - name: Idempotency-Key
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency-Key
+        description: A unique value of your choosing, so a retried launch returns the FIRST operation instead of starting a second billable job. Reusing one with a different body is refused. Retrying with the same key and the same body is free and is the intended way to recover from a timeout.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowRunRequest'
+            example:
+              title: Diligence pass, Acme
+              documents:
+              - documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                role: subject
+                position: 0
+              inputs:
+                counterpartyName: Acme Corporation
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operation'
+              example:
+                id: op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                type: matrix.run
+                status: succeeded
+                createdAt: '2026-08-19T14:32:10Z'
+                completedAt: '2026-08-19T14:32:10Z'
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                resource:
+                  kind: matrix
+                  id: mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  url: https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+                progress:
+                  done: 24
+                  total: 128
+                  unit: cells
+                requestId: req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/workflow-runs/{runId}:
+    get:
+      tags:
+      - Workflows
+      summary: Get a workflow run
+      description: 'One run, with the artifacts it has produced so far.
+
+
+        The internal stage vocabulary collapses to `running`, so `progressPercent`
+
+        and `progressMessage` are what carry how far along it is. Artifacts are
+
+        listed without URLs; fetching one is its own call, so that a link cannot be
+
+        minted for a credential revoked between the two.'
+      operationId: workflowRuns.get
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: runId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Runid
+        description: '`wfr_` identifier of one workflow RUN. Returned on the operation that launched it, and distinct from the `workflowId` that was run.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowRun'
+              example:
+                id: wfr_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                workflowId: contract-diligence
+                title: Diligence pass, Acme
+                status: succeeded
+                progressPercent: 100
+                progressMessage: synthesizing findings
+                artifacts:
+                - key: redline
+                  label: Liability cap
+                  contentType: application/pdf
+                  sizeBytes: 248193
+                startedAt: '2026-08-19T14:32:10Z'
+                completedAt: '2026-08-19T14:32:10Z'
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      tags:
+      - Workflows
+      summary: Delete a workflow run
+      description: 'Delete a workflow run and its event history.
+
+
+        Documents the run produced and filed into the matter are NOT deleted. They
+
+        stay where they are and simply stop pointing back at the run, so deleting
+
+        the record of the work does not delete the work.
+
+
+        Refused with `409 operation-in-flight` while the run has not finished. Poll
+
+        the operation that started it first.
+
+
+        There is no undo, and a repeated delete answers `404`. If a delete timed
+
+        out, treat a subsequent `404` as success.'
+      operationId: workflowRuns.delete
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: runId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Runid
+        description: '`wfr_` identifier of one workflow RUN. Returned on the operation that launched it, and distinct from the `workflowId` that was run.'
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/workflow-runs/{runId}/artifact:
+    get:
+      tags:
+      - Workflows
+      summary: Download a workflow artifact
+      description: 'A short-lived URL for one of the run''s artifacts.
+
+
+        `key` is the definition''s own name for the deliverable, which
+
+        `workflows.list` publishes before anything has been run, so an integration
+
+        can be written against it without a round trip.'
+      operationId: workflowRuns.artifact
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: runId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Runid
+        description: '`wfr_` identifier of one workflow RUN. Returned on the operation that launched it, and distinct from the `workflowId` that was run.'
+      - name: key
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Key
+        description: The artifact's `key` slug, as published in the run's `artifacts` list. A slug, never a storage path.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowArtifactDownload'
+              example:
+                key: redline
+                url: https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+                expiresAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/workflow-runs:
+    get:
+      tags:
+      - Workflows
+      summary: List workflow runs in a matter
+      description: 'Every workflow run in this matter, newest first.
+
+
+        Runs started in the app outside any matter are not here, and cannot be:
+
+        every route on this resource is matter-nested, so a flat list would name
+
+        rows this API has no URL for. Everything started through this API appears.'
+      operationId: workflowRuns.list
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: How many rows to return, 1 to 200. Defaults to 50.
+          default: 50
+          title: Limit
+        description: How many rows to return, 1 to 200. Defaults to 50.
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+          default: 0
+          title: Offset
+        description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_WorkflowRun_'
+              example:
+                data:
+                - id: wfr_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  workflowId: contract-diligence
+                  title: Diligence pass, Acme
+                  status: succeeded
+                  progressPercent: 100
+                  progressMessage: synthesizing findings
+                  artifacts:
+                  - key: redline
+                    label: Liability cap
+                    contentType: application/pdf
+                    sizeBytes: 248193
+                  startedAt: '2026-08-19T14:32:10Z'
+                  completedAt: '2026-08-19T14:32:10Z'
+                  createdAt: '2026-08-19T14:32:10Z'
+                  updatedAt: '2026-08-19T14:32:10Z'
+                pagination:
+                  limit: 50
+                  offset: 0
+                  total: 128
+                  hasMore: false
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+components:
+  schemas:
+    WorkflowArtifact:
+      properties:
+        key:
+          type: string
+          title: Key
+          description: Slug identifying this artifact. Pass it to the artifact download route to get bytes.
+          examples:
+          - redline
+        label:
+          type: string
+          title: Label
+          description: Human-readable name for the deliverable.
+          examples:
+          - Liability cap
+        contentType:
+          type: string
+          title: Contenttype
+          description: IANA media type of the produced file.
+          examples:
+          - application/pdf
+        sizeBytes:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Sizebytes
+          description: Size of the artifact in bytes, when known.
+          examples:
+          - 248193
+      additionalProperties: false
+      type: object
+      required:
+      - key
+      - label
+      - contentType
+      title: WorkflowArtifact
+      description: 'An artifact a finished run produced. No URL: fetching one is its own call.
+
+
+        Separating the listing from the signing is what lets the download route
+
+        re-check the installation at signing time, so a URL cannot be minted for an
+
+        installation that was revoked between the two.'
+    WorkflowInputField:
+      properties:
+        key:
+          type: string
+          title: Key
+          description: The key to use for this field inside the run request's `inputs` object.
+          examples:
+          - redline
+        label:
+          type: string
+          title: Label
+          description: Human-readable question text.
+          examples:
+          - Liability cap
+        fieldType:
+          type: string
+          title: Fieldtype
+          description: What sort of value is expected, for example a string, a date or a choice. A plain string, since the internal vocabulary grows whenever the launcher gains a widget.
+          examples:
+          - string
+        required:
+          type: boolean
+          title: Required
+          description: True when a run is refused without this input.
+          default: false
+          examples:
+          - false
+        options:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Options
+          description: Allowed values when the field is a choice.
+          examples:
+          - - 'yes'
+            - 'no'
+            - not addressed
+        placeholder:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Placeholder
+          description: Example value, for display.
+          examples:
+          - Acme Corporation
+        helpText:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Helptext
+          description: Extra guidance on what to supply.
+          examples:
+          - The counterparty's full legal entity name.
+      additionalProperties: false
+      type: object
+      required:
+      - key
+      - label
+      - fieldType
+      title: WorkflowInputField
+      description: One question the definition asks, and how it is answered.
+    WorkflowRun:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `wfr_` followed by 32 hex characters.
+          examples:
+          - wfr_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        matterId:
+          type: string
+          title: Matterid
+          description: '`mat_` identifier of the matter this run belongs to.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        workflowId:
+          type: string
+          title: Workflowid
+          description: Identifier of the workflow definition that was run.
+          examples:
+          - contract-diligence
+        title:
+          type: string
+          title: Title
+          description: Display title for the run.
+          examples:
+          - Diligence pass, Acme
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: Run status, using the same five public values as an operation. The internal stage vocabulary (`preparing`, `extracting`, `synthesizing`, `rendering`) all reads as `running`.
+          examples:
+          - succeeded
+        progressPercent:
+          type: integer
+          title: Progresspercent
+          description: How far along the run is, 0 to 100. This is what carries progress, since the stages all collapse to `running`.
+          examples:
+          - 100
+        progressMessage:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Progressmessage
+          description: Short human-readable stage label, for example 'synthesizing findings'. Free text for a progress line only. Never branch on it; branch on `status`.
+          examples:
+          - synthesizing findings
+        artifacts:
+          items:
+            $ref: '#/components/schemas/WorkflowArtifact'
+          type: array
+          title: Artifacts
+          description: Deliverables produced so far. Listing is separate from downloading, so that a URL cannot be minted for an installation revoked between the two calls.
+        startedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Startedat
+          description: When the run began executing (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        completedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Completedat
+          description: When the run reached a terminal status (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the run was created (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        updatedAt:
+          type: string
+          format: date-time
+          title: Updatedat
+          description: When the run was last updated (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - matterId
+      - workflowId
+      - title
+      - status
+      - progressPercent
+      - createdAt
+      - updatedAt
+      title: WorkflowRun
+      description: 'One run. `status` is the public five, never the stored spelling.
+
+
+        The internal vocabulary has eight values, five of which (`preparing`,
+
+        `extracting`, `synthesizing`, `rendering`, plus `pending`) describe a stage
+
+        rather than an outcome. Those read as `running`, and `progressPercent` is
+
+        what carries how far along it is.'
+    Problem:
+      type: object
+      title: Problem
+      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: true
+    OperationProgress:
+      properties:
+        done:
+          type: integer
+          minimum: 0.0
+          title: Done
+          description: How many units are finished.
+          examples:
+          - 24
+        total:
+          type: integer
+          minimum: 0.0
+          title: Total
+          description: How many units there are in total. Can legitimately be zero for an empty run.
+          examples:
+          - 128
+        unit:
+          type: string
+          enum:
+          - cells
+          - steps
+          - documents
+          - files
+          - rows
+          - percent
+          title: Unit
+          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
+          examples:
+          - cells
+      additionalProperties: false
+      type: object
+      required:
+      - done
+      - total
+      - unit
+      title: OperationProgress
+      description: 'How far along, and in what units.
+
+
+        The unit is not decoration. A workflow run stores only a percentage while a
+
+        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
+
+        as 43 of 100 documents and a client builds a wrong estimate from it.'
+    WorkflowArtifactSpec:
+      properties:
+        key:
+          type: string
+          title: Key
+          description: Stable slug for this artifact. This is the value `workflowRuns.artifact` takes, so a download can be wired up before anything is run.
+          examples:
+          - redline
+        label:
+          type: string
+          title: Label
+          description: Human-readable name for the deliverable.
+          examples:
+          - Liability cap
+        contentType:
+          type: string
+          title: Contenttype
+          description: IANA media type the artifact will be produced in.
+          examples:
+          - application/pdf
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: What the artifact contains.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+      additionalProperties: false
+      type: object
+      required:
+      - key
+      - label
+      - contentType
+      title: WorkflowArtifactSpec
+      description: 'A deliverable this workflow produces, named before it exists.
+
+
+        `key` is what `workflowRuns.artifact` takes, so a customer can wire up the
+
+        download before running anything. `sampleUrl` is not carried over: it points
+
+        into the web app''s static tree and means nothing to a backend.'
+    OperationResource:
+      properties:
+        kind:
+          type: string
+          title: Kind
+          description: What sort of thing was produced, for example `matrix` or `document`.
+          examples:
+          - matrix
+        id:
+          type: string
+          title: Id
+          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
+          examples:
+          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+      additionalProperties: false
+      type: object
+      required:
+      - kind
+      - id
+      title: OperationResource
+      description: 'What the operation produced, or is producing.
+
+
+        `url` is a path on this API rather than an absolute URL, because the service
+
+        is mounted today and gets its own hostname later (docs 07.5). A relative
+
+        path survives that move; a baked-in host does not.'
+    Operation:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `op_` followed by 32 hex characters. Poll `GET /v1/operations/{operationId}` with it.
+          examples:
+          - op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        type:
+          type: string
+          title: Type
+          description: What kind of work this is, for example `matrix.run` or `draft.generate`.
+          examples:
+          - matrix.run
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: 'One of five values: `queued`, `running`, `succeeded`, `failed`, `cancelled`. There is no sixth and there are no synonyms. Stop polling once it is `succeeded`, `failed` or `cancelled`.'
+          examples:
+          - succeeded
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the operation was accepted (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        completedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Completedat
+          description: When the operation reached a terminal status (RFC 3339). Present if and only if the status is terminal.
+          examples:
+          - '2026-08-19T14:32:10Z'
+        matterId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matterid
+          description: '`mat_` identifier of the matter this work belongs to, when it belongs to one.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        resource:
+          anyOf:
+          - $ref: '#/components/schemas/OperationResource'
+          - type: 'null'
+          description: What the operation produced. Absent until the underlying job row exists, which an idempotent replay can briefly observe, so treat absence as 'not yet' rather than 'never'.
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/OperationError'
+          - type: 'null'
+          description: Why the work failed. Present only when `status` is `failed`. Partial success is `succeeded` with `progress.done < progress.total`, never an error.
+        progress:
+          anyOf:
+          - $ref: '#/components/schemas/OperationProgress'
+          - type: 'null'
+          description: How far along the work is, when the underlying job reports it. Absent does not mean no progress.
+        requestId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Requestid
+          description: The `X-Request-ID` of the request that created this operation. Quote it in a support ticket.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - type
+      - status
+      - createdAt
+      title: Operation
+      description: 'One long-running operation, whatever kind of work it is.
+
+
+        Readable for `OPERATION_RETENTION_DAYS` after creation, per AIP-151.'
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
+    WorkflowDefinition:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Identifier of the workflow definition. Pass it in the path when launching a run.
+          examples:
+          - contract-diligence
+        title:
+          type: string
+          title: Title
+          description: The workflow's display name.
+          examples:
+          - Contract diligence review
+        description:
+          type: string
+          title: Description
+          description: What the workflow does.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        category:
+          type: string
+          title: Category
+          description: Broad grouping for the catalogue.
+          examples:
+          - commercial
+        practiceAreas:
+          items:
+            type: string
+          type: array
+          title: Practiceareas
+          description: Practice areas this workflow suits.
+          examples:
+          - - commercial
+        estimatedMinutesMin:
+          type: integer
+          title: Estimatedminutesmin
+          description: Low end of the expected run time in minutes. Use it to size your polling interval.
+          examples:
+          - 4
+        estimatedMinutesMax:
+          type: integer
+          title: Estimatedminutesmax
+          description: High end of the expected run time in minutes.
+          examples:
+          - 9
+        documentSlots:
+          items:
+            $ref: '#/components/schemas/WorkflowDocumentSlot'
+          type: array
+          title: Documentslots
+          description: What documents the workflow accepts, and in which roles. Validate against this before launching rather than discovering the shape from 422s.
+        inputs:
+          items:
+            $ref: '#/components/schemas/WorkflowInputField'
+          type: array
+          title: Inputs
+          description: The questions this workflow asks. Their `key` values are the keys of the run request's `inputs` object.
+        artifacts:
+          items:
+            $ref: '#/components/schemas/WorkflowArtifactSpec'
+          type: array
+          title: Artifacts
+          description: The deliverables a finished run produces.
+        bestFor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Bestfor
+          description: When to reach for this workflow, in plain language.
+          examples:
+          - A first pass over a counterparty's standard form.
+        limitations:
+          items:
+            type: string
+          type: array
+          title: Limitations
+          description: What this workflow does not do. Worth reading before wiring it into an automated path.
+          examples:
+          - - Does not assess data-protection adequacy.
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - title
+      - description
+      - category
+      - estimatedMinutesMin
+      - estimatedMinutesMax
+      title: WorkflowDefinition
+      description: 'One catalogue entry.
+
+
+        Only active definitions are listed. A retired one still resolves in code so
+
+        old runs stay readable, but offering it would be offering something the
+
+        launch route refuses.'
+    WorkflowRunDocument:
+      properties:
+        documentId:
+          type: string
+          title: Documentid
+          description: '`doc_` identifier of the document to attach. Must be in this matter.'
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        role:
+          type: string
+          enum:
+          - subject
+          - playbook
+          - reference
+          - exhibit
+          - opposing
+          - context
+          title: Role
+          description: What part this document plays in the run. Must be a role the definition declares in its `documentSlots`.
+          default: subject
+          examples:
+          - subject
+        position:
+          type: integer
+          minimum: 0.0
+          title: Position
+          description: Order within the role, counting from 0. Matters when a role accepts more than one document.
+          default: 0
+          examples:
+          - 0
+      additionalProperties: false
+      type: object
+      required:
+      - documentId
+      title: WorkflowRunDocument
+      description: One document attached to a run, in a role the definition declares.
+    WorkflowArtifactDownload:
+      properties:
+        key:
+          type: string
+          title: Key
+          description: The artifact that was signed for.
+          examples:
+          - redline
+        url:
+          type: string
+          title: Url
+          description: Short-lived signed URL to download the artifact bytes. Fetch it promptly and do not store it.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+        expiresAt:
+          type: string
+          format: date-time
+          title: Expiresat
+          description: When the URL stops working (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - key
+      - url
+      - expiresAt
+      title: WorkflowArtifactDownload
+      description: A short-lived pointer to one artifact's bytes.
+    OperationStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: OperationStatus
+      description: 'The public five. There is no sixth, and there are no synonyms.
+
+
+        Internal vocabularies spell terminal success `completed`, `ready`,
+
+        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+
+        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+
+        `app.workspace_api.adapters.status_map`, which refuses to guess.'
+    Page_WorkflowDefinition_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/WorkflowDefinition'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[WorkflowDefinition]
+    WorkflowDocumentSlot:
+      properties:
+        role:
+          type: string
+          title: Role
+          description: The role slug to pass as a document's `role` when launching a run.
+          examples:
+          - subject
+        label:
+          type: string
+          title: Label
+          description: Human-readable name for this slot.
+          examples:
+          - Liability cap
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: What sort of document belongs in this slot.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        minCount:
+          type: integer
+          title: Mincount
+          description: Fewest documents accepted in this role.
+          examples:
+          - 1
+        maxCount:
+          type: integer
+          title: Maxcount
+          description: Most documents accepted in this role.
+          examples:
+          - 3
+        required:
+          type: boolean
+          title: Required
+          description: True when a run cannot start without at least one document in this role.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - role
+      - label
+      - minCount
+      - maxCount
+      - required
+      title: WorkflowDocumentSlot
+      description: 'What a definition will accept in one role, so a caller can validate first.
+
+
+        Published because the alternative is a customer discovering the shape of a
+
+        workflow by submitting runs and reading 422s.'
+    Page_WorkflowRun_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/WorkflowRun'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[WorkflowRun]
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
+          examples:
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
+
+
+        `total` is the count of rows matching the filter, not the count returned,
+
+        so a caller can size a job before running it.'
+    WorkflowRunRequest:
+      properties:
+        title:
+          anyOf:
+          - type: string
+            maxLength: 300
+            minLength: 1
+          - type: 'null'
+          title: Title
+          description: Display title for this run. Omit to take the definition's own title.
+          examples:
+          - Diligence pass, Acme
+        documents:
+          items:
+            $ref: '#/components/schemas/WorkflowRunDocument'
+          type: array
+          title: Documents
+          description: Documents to attach, each in a role the definition declares.
+        inputs:
+          additionalProperties: true
+          type: object
+          title: Inputs
+          description: Answers to the definition's questions, keyed by each input field's `key`. Untyped here because every definition declares its own field set; read `workflows.list` for the shape this workflow expects.
+      additionalProperties: false
+      type: object
+      title: WorkflowRunRequest
+      description: 'Launch a run of one definition inside one matter.
+
+
+        `inputs` is `dict[str, Any]` because each definition declares its own field
+
+        set, which `workflows.list` publishes and the definition itself validates.
+
+        Typing it here would mean generating one request model per workflow and
+
+        regenerating the OpenAPI document every time a definition gained a field.
+
+
+        There is no `countryCode`. Every active workflow is US-scoped after the 2026
+
+        pivot, and the internal route stopped accepting one for the same reason.'
+    OperationError:
+      properties:
+        code:
+          type: string
+          title: Code
+          description: Stable, machine-readable failure code. Branch on this, never on `message`.
+          examples:
+          - EXTRACTION_FAILED
+        message:
+          type: string
+          title: Message
+          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
+          examples:
+          - The upstream extraction did not finish.
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - message
+      title: OperationError
+      description: 'Why a failed operation failed, in terms a customer can act on.
+
+
+        `code` is stable and machine-readable. `message` is sanitized: the internal
+
+        job tables store stack traces and file paths in their `error_message`
+
+        columns, and forwarding those verbatim leaks our internals into a customer''s
+
+        logs.'
+  securitySchemes:
+    WorkspaceAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: vq_ws_*
+      description: 'Workspace credential issued from the automation console at `/automation`. Send it as `Authorization: Bearer vq_ws_...`. This is NOT a Data API key: a `vq_key_` credential is refused here and names the other product in the error.'
+externalDocs:
+  description: Getting started guide and error reference
+  url: https://vaquill.ai/docs/workspace-api
+x-refined-from:
+- vaquill-ai-workspace-openapi.json
+- vaquill-ai-workspace-openapi.yml

@@ -1,0 +1,562 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/vaquill-ai/main/json-schema/vaquill-ai-act-status-response-schema.json",
+  "title": "ActStatusResponse",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActStatusResponse",
+  "properties": {
+    "actId": {
+      "type": "string",
+      "title": "Actid"
+    },
+    "title": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Title"
+    },
+    "citation": {
+      "$ref": "#/$defs/Citation"
+    },
+    "goodLawStatus": {
+      "type": "string",
+      "title": "Goodlawstatus",
+      "description": "Our DERIVED verdict: `good_law`, `not_good_law` or `unknown`. Conservative by construction -- an unverified repeal claim maps to `unknown`, NEVER to `not_good_law`, because we do not check whether a repealing instrument was brought into force and at least one repeal on this record involves an Act that never commenced. One field to filter on; the three raw fields below remain if you want to judge it yourself.",
+      "default": "unknown"
+    },
+    "goodLawReason": {
+      "type": "string",
+      "title": "Goodlawreason",
+      "description": "Why the verdict above is what it is. Always present.",
+      "default": ""
+    },
+    "publisherStatus": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Publisherstatus",
+      "description": "`act_status` exactly as the publisher records it. Their word, not our verdict."
+    },
+    "servedStatus": {
+      "type": "string",
+      "title": "Servedstatus",
+      "description": "`served` or `retired`. OUR word about whether this API answers for it."
+    },
+    "isSubordinate": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Issubordinate"
+    },
+    "delegationType": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Delegationtype"
+    },
+    "parentActName": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Parentactname"
+    },
+    "commencementInfo": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Commencementinfo"
+    },
+    "territorialExtent": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Territorialextent"
+    },
+    "enactmentDate": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Enactmentdate",
+      "description": "The date the act was enacted, as `YYYY-MM-DD`, or null when the stored value is not a date we can state without guessing. 🔴 This is NOT the year in the act's short title: 'The Biswa Bangla Biswabidyalay Act, 2017' was enacted 2018-01-09, and on a subordinate instrument `year` is often the PARENT act's year. Use `year` for the title year and this field for the date."
+    },
+    "enactmentDateRaw": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Enactmentdateraw",
+      "description": "What the publisher stored, present only when it differs from `enactmentDate`. When `enactmentDate` is null this carries the reason it is null, by showing you the value: a bare year ('1963'), an era year ('15-Oct-1349', from an act titled in the Fasli calendar), or a corrupt one ('0032-03-05')."
+    },
+    "dateOfAssent": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dateofassent",
+      "description": "The date of assent as `YYYY-MM-DD`, or null when the stored value is not a date. Some records store an act NUMBER here ('15 of 1992'); those return null with the value in `dateOfAssentRaw`."
+    },
+    "dateOfAssentRaw": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dateofassentraw",
+      "description": "What the publisher stored, when it differs from `dateOfAssent`."
+    },
+    "lastAmendedYear": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Lastamendedyear"
+    },
+    "repeals": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Repeals",
+      "description": "Acts this one repeals, as the publisher names them. The inverse of `repealClaim`, and subject to the same caveat: it is their record, and we do not verify commencement."
+    },
+    "supersededBy": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Supersededby",
+      "description": "A later consolidation that replaced this version, where one is recorded."
+    },
+    "subordinateCount": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Subordinatecount",
+      "description": "Subordinate instruments the publisher records under this act."
+    },
+    "repealClaim": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RepealClaim"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retirement": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Retirement"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "currencyNote": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Currencynote"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "resolvedFrom": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IdentifierResolution"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "How your act_id or section number was matched, when it did not match exactly as sent. Null when it did."
+    },
+    "meta": {
+      "$ref": "#/$defs/Meta"
+    }
+  },
+  "type": "object",
+  "required": [
+    "actId",
+    "citation",
+    "servedStatus",
+    "provenance",
+    "meta"
+  ],
+  "$defs": {
+    "Citation": {
+      "properties": {
+        "citation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Citation"
+        },
+        "citationShort": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Citationshort"
+        },
+        "displayPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Displaypath"
+        },
+        "breadcrumb": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Breadcrumb"
+        }
+      },
+      "type": "object",
+      "title": "Citation",
+      "description": "How to cite the thing this response is about.\n\nBuilt from the publisher's own title, so where that title carries a defect\nso does the citation: some titles end in a period, which reads as\n`... Act., s. 3`, and some carry no year at all. Those are recorded defects\nrather than reasons to withhold the field. `GET /acts/coverage` publishes\nhow many served acts carry a citation, as `depth.actsWithCitation`."
+    },
+    "IdentifierResolution": {
+      "properties": {
+        "input": {
+          "type": "string",
+          "title": "Input",
+          "description": "The act identifier exactly as you sent it."
+        },
+        "actId": {
+          "type": "string",
+          "title": "Actid",
+          "description": "The act_id it matched. Send this next time."
+        },
+        "sectionInput": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sectioninput",
+          "description": "The section number exactly as you sent it, on a section route."
+        },
+        "sectionNumber": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sectionnumber",
+          "description": "The section number as the publisher writes it. Send this next time."
+        },
+        "via": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Via",
+          "description": "What was done to your input, in order. `normalized_id`: the act_id carried surrounding whitespace, quotes, backticks, an invisible character, a trailing period or double percent-encoding, which were removed. `normalized_section`: the section number was written differently from the publisher (a `s.` / `Sec.` / `Section` prefix, a hyphen or space before an alphabetic suffix, a lowercase suffix, or a trailing sub-provision), and matched one stored number and only one."
+        },
+        "subProvision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Subprovision",
+          "description": "The sub-provision your section number carried, e.g. `(1)(a)` for `302(1)(a)`. The WHOLE section is served: sub-provisions are not addressed separately."
+        }
+      },
+      "type": "object",
+      "required": [
+        "input",
+        "actId"
+      ],
+      "title": "IdentifierResolution",
+      "description": "How the act_id or section number you sent was matched, when not as sent.\n\nPresent only when the input did NOT match exactly. Absent (null) means the\nresponse is about exactly the act_id and section number in your request.\nSame idea, and the same field name, as `resolvedFrom` on the US surface."
+    },
+    "Meta": {
+      "properties": {
+        "processingTimeMs": {
+          "type": "number",
+          "title": "Processingtimems",
+          "description": "Server-side time for this request in milliseconds, excluding network transit. Not billed on.",
+          "default": 0.0
+        },
+        "creditsConsumed": {
+          "type": "number",
+          "title": "Creditsconsumed",
+          "description": "Credits actually charged. Read this rather than assuming the list price: refunded work bills 0.",
+          "default": 0.0
+        }
+      },
+      "type": "object",
+      "title": "Meta"
+    },
+    "Provenance": {
+      "properties": {
+        "sourceUrl": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sourceurl",
+          "description": "The publisher's own page for this document, when it resolves."
+        },
+        "sourceUrlNote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sourceurlnote",
+          "description": "Why `sourceUrl` is absent, when it is. A named reason, because a bare null cannot be told apart from 'not applicable'."
+        },
+        "textUrl": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Texturl"
+        },
+        "pdfUrl": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pdfurl"
+        }
+      },
+      "type": "object",
+      "title": "Provenance"
+    },
+    "RepealClaim": {
+      "properties": {
+        "repealedBy": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Repealedby"
+        },
+        "repealedByYear": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Repealedbyyear"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source"
+        },
+        "sourceHandle": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sourcehandle"
+        },
+        "commencementVerified": {
+          "type": "boolean",
+          "title": "Commencementverified",
+          "description": "Whether we checked that the repealing instrument was brought into force. Always false: we do not verify this, and at least one repeal on record involves an Act that never commenced.",
+          "default": false
+        },
+        "note": {
+          "type": "string",
+          "title": "Note"
+        }
+      },
+      "type": "object",
+      "required": [
+        "note"
+      ],
+      "title": "RepealClaim",
+      "description": "The publisher's claim about repeal, with our caveat attached.\n\nNever flattened into a verdict. India Code lists the Industrial Disputes\nAct, 1947 as repealed by Act 37 of 2020, the Industrial Relations Code,\nwhich has never been brought into force. Serving that as flatly \"repealed\"\nwould be wrong."
+    },
+    "Retirement": {
+      "properties": {
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "duplicateOf": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Duplicateof"
+        },
+        "observedOn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observedon"
+        }
+      },
+      "type": "object",
+      "title": "Retirement"
+    }
+  }
+}

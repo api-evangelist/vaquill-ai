@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/vaquill-ai/main/json-schema/vaquill-ai-ask-request-schema.json",
+  "title": "AskRequest",
+  "description": "One turn posted to a conversation.\n\nAnswers 202 with an operation. There is no streaming variant and no\nsynchronous mode: a customer's backend is not a browser, the answer is well\nover the ten-second threshold that decides 200 from 202, and one capability\nwith two response shapes is two integrations to test.",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/vaquill-ai-workspace-openapi.yml#/components/schemas/AskRequest",
+  "properties": {
+    "question": {
+      "type": "string",
+      "maxLength": 50000,
+      "minLength": 1,
+      "title": "Question",
+      "description": "What to ask, 1 to 50,000 characters. Whitespace is trimmed. Put documents in `groundIn` or `alsoConsider` rather than pasting them here."
+    },
+    "groundIn": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "maxItems": 20,
+      "title": "Groundin",
+      "description": "LOCK the answer to these `doc_` documents, at most 20. The corpus and web are suppressed and the answer is grounded only in these files. Mutually exclusive with `alsoConsider`."
+    },
+    "alsoConsider": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "maxItems": 20,
+      "title": "Alsoconsider",
+      "description": "ADD these `doc_` documents to what is searched, at most 20. Unlike `groundIn` the corpus and web stay in play, so use this when the documents are context rather than the whole answer."
+    },
+    "alsoConsiderDrafts": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "maxItems": 20,
+      "title": "Alsoconsiderdrafts",
+      "description": "`drf_` identifiers of in-progress drafts to pin into the answer's context, at most 20."
+    },
+    "skillSlug": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 200
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Skillslug",
+      "description": "Slug of a skill whose prompt should steer this answer. List them with `GET /v1/skills`. An unknown or invisible slug is refused rather than ignored."
+    },
+    "ragTier": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "standard",
+            "deep"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Ragtier",
+      "description": "`standard` or `deep`. Omit to use the matter's setting. Cannot be `deep` together with `enableAgenticMode`."
+    },
+    "enableWebSearch": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Enablewebsearch",
+      "description": "Omit to use the matter's setting, which defaults to ON. `false` turns web search off for this turn only and is not persisted."
+    },
+    "enableCorpusSearch": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Enablecorpussearch",
+      "description": "Search the shared US legal corpus (statutes, regulations, court rules, case law). Omit to use the matter's setting, which defaults to ON."
+    },
+    "enableMatterDocsSearch": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Enablematterdocssearch",
+      "description": "Search the matter's own uploaded documents. Omit to use the matter's setting, which defaults to ON."
+    },
+    "enableDraftSearch": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Enabledraftsearch",
+      "description": "Search the organization's in-progress drafts. Request-only: there is no column for it on a matter, so omitting it leaves the pipeline's own default rather than falling back to a matter setting."
+    },
+    "enableAgenticMode": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Enableagenticmode",
+      "description": "Let the model drive tools (web search, URL reading, document search) rather than retrieving once. Omit to use the matter's setting, which defaults to OFF. Agentic mode runs on the standard model, so it cannot be combined with `ragTier: deep`."
+    },
+    "enableDeepResearchMode": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Enabledeepresearchmode",
+      "description": "Answer from a long web-research pass instead of retrieval. Omit to use the matter's setting, which defaults to OFF. **Forced off when `groundIn` is set or the question refers to the matter's documents**: answering from the web while ignoring a pinned file is wrong. Compare `requestedSettings` with `effectiveSettings` on the answer to see whether it applied."
+    },
+    "countryCode": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Countrycode",
+      "description": "ISO 3166-1 alpha-2 jurisdiction for this turn. Omit to use the matter's setting."
+    },
+    "usStates": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "title": "Usstates",
+      "description": "Retrieval scope: two-letter state codes and/or `federal`, for example `[\"ca\", \"federal\"]`. Omit to use the matter's setting."
+    },
+    "usCorpusTypes": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "title": "Uscorpustypes",
+      "description": "Retrieval scope by KIND of law rather than by government: `STATE`, `REGULATION`, `STATE_RULES` and so on. An unrecognised token is refused, never dropped: silently ignoring one hands back the whole unfiltered corpus and the answer looks just as confident."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "question"
+  ]
+}

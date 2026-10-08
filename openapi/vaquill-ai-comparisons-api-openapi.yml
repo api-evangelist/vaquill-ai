@@ -1,0 +1,1933 @@
+openapi: 3.2.0
+info:
+  title: Vaquill Ai Comparisons API
+  version: 1.0.0
+  description: 'Operations tagged Comparisons across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.vaquill.ai/workspace
+  description: Vaquill Legal Workspace API (production)
+- url: /workspace
+  description: Vaquill Legal Workspace API (relative to the mount)
+security:
+- WorkspaceAuth: []
+tags:
+- name: Comparisons
+  description: Diffing two documents in a matter into structural changes, with a substantive-versus-cosmetic judgment and a downloadable redline.
+paths:
+  /v1/matters/{matterId}/comparisons:
+    post:
+      tags:
+      - Comparisons
+      summary: Compare two documents
+      description: 'Queue a comparison. 202 with an operation to poll.
+
+
+        A retry carrying the same `Idempotency-Key` returns the original operation
+
+        and starts nothing, which is what makes a client timeout free rather than a
+
+        second billed comparison.'
+      operationId: comparisons.create
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: Idempotency-Key
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency-Key
+        description: A unique value of your choosing, so a retried launch returns the FIRST operation instead of starting a second billable job. Reusing one with a different body is refused. Retrying with the same key and the same body is free and is the intended way to recover from a timeout.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComparisonCreateRequest'
+            example:
+              title: MSA v2 against v3
+              originalDocumentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+              revisedDocumentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+              settings:
+                granularity: word
+                ignoreCase: false
+                ignoreWhitespace: true
+                ignoreNumbering: false
+                ignoreFormatting: false
+                compareTables: true
+                compareFootnotes: true
+                compareHeadersFooters: true
+                authorLabel: Vaquill
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operation'
+              example:
+                id: op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                type: matrix.run
+                status: succeeded
+                createdAt: '2026-08-19T14:32:10Z'
+                completedAt: '2026-08-19T14:32:10Z'
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                resource:
+                  kind: matrix
+                  id: mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  url: https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+                progress:
+                  done: 24
+                  total: 128
+                  unit: cells
+                requestId: req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    get:
+      tags:
+      - Comparisons
+      summary: List comparisons in a matter
+      description: 'Every comparison in this matter, newest first.
+
+
+        Comparisons made in the app outside any matter are not here, and cannot be:
+
+        every route on this resource is matter-nested, so a flat list would name
+
+        rows this API has no URL for. Everything started through this API appears.
+
+
+        Deleted comparisons are absent, in the app''s trash as well as here.'
+      operationId: comparisons.list
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: How many rows to return, 1 to 200. Defaults to 50.
+          default: 50
+          title: Limit
+        description: How many rows to return, 1 to 200. Defaults to 50.
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+          default: 0
+          title: Offset
+        description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_Comparison_'
+              example:
+                data:
+                - id: cmp_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  title: MSA v2 against v3
+                  status: succeeded
+                  original:
+                    documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                    filename: msa-acme-v3.docx
+                    format: docx
+                    pageCount: 14
+                    sizeBytes: 248193
+                  revised:
+                    documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                    filename: msa-acme-v3.docx
+                    format: docx
+                    pageCount: 14
+                    sizeBytes: 248193
+                  settings:
+                    granularity: word
+                    ignoreCase: false
+                    ignoreWhitespace: true
+                    ignoreNumbering: false
+                    ignoreFormatting: false
+                    compareTables: true
+                    compareFootnotes: true
+                    compareHeadersFooters: true
+                    authorLabel: Vaquill
+                  hunkCount: 37
+                  substantiveCount: 12
+                  summary: Twelve substantive changes, seven of them in the liability and indemnity sections.
+                  summaryBullets:
+                  - Liability cap reduced
+                  - Governing law moved to California
+                  createdAt: '2026-08-19T14:32:10Z'
+                  updatedAt: '2026-08-19T14:32:10Z'
+                pagination:
+                  limit: 50
+                  offset: 0
+                  total: 128
+                  hasMore: false
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/comparisons/{comparisonId}:
+    get:
+      tags:
+      - Comparisons
+      summary: Get a comparison
+      description: 'One comparison: its status, its two sides, and its summary.
+
+
+        The sources are recorded as they were at launch, so they stay true after a
+
+        document is renamed or replaced. `substantiveCount` is the number a reviewer
+
+        actually has to look at; `hunkCount` includes cosmetic changes too. A `404`
+
+        covers every reason it is not readable.'
+      operationId: comparisons.get
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: comparisonId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Comparisonid
+        description: '`cmp_` identifier of the comparison. Returned on the operation that launched it.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comparison'
+              example:
+                id: cmp_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                title: MSA v2 against v3
+                status: succeeded
+                original:
+                  documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  filename: msa-acme-v3.docx
+                  format: docx
+                  pageCount: 14
+                  sizeBytes: 248193
+                revised:
+                  documentId: doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  filename: msa-acme-v3.docx
+                  format: docx
+                  pageCount: 14
+                  sizeBytes: 248193
+                settings:
+                  granularity: word
+                  ignoreCase: false
+                  ignoreWhitespace: true
+                  ignoreNumbering: false
+                  ignoreFormatting: false
+                  compareTables: true
+                  compareFootnotes: true
+                  compareHeadersFooters: true
+                  authorLabel: Vaquill
+                hunkCount: 37
+                substantiveCount: 12
+                summary: Twelve substantive changes, seven of them in the liability and indemnity sections.
+                summaryBullets:
+                - Liability cap reduced
+                - Governing law moved to California
+                createdAt: '2026-08-19T14:32:10Z'
+                updatedAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      tags:
+      - Comparisons
+      summary: Delete a comparison
+      description: 'Delete a comparison.
+
+
+        It goes to the trash a lawyer can see in the app, so somebody at the firm
+
+        can still restore it there. Through this API it is gone: it answers `404` on
+
+        its own `GET`, disappears from this list, and its export stops being
+
+        signable. The redline files it produced are left in storage and are no
+
+        longer reachable.
+
+
+        Refused with `409 operation-in-flight` while the comparison is still
+
+        running. Poll the operation that started it first.
+
+
+        A repeated delete answers `404`. If a delete timed out, treat a subsequent
+
+        `404` as success.'
+      operationId: comparisons.delete
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: comparisonId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Comparisonid
+        description: '`cmp_` identifier of the comparison. Returned on the operation that launched it.'
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/comparisons/{comparisonId}/hunks:
+    get:
+      tags:
+      - Comparisons
+      summary: List the changes in a comparison
+      description: 'The change list, in document order, one page at a time.
+
+
+        `index` is the stable position a customer means by "the third change", and
+
+        it is the sort key this list is paged by. Playbook and analysis fields are
+
+        populated only when the comparison ran with those passes.'
+      operationId: comparisons.hunks
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: comparisonId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Comparisonid
+        description: '`cmp_` identifier of the comparison. Returned on the operation that launched it.'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: How many rows to return, 1 to 200. Defaults to 50.
+          default: 50
+          title: Limit
+        description: How many rows to return, 1 to 200. Defaults to 50.
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+          default: 0
+          title: Offset
+        description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_ComparisonHunk_'
+              example:
+                data:
+                - id: hnk_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  index: 2
+                  kind: matrix
+                  severity: yellow
+                  beforeText: governed by the laws of Delaware
+                  afterText: governed by the laws of California
+                  sectionHeading: 12. Governing Law
+                  clauseLabel: '12.1'
+                  playbookVerdict: deviates
+                  playbookReason: The playbook requires Delaware or New York.
+                  playbookClauseType: governing_law
+                  favorability: unfavorable
+                  materiality: high
+                  category: liability
+                  impact: Moves disputes to the counterparty's home forum.
+                pagination:
+                  limit: 50
+                  offset: 0
+                  total: 128
+                  hasMore: false
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/matters/{matterId}/comparisons/{comparisonId}/exports:
+    post:
+      tags:
+      - Comparisons
+      summary: Export a comparison
+      description: 'Mint a short-lived URL to the rendered redline.
+
+
+        A POST rather than a GET because it creates something: a bearer URL that
+
+        grants access to a client document for as long as it lives. Recording that
+
+        as a creation is what lets an audit answer who took a copy and when.'
+      operationId: comparisons.export
+      parameters:
+      - name: matterId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Matterid
+        description: '`mat_` identifier of the matter to work inside. Everything in this API hangs off a matter, and the matter in the path is what the authorization boundary is checked against. Take it from `GET /v1/matters`.'
+      - name: comparisonId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Comparisonid
+        description: '`cmp_` identifier of the comparison. Returned on the operation that launched it.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComparisonExportRequest'
+            example:
+              format: redlineDocx
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComparisonExport'
+              example:
+                format: redlineDocx
+                url: https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+                expiresAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+components:
+  schemas:
+    OperationStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: OperationStatus
+      description: 'The public five. There is no sixth, and there are no synonyms.
+
+
+        Internal vocabularies spell terminal success `completed`, `ready`,
+
+        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+
+        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+
+        `app.workspace_api.adapters.status_map`, which refuses to guess.'
+    ComparisonExport:
+      properties:
+        format:
+          type: string
+          enum:
+          - redlineDocx
+          - redlinePdf
+          title: Format
+          description: The format that was exported.
+          examples:
+          - redlineDocx
+        url:
+          type: string
+          title: Url
+          description: Short-lived signed URL to download the rendered redline. Fetch it promptly and do not store it.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+        expiresAt:
+          type: string
+          format: date-time
+          title: Expiresat
+          description: When the URL stops working (RFC 3339). Absolute rather than a duration, so it is meaningful whenever you read it.
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - format
+      - url
+      - expiresAt
+      title: ComparisonExport
+      description: 'A short-lived pointer to the rendered comparison.
+
+
+        A URL rather than the bytes: the file is already in object storage, and
+
+        proxying it would put a customer''s large DOCX through our request path for
+
+        no benefit. `expiresAt` is absolute rather than a duration, because a
+
+        duration is only meaningful if the client knows when the response was
+
+        produced.'
+    ComparisonCreateRequest:
+      properties:
+        title:
+          type: string
+          maxLength: 300
+          minLength: 1
+          title: Title
+          description: Display title for the comparison. Trimmed; whitespace alone is refused.
+          examples:
+          - MSA v2 against v3
+        originalDocumentId:
+          type: string
+          title: Originaldocumentid
+          description: '`doc_` identifier of the ORIGINAL document, the one being compared against. Must be in this matter.'
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        revisedDocumentId:
+          type: string
+          title: Reviseddocumentid
+          description: '`doc_` identifier of the REVISED document. Must be in this matter, and must differ from `originalDocumentId`.'
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        settings:
+          $ref: '#/components/schemas/ComparisonSettings'
+          description: How the diff engine should treat the two inputs. Omit for sensible defaults.
+      additionalProperties: false
+      type: object
+      required:
+      - title
+      - originalDocumentId
+      - revisedDocumentId
+      title: ComparisonCreateRequest
+      description: 'Start a comparison between two documents already in the matter.
+
+
+        Both sides are matter documents. The internal API also accepts drafts,
+
+        draft versions and loose uploads; publishing those would mean publishing
+
+        three more identifier spaces, and a customer that wants to compare arbitrary
+
+        bytes uploads them to the matter first, which is one call it was going to
+
+        make anyway.
+
+
+        There is no `matterId` field. The matter is the path, which is what makes
+
+        the authorization boundary visible in the URL.'
+    Comparison:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `cmp_` followed by 32 hex characters.
+          examples:
+          - cmp_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        matterId:
+          type: string
+          title: Matterid
+          description: '`mat_` identifier of the matter this comparison belongs to.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        title:
+          type: string
+          title: Title
+          description: Display title for the comparison.
+          examples:
+          - MSA v2 against v3
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: Comparison status, using the same five public values as an operation. Hunks are only complete once this is `succeeded`.
+          examples:
+          - succeeded
+        original:
+          $ref: '#/components/schemas/ComparisonSource'
+          description: The original side, as resolved at launch.
+        revised:
+          $ref: '#/components/schemas/ComparisonSource'
+          description: The revised side, as resolved at launch.
+        settings:
+          $ref: '#/components/schemas/ComparisonSettings'
+          description: The settings this comparison actually ran with.
+        hunkCount:
+          type: integer
+          title: Hunkcount
+          description: Total structural changes found, cosmetic ones included.
+          examples:
+          - 37
+        substantiveCount:
+          type: integer
+          title: Substantivecount
+          description: Changes the engine judged substantive rather than cosmetic. This is the number a reviewer actually has to look at.
+          examples:
+          - 12
+        summary:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Summary
+          description: Prose summary of what changed. Absent until the comparison succeeds.
+          examples:
+          - Twelve substantive changes, seven of them in the liability and indemnity sections.
+        summaryBullets:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Summarybullets
+          description: The same summary as discrete points, for rendering as a list.
+          examples:
+          - - Liability cap reduced
+            - Governing law moved to California
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the comparison was created (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        updatedAt:
+          type: string
+          format: date-time
+          title: Updatedat
+          description: When the comparison was last updated (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - matterId
+      - title
+      - status
+      - original
+      - revised
+      - settings
+      - hunkCount
+      - substantiveCount
+      - createdAt
+      - updatedAt
+      title: Comparison
+      description: One comparison. `status` is the public five, never the stored spelling.
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
+          examples:
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
+
+
+        `total` is the count of rows matching the filter, not the count returned,
+
+        so a caller can size a job before running it.'
+    OperationProgress:
+      properties:
+        done:
+          type: integer
+          minimum: 0.0
+          title: Done
+          description: How many units are finished.
+          examples:
+          - 24
+        total:
+          type: integer
+          minimum: 0.0
+          title: Total
+          description: How many units there are in total. Can legitimately be zero for an empty run.
+          examples:
+          - 128
+        unit:
+          type: string
+          enum:
+          - cells
+          - steps
+          - documents
+          - files
+          - rows
+          - percent
+          title: Unit
+          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
+          examples:
+          - cells
+      additionalProperties: false
+      type: object
+      required:
+      - done
+      - total
+      - unit
+      title: OperationProgress
+      description: 'How far along, and in what units.
+
+
+        The unit is not decoration. A workflow run stores only a percentage while a
+
+        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
+
+        as 43 of 100 documents and a client builds a wrong estimate from it.'
+    Operation:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `op_` followed by 32 hex characters. Poll `GET /v1/operations/{operationId}` with it.
+          examples:
+          - op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        type:
+          type: string
+          title: Type
+          description: What kind of work this is, for example `matrix.run` or `draft.generate`.
+          examples:
+          - matrix.run
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: 'One of five values: `queued`, `running`, `succeeded`, `failed`, `cancelled`. There is no sixth and there are no synonyms. Stop polling once it is `succeeded`, `failed` or `cancelled`.'
+          examples:
+          - succeeded
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the operation was accepted (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        completedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Completedat
+          description: When the operation reached a terminal status (RFC 3339). Present if and only if the status is terminal.
+          examples:
+          - '2026-08-19T14:32:10Z'
+        matterId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matterid
+          description: '`mat_` identifier of the matter this work belongs to, when it belongs to one.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        resource:
+          anyOf:
+          - $ref: '#/components/schemas/OperationResource'
+          - type: 'null'
+          description: What the operation produced. Absent until the underlying job row exists, which an idempotent replay can briefly observe, so treat absence as 'not yet' rather than 'never'.
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/OperationError'
+          - type: 'null'
+          description: Why the work failed. Present only when `status` is `failed`. Partial success is `succeeded` with `progress.done < progress.total`, never an error.
+        progress:
+          anyOf:
+          - $ref: '#/components/schemas/OperationProgress'
+          - type: 'null'
+          description: How far along the work is, when the underlying job reports it. Absent does not mean no progress.
+        requestId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Requestid
+          description: The `X-Request-ID` of the request that created this operation. Quote it in a support ticket.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - type
+      - status
+      - createdAt
+      title: Operation
+      description: 'One long-running operation, whatever kind of work it is.
+
+
+        Readable for `OPERATION_RETENTION_DAYS` after creation, per AIP-151.'
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
+    Page_Comparison_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Comparison'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[Comparison]
+    OperationResource:
+      properties:
+        kind:
+          type: string
+          title: Kind
+          description: What sort of thing was produced, for example `matrix` or `document`.
+          examples:
+          - matrix
+        id:
+          type: string
+          title: Id
+          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
+          examples:
+          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+      additionalProperties: false
+      type: object
+      required:
+      - kind
+      - id
+      title: OperationResource
+      description: 'What the operation produced, or is producing.
+
+
+        `url` is a path on this API rather than an absolute URL, because the service
+
+        is mounted today and gets its own hostname later (docs 07.5). A relative
+
+        path survives that move; a baked-in host does not.'
+    OperationError:
+      properties:
+        code:
+          type: string
+          title: Code
+          description: Stable, machine-readable failure code. Branch on this, never on `message`.
+          examples:
+          - EXTRACTION_FAILED
+        message:
+          type: string
+          title: Message
+          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
+          examples:
+          - The upstream extraction did not finish.
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - message
+      title: OperationError
+      description: 'Why a failed operation failed, in terms a customer can act on.
+
+
+        `code` is stable and machine-readable. `message` is sanitized: the internal
+
+        job tables store stack traces and file paths in their `error_message`
+
+        columns, and forwarding those verbatim leaks our internals into a customer''s
+
+        logs.'
+    ComparisonSettings:
+      properties:
+        granularity:
+          type: string
+          enum:
+          - word
+          - sentence
+          - character
+          title: Granularity
+          description: How finely to diff. `word` is the readable default; `character` catches punctuation edits but produces far more hunks.
+          default: word
+          examples:
+          - word
+        ignoreCase:
+          type: boolean
+          title: Ignorecase
+          description: Treat differences in letter case as unchanged.
+          default: false
+          examples:
+          - false
+        ignoreWhitespace:
+          type: boolean
+          title: Ignorewhitespace
+          description: Treat differences in spacing and line breaks as unchanged. On by default, since reflowed paragraphs otherwise dominate the result.
+          default: true
+          examples:
+          - true
+        ignoreNumbering:
+          type: boolean
+          title: Ignorenumbering
+          description: Treat renumbered clauses as unchanged. Useful when a clause was inserted and everything below it shifted.
+          default: false
+          examples:
+          - false
+        ignoreFormatting:
+          type: boolean
+          title: Ignoreformatting
+          description: Treat bold, italic and font changes as unchanged.
+          default: false
+          examples:
+          - false
+        compareTables:
+          type: boolean
+          title: Comparetables
+          description: Include table contents in the comparison.
+          default: true
+          examples:
+          - true
+        compareFootnotes:
+          type: boolean
+          title: Comparefootnotes
+          description: Include footnotes in the comparison.
+          default: true
+          examples:
+          - true
+        compareHeadersFooters:
+          type: boolean
+          title: Compareheadersfooters
+          description: Include page headers and footers in the comparison.
+          default: true
+          examples:
+          - true
+        authorLabel:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Authorlabel
+          description: Name shown as the revision author on every tracked change in an exported redline. Set it to your own firm or product name.
+          examples:
+          - Vaquill
+      additionalProperties: false
+      type: object
+      title: ComparisonSettings
+      description: 'How the diff engine treats the two inputs.
+
+
+        A `WorkspaceRequest` even though it is also read back, so `extra="forbid"`
+
+        refuses an unknown knob on the way in rather than accepting and ignoring it.
+
+        A silently ignored setting is worse than a rejected one: the customer
+
+        believes the comparison honoured it.
+
+
+        Reading it back is done by explicit projection in the store and never by
+
+        validating the stored JSONB, which also carries the engine and the
+
+        denormalized playbook fields.'
+    ComparisonSource:
+      properties:
+        documentId:
+          type: string
+          title: Documentid
+          description: '`doc_` identifier of this side''s document.'
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        filename:
+          type: string
+          title: Filename
+          description: Filename as it was at launch. Recorded rather than looked up, so it stays true after the document is renamed.
+          examples:
+          - msa-acme-v3.docx
+        format:
+          type: string
+          title: Format
+          description: 'Detected document format, for example `docx` or `pdf`. A plain string: the detector also recognizes `rtf` and `odt`.'
+          examples:
+          - docx
+        pageCount:
+          type: integer
+          title: Pagecount
+          description: Pages in this side's document.
+          examples:
+          - 14
+        sizeBytes:
+          type: integer
+          title: Sizebytes
+          description: Size of this side's document in bytes.
+          examples:
+          - 248193
+      additionalProperties: false
+      type: object
+      required:
+      - documentId
+      - filename
+      - format
+      - pageCount
+      - sizeBytes
+      title: ComparisonSource
+      description: 'One side of a comparison, as it was resolved at launch.
+
+
+        Denormalized on purpose and read back from the stored row rather than from
+
+        the document: it records what was compared, which stays true after the
+
+        document is renamed or replaced.'
+    ComparisonHunk:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier for this hunk, `hnk_` followed by 32 hex characters.
+          examples:
+          - hnk_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        index:
+          type: integer
+          title: Index
+          description: Position in the change list, stable across reads of a finished comparison. This is what a customer means by 'the third change', and it is the sort key the list is paged by. Ordering, not geometry.
+          examples:
+          - 2
+        kind:
+          type: string
+          title: Kind
+          description: What sort of change this is, for example an insertion, a deletion or a replacement.
+          examples:
+          - matrix
+        severity:
+          type: string
+          title: Severity
+          description: How significant the engine judged the change. Published as a plain string.
+          examples:
+          - yellow
+        beforeText:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Beforetext
+          description: The text as it stood in the original. Absent for a pure insertion.
+          examples:
+          - governed by the laws of Delaware
+        afterText:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Aftertext
+          description: The text as it stands in the revision. Absent for a pure deletion.
+          examples:
+          - governed by the laws of California
+        sectionHeading:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectionheading
+          description: Heading of the section the change sits in, when one could be resolved.
+          examples:
+          - 12. Governing Law
+        clauseLabel:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Clauselabel
+          description: Clause number or label the change sits under, for example `8.2`.
+          examples:
+          - '12.1'
+        playbookVerdict:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Playbookverdict
+          description: What the playbook makes of this change. Present only when the comparison ran against a playbook.
+          examples:
+          - deviates
+        playbookReason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Playbookreason
+          description: Why the playbook reached that verdict. Present only when the comparison ran against a playbook.
+          examples:
+          - The playbook requires Delaware or New York.
+        playbookClauseType:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Playbookclausetype
+          description: Clause-type slug the playbook matched this change to.
+          examples:
+          - governing_law
+        favorability:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Favorability
+          description: Whether the change favors your side or the counterparty. Present when the analysis pass ran.
+          examples:
+          - unfavorable
+        materiality:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Materiality
+          description: How much the change matters commercially. Present when the analysis pass ran.
+          examples:
+          - high
+        category:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Category
+          description: What the change is about, for example liability or termination. Present when the analysis pass ran.
+          examples:
+          - liability
+        impact:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Impact
+          description: Plain-language statement of what the change does to your position. Present when the analysis pass ran.
+          examples:
+          - Moves disputes to the counterparty's home forum.
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - index
+      - kind
+      - severity
+      title: ComparisonHunk
+      description: One structural change, in terms that survive outside the viewer.
+    Problem:
+      type: object
+      title: Problem
+      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: true
+    ComparisonExportRequest:
+      properties:
+        format:
+          type: string
+          enum:
+          - redlineDocx
+          - redlinePdf
+          title: Format
+          description: Which rendered artifact to link to. Both are written by the comparison worker, so this returns a pointer rather than triggering a render.
+          examples:
+          - redlineDocx
+      additionalProperties: false
+      type: object
+      required:
+      - format
+      title: ComparisonExportRequest
+      description: Ask for a pointer to a rendered redline the worker already produced.
+    Page_ComparisonHunk_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/ComparisonHunk'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[ComparisonHunk]
+  securitySchemes:
+    WorkspaceAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: vq_ws_*
+      description: 'Workspace credential issued from the automation console at `/automation`. Send it as `Authorization: Bearer vq_ws_...`. This is NOT a Data API key: a `vq_key_` credential is refused here and names the other product in the error.'
+externalDocs:
+  description: Getting started guide and error reference
+  url: https://vaquill.ai/docs/workspace-api
+x-refined-from:
+- vaquill-ai-workspace-openapi.json
+- vaquill-ai-workspace-openapi.yml

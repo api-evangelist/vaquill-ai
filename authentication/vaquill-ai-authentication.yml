@@ -1,0 +1,72 @@
+generated: '2026-10-07'
+method: searched
+source: openapi/vaquill-ai-india-openapi.yml, openapi/vaquill-ai-openapi.yml, openapi/vaquill-ai-workspace-openapi.yml; https://www.vaquill.ai/docs/api-guide/authentication;
+  https://www.vaquill.ai/docs/workspace-api/authentication; https://www.vaquill.ai/docs/integrations/mcp/vaquill
+summary:
+  types:
+  - apiKey
+  - http
+  - oauth2
+  api_key_in:
+  - header
+  - query
+schemes:
+- name: ApiKeyAuth
+  type: http
+  scheme: bearer
+  bearerFormat: vq_key_*
+  description: 'API key issued from the developer dashboard. Pass as `Authorization: Bearer vq_key_...` (preferred).'
+  sources:
+  - openapi/vaquill-ai-openapi.yml
+  - openapi/vaquill-ai-india-openapi.yml
+  key_prefix: vq_key_
+  issued_from: https://app.vaquill.ai/settings (API Keys)
+  docs: https://www.vaquill.ai/docs/api-guide/authentication
+- name: ApiKeyHeader
+  type: apiKey
+  in: header
+  parameter: X-API-Key
+  description: 'The same API key as a bare header value: `X-API-Key: vq_key_...`. Equivalent to the Bearer form.'
+  sources:
+  - openapi/vaquill-ai-india-openapi.yml
+  - openapi/vaquill-ai-openapi.yml
+- name: ApiKeyQuery
+  type: apiKey
+  in: query
+  parameter: api_key
+  description: 'The same API key as a query parameter: `?api_key=vq_key_...`. Use only where you cannot set a header. A URL can end up in proxy
+    and server logs, browser history and shared links, so prefer either header form, and rotate a key that has leaked.'
+  sources:
+  - openapi/vaquill-ai-india-openapi.yml
+  - openapi/vaquill-ai-openapi.yml
+- name: WorkspaceAuth
+  type: http
+  scheme: bearer
+  bearerFormat: vq_ws_*
+  description: Workspace credential issued by an organization owner from the automation console at /automation. 42 characters including a 6-character
+    checksum, hashed at rest, expiry required (maximum 180 days), 5 active credentials per installation, no rotate operation (issue a second,
+    deploy, revoke the first). Carries resource:action scopes (see scopes/). A vq_key_ Data API key is refused with wrong-product-credential.
+  sources:
+  - openapi/vaquill-ai-workspace-openapi.yml
+  docs: https://www.vaquill.ai/docs/workspace-api/authentication
+  key_prefix: vq_ws_
+- name: McpOAuth
+  type: oauth2
+  flows:
+    authorizationCode:
+      authorizationUrl: https://mcp.vaquill.ai/authorize
+      tokenUrl: https://mcp.vaquill.ai/token
+      refreshUrl: https://mcp.vaquill.ai/token
+      scopes:
+        offline_access: Refresh-token access for the MCP connector
+  description: 'OAuth 2.1 for the hosted MCP endpoint https://mcp.vaquill.ai/mcp: PKCE S256, dynamic client registration at /register, client_id
+    metadata documents supported, token endpoint auth none or private_key_jwt. Read from the served RFC 8414 / RFC 9728 metadata.'
+  sources:
+  - well-known/mcp.vaquill.ai-oauth-authorization-server.json
+  - well-known/mcp.vaquill.ai-oauth-protected-resource-mcp.json
+  docs: https://www.vaquill.ai/docs/integrations/mcp/claude-connector
+docs: https://www.vaquill.ai/docs/api-guide/authentication; https://www.vaquill.ai/docs/workspace-api/authentication; https://www.vaquill.ai/docs/integrations/mcp/vaquill
+surfaces:
+  data_api: vq_key_ (Bearer, X-API-Key or api_key query)
+  workspace_api: vq_ws_ Bearer with scopes
+  mcp_remote: OAuth 2.1 at /mcp or vq_key_ Bearer at /s/_

@@ -1,0 +1,275 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/vaquill-ai/main/json-schema/vaquill-ai-act-subordinate-response-schema.json",
+  "title": "ActSubordinateResponse",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActSubordinateResponse",
+  "properties": {
+    "actId": {
+      "type": "string",
+      "title": "Actid"
+    },
+    "title": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Title"
+    },
+    "citation": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Citation"
+    },
+    "children": {
+      "items": {
+        "$ref": "#/$defs/SubordinateRow"
+      },
+      "type": "array",
+      "title": "Children"
+    },
+    "total": {
+      "type": "integer",
+      "title": "Total",
+      "description": "Distinct subordinate instruments across all pages, not rows on this page (that is `returned`). Counted per instrument, so an instrument stored as many passages counts once."
+    },
+    "totalIsExact": {
+      "type": "boolean",
+      "title": "Totalisexact",
+      "description": "False when the corpus scan behind `total` hit its ceiling, which makes `total` a floor. The ceiling sits above the largest parent in the corpus, so this is true today."
+    },
+    "returned": {
+      "type": "integer",
+      "title": "Returned",
+      "description": "Rows in `children` on THIS page."
+    },
+    "page": {
+      "type": "integer",
+      "title": "Page",
+      "description": "1-based page this response answers."
+    },
+    "pageSize": {
+      "type": "integer",
+      "title": "Pagesize",
+      "description": "Rows per page requested."
+    },
+    "hasMore": {
+      "type": "boolean",
+      "title": "Hasmore",
+      "description": "True when a further page of instruments exists."
+    },
+    "truncated": {
+      "type": "boolean",
+      "title": "Truncated",
+      "description": "DEPRECATED. True when `hasMore` is true or `totalIsExact` is false. Read those two instead."
+    },
+    "matchBasis": {
+      "type": "string",
+      "title": "Matchbasis"
+    },
+    "note": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Note"
+    },
+    "resolvedFrom": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IdentifierResolution"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "How your act_id or section number was matched, when it did not match exactly as sent. Null when it did."
+    },
+    "meta": {
+      "$ref": "#/$defs/Meta"
+    }
+  },
+  "type": "object",
+  "required": [
+    "actId",
+    "total",
+    "totalIsExact",
+    "returned",
+    "page",
+    "pageSize",
+    "hasMore",
+    "truncated",
+    "matchBasis",
+    "meta"
+  ],
+  "$defs": {
+    "IdentifierResolution": {
+      "properties": {
+        "input": {
+          "type": "string",
+          "title": "Input",
+          "description": "The act identifier exactly as you sent it."
+        },
+        "actId": {
+          "type": "string",
+          "title": "Actid",
+          "description": "The act_id it matched. Send this next time."
+        },
+        "sectionInput": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sectioninput",
+          "description": "The section number exactly as you sent it, on a section route."
+        },
+        "sectionNumber": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sectionnumber",
+          "description": "The section number as the publisher writes it. Send this next time."
+        },
+        "via": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Via",
+          "description": "What was done to your input, in order. `normalized_id`: the act_id carried surrounding whitespace, quotes, backticks, an invisible character, a trailing period or double percent-encoding, which were removed. `normalized_section`: the section number was written differently from the publisher (a `s.` / `Sec.` / `Section` prefix, a hyphen or space before an alphabetic suffix, a lowercase suffix, or a trailing sub-provision), and matched one stored number and only one."
+        },
+        "subProvision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Subprovision",
+          "description": "The sub-provision your section number carried, e.g. `(1)(a)` for `302(1)(a)`. The WHOLE section is served: sub-provisions are not addressed separately."
+        }
+      },
+      "type": "object",
+      "required": [
+        "input",
+        "actId"
+      ],
+      "title": "IdentifierResolution",
+      "description": "How the act_id or section number you sent was matched, when not as sent.\n\nPresent only when the input did NOT match exactly. Absent (null) means the\nresponse is about exactly the act_id and section number in your request.\nSame idea, and the same field name, as `resolvedFrom` on the US surface."
+    },
+    "Meta": {
+      "properties": {
+        "processingTimeMs": {
+          "type": "number",
+          "title": "Processingtimems",
+          "description": "Server-side time for this request in milliseconds, excluding network transit. Not billed on.",
+          "default": 0.0
+        },
+        "creditsConsumed": {
+          "type": "number",
+          "title": "Creditsconsumed",
+          "description": "Credits actually charged. Read this rather than assuming the list price: refunded work bills 0.",
+          "default": 0.0
+        }
+      },
+      "type": "object",
+      "title": "Meta"
+    },
+    "SubordinateRow": {
+      "properties": {
+        "actId": {
+          "type": "string",
+          "title": "Actid"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        },
+        "citation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Citation"
+        },
+        "delegationType": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Delegationtype",
+          "description": "`rules`, `regulations`, `notification` or `order`."
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Year"
+        },
+        "actStatus": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actstatus"
+        }
+      },
+      "type": "object",
+      "required": [
+        "actId"
+      ],
+      "title": "SubordinateRow"
+    }
+  }
+}

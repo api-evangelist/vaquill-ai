@@ -1,0 +1,22 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist overlay for vaquill-ai-workspace-openapi.yml
+  version: '2026-10-07'
+extends: ../openapi/_original/vaquill-ai-workspace-openapi.yml
+x-generated: '2026-10-07'
+x-method: generated
+actions:
+- target: $.info
+  update:
+    x-apievangelist-provenance:
+      fetched: '2026-10-07'
+      from: https://api.vaquill.ai/workspace/openapi/v1.json
+      verbatim_copy: openapi/_original/vaquill-ai-workspace-openapi.json
+    x-apievangelist-docs: https://www.vaquill.ai/docs/introduction
+    x-apievangelist-changelog: https://www.vaquill.ai/docs/api-guide/changelog
+    x-apievangelist-mcp: https://mcp.vaquill.ai/mcp
+    x-apievangelist-errors: errors/vaquill-ai-problem-types.yml
+    x-apievangelist-rate-limits: rate-limits/vaquill-ai-workspace-rate-limits.yml
+- target: $.servers[0]
+  update:
+    x-apievangelist-verified: '2026-10-07'

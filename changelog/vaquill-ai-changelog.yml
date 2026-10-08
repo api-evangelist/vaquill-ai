@@ -1,0 +1,111 @@
+generated: '2026-10-07'
+method: searched
+source: https://www.vaquill.ai/docs/api-guide/changelog
+name: Vaquill Developer API changelog
+scheme: dated entries, no version numbers
+current_version: v1 (OpenAPI info.version 1.0.0)
+entry_count_on_page: 64
+window: most recent 20 entries
+entries:
+- version: '2026-10-07'
+  date: '2026-10-07'
+  breaking: false
+  highlights:
+  - Federal local court rules, and more state law
+- version: '2026-10-06'
+  date: '2026-10-06'
+  breaking: false
+  highlights:
+  - Search the text of state session laws; list filters take several values
+- version: '2026-10-05'
+  date: '2026-10-05'
+  breaking: false
+  highlights:
+  - 'State session laws: 20,604 acts across 50 jurisdictions'
+- version: '2026-09-23'
+  date: '2026-09-23'
+  breaking: false
+  highlights:
+  - Browse and search inside constitutions, federal rules and New York articles; know what is browsable before you ask
+- version: '2026-09-14'
+  date: '2026-09-14'
+  breaking: false
+  highlights:
+  - Scope counting, batch full text, and enumeration that says when it is incomplete
+- version: '2026-09-13'
+  date: '2026-09-13'
+  breaking: false
+  highlights:
+  - 'STATE_RULES reaches 50 jurisdictions: Colorado, built from a 2023 compilation plus every amending order since'
+- version: '2026-09-12'
+  date: '2026-09-12'
+  breaking: false
+  highlights:
+  - 'STATE_AG_OPINION reaches 36 jurisdictions and 73,514 opinions: Montana and North Carolina'
+- version: '2026-09-11'
+  date: '2026-09-11'
+  breaking: false
+  highlights:
+  - 'STATE_AG_OPINION reaches 34 jurisdictions and 68,874 opinions: seven more states, plus corrected agency-guidance and federal counts'
+- version: '2026-09-10'
+  date: '2026-09-10'
+  breaking: false
+  highlights:
+  - 'STATE_AG_OPINION reaches 27 jurisdictions and 52,754 opinions: 22 more states, including California, Missouri, Washington and the Dakotas'
+- version: '2026-09-09'
+  date: '2026-09-09'
+  breaking: false
+  highlights:
+  - 'STATE_AG_OPINION adds Arkansas, Indiana, Idaho and Oklahoma: 20,273 more opinions, including the two largest jurisdictions in the corpus'
+- version: '2026-09-08'
+  date: '2026-09-08'
+  breaking: false
+  highlights:
+  - 'New corpusType STATE_AG_OPINION: state Attorney General opinions, starting with Delaware'
+- version: '2026-09-08'
+  date: '2026-09-08'
+  breaking: false
+  highlights:
+  - 'Two new FTC sources under AGENCY_GUIDANCE: HSR premerger interpretations (4,589) and advocacy filings (860)'
+- version: '2026-09-07'
+  date: '2026-09-07'
+  breaking: false
+  highlights:
+  - 'NLRB Board decisions widen from a 15-year window to the full 90-year archive: 66,597 decisions back to 1935'
+- version: '2026-09-07'
+  date: '2026-09-07'
+  breaking: false
+  highlights:
+  - 'IRS written determinations: the full 45,358-document archive, and they are not precedent'
+- version: '2026-09-06'
+  date: '2026-09-06'
+  breaking: false
+  highlights:
+  - CMS Medicare Internet-Only Manuals now covered
+- version: '2026-09-06'
+  date: '2026-09-06'
+  breaking: false
+  highlights:
+  - FTC Part 3 administrative filings now covered
+- version: '2026-09-07'
+  date: '2026-09-07'
+  breaking: false
+  highlights:
+  - Coverage is 4,983,685 sections, and every corpus type is now filterable
+- version: '2026-09-06'
+  date: '2026-09-06'
+  breaking: false
+  highlights:
+  - OFAC sanctions FAQs join AGENCY_GUIDANCE, with their prior versions as separately citable documents
+- version: '2026-09-06'
+  date: '2026-09-06'
+  breaking: false
+  highlights:
+  - FinCEN AML Act of 2020 implementation material is live as source=fincen_amla_material
+- version: '2026-09-05'
+  date: '2026-09-05'
+  breaking: false
+  highlights:
+  - State financial-institutions regulator bulletins are live as source=state_financial_bulletin under corpusType=STATE_AGENCY_GUIDANCE
+note: The page carries no explicit breaking-change markers; entries are corpus additions, new endpoints and behaviour changes. The 2026-10-07
+  entry notes the OpenAPI corpusType enum now carries 20 tokens and state accepts 54 jurisdictions.

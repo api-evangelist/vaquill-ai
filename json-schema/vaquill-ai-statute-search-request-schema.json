@@ -1,0 +1,1038 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/vaquill-ai/main/json-schema/vaquill-ai-statute-search-request-schema.json",
+  "title": "StatuteSearchRequest",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/vaquill-ai-openapi.yml#/components/schemas/StatuteSearchRequest",
+  "properties": {
+    "query": {
+      "type": "string",
+      "maxLength": 500,
+      "minLength": 2,
+      "title": "Query",
+      "description": "Search query in natural language."
+    },
+    "corpusType": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "USC",
+            "CFR",
+            "STATE",
+            "CONSTITUTION",
+            "FEDERAL_RULES",
+            "FEDERAL_LOCAL_RULES",
+            "STATE_CONSTITUTION",
+            "STATE_RULES",
+            "EXECUTIVE_ACTION",
+            "REGULATION",
+            "FEDERAL_REGISTER",
+            "FEDERAL_REGISTER_NOTICE",
+            "AGENCY_GUIDANCE",
+            "SENTENCING_GUIDELINES",
+            "US_TAX_TREATY",
+            "STATE_AGENCY_GUIDANCE",
+            "STATE_AG_OPINION",
+            "SESSION_LAW",
+            "STATUTE_COMPILATION",
+            "AGENCY_ADJUDICATION",
+            "CFR_ANNUAL",
+            "USC_ANNUAL"
+          ]
+        },
+        {
+          "items": {
+            "type": "string",
+            "enum": [
+              "USC",
+              "CFR",
+              "STATE",
+              "CONSTITUTION",
+              "FEDERAL_RULES",
+              "FEDERAL_LOCAL_RULES",
+              "STATE_CONSTITUTION",
+              "STATE_RULES",
+              "EXECUTIVE_ACTION",
+              "REGULATION",
+              "FEDERAL_REGISTER",
+              "FEDERAL_REGISTER_NOTICE",
+              "AGENCY_GUIDANCE",
+              "SENTENCING_GUIDELINES",
+              "US_TAX_TREATY",
+              "STATE_AGENCY_GUIDANCE",
+              "STATE_AG_OPINION",
+              "SESSION_LAW",
+              "STATUTE_COMPILATION",
+              "AGENCY_ADJUDICATION",
+              "CFR_ANNUAL",
+              "USC_ANNUAL"
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Corpustype",
+      "description": "Restrict to one corpus, or to several by passing a list (`\"corpusType\": [\"USC\", \"CFR\"]`). One of: `USC` (United States Code), `CFR` (Code of Federal Regulations), `STATE` (state statutory codes; call `/us/statutes/coverage` for the list of ingested jurisdictions), `CONSTITUTION` (U.S. Constitution), `FEDERAL_RULES` (FRCP / FRCrP / FRE / FRAP / FRBP), `STATE_CONSTITUTION` (state constitutions; call `/us/statutes/coverage` for the current jurisdiction list), `STATE_RULES` (state court rules; see `/us/statutes/coverage`), `EXECUTIVE_ACTION` (Federal Register Presidential Documents), `REGULATION` (state administrative regulations; pair with `state`), `FEDERAL_REGISTER` (Federal Register agency rules, final and proposed), `AGENCY_GUIDANCE` (sub-regulatory federal agency guidance, 53 named sources spanning the tax, banking, securities, labor, immigration, health-privacy, export-control, intellectual-property, antitrust, energy and communications agencies; each is independently filterable with `source`, which lists them all), `STATE_AGENCY_GUIDANCE` (state-issued regulatory guidance, currently state Department of Insurance bulletins and circular letters; pair with `state`, and see `/us/statutes/coverage`), `SENTENCING_GUIDELINES` (US Sentencing Guidelines Manual), `US_TAX_TREATY` (US income tax treaties and protocols), `SESSION_LAW` (US Statutes at Large: federal public and private laws AS ENACTED, 1789 to date. This is the source the US Code is compiled from, so a section's `publicLawCites` resolve here to the enacting text; call `/us/statutes/coverage` for the live section count). Omit to search across all corpora. The `enum` on this field is the complete token list, and `/us/statutes/coverage` serves a one-line description of each in its legend."
+    },
+    "state": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "federal",
+            "al",
+            "ak",
+            "az",
+            "ar",
+            "ca",
+            "co",
+            "ct",
+            "de",
+            "dc",
+            "fl",
+            "ga",
+            "gu",
+            "hi",
+            "id",
+            "il",
+            "in",
+            "ia",
+            "ks",
+            "ky",
+            "la",
+            "me",
+            "md",
+            "ma",
+            "mi",
+            "mn",
+            "ms",
+            "mo",
+            "mt",
+            "ne",
+            "nv",
+            "nh",
+            "nj",
+            "nm",
+            "ny",
+            "nc",
+            "nd",
+            "mp",
+            "oh",
+            "ok",
+            "or",
+            "pa",
+            "pr",
+            "ri",
+            "sc",
+            "sd",
+            "tn",
+            "tx",
+            "ut",
+            "vt",
+            "va",
+            "wa",
+            "wv",
+            "wi",
+            "wy"
+          ]
+        },
+        {
+          "items": {
+            "type": "string",
+            "enum": [
+              "federal",
+              "al",
+              "ak",
+              "az",
+              "ar",
+              "ca",
+              "co",
+              "ct",
+              "de",
+              "dc",
+              "fl",
+              "ga",
+              "gu",
+              "hi",
+              "id",
+              "il",
+              "in",
+              "ia",
+              "ks",
+              "ky",
+              "la",
+              "me",
+              "md",
+              "ma",
+              "mi",
+              "mn",
+              "ms",
+              "mo",
+              "mt",
+              "ne",
+              "nv",
+              "nh",
+              "nj",
+              "nm",
+              "ny",
+              "nc",
+              "nd",
+              "mp",
+              "oh",
+              "ok",
+              "or",
+              "pa",
+              "pr",
+              "ri",
+              "sc",
+              "sd",
+              "tn",
+              "tx",
+              "ut",
+              "vt",
+              "va",
+              "wa",
+              "wv",
+              "wi",
+              "wy"
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "State",
+      "description": "Jurisdiction filter. A 2-letter code for one of the 52 supported US jurisdictions (50 states + DC + PR), or `federal` to scope to USC / CFR / Constitution / federal rules. Pass a LIST to search several at once (`\"state\": [\"ca\", \"ny\", \"tx\"]`), which is one call instead of one per jurisdiction. Case-insensitive: `ca` and `CA` both work. An unrecognized value is rejected with 422 rather than silently matching nothing. Omit to search every jurisdiction."
+    },
+    "code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Code",
+      "description": "Restrict to specific state statutory codes, e.g. `tx_pe` for the Texas Penal Code. Values are the `identifier`s returned by `GET /us/statutes/divisions?corpusType=STATE&state=XX`, so the browse output can be fed straight back in. Pass a list to search several codes, across states if you like (`[\"tx_pe\", \"ca_pen\"]`). This is the only way to scope below a whole jurisdiction: `state=tx` alone searches every Texas code at once.\n\nWith `corpusType=FEDERAL_RULES`, a value can instead be a federal rule set as `GET /us/statutes/divisions?corpusType=FEDERAL_RULES` lists it: `frcp`, `fre`, `frcpsuppadm`, or an appendix copy such as `uscapp_t28a_fre`. Without that corpusType a bare `frcp` is refused, because it cannot be told apart from a state code missing its state."
+    },
+    "article": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Article",
+      "description": "Scope a search to one or more articles. On `CONSTITUTION` and `STATE_CONSTITUTION` this is the article label as `GET /us/statutes/divisions` lists it (`Amendment XIV`, `Article IV`, `Preamble`). On `STATE` / `REGULATION` it is the article of a code divided by article instead of chapter, such as New York (`2-A` in `ny_jud`). This is the search side of `parent.article`: pass a hit's `parent` straight back to search within its article.\n\nPass the `identifier` exactly as the listing returned it; a case slip such as `amendment xiv` also matches. Article labels repeat, so `article` needs a `corpusType` from one of those two families, `STATE_CONSTITUTION` also needs `state`, and `STATE` / `REGULATION` need the `code`. A request missing one is refused with 422 before anything is charged. String or list."
+    },
+    "yearFrom": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "maximum": 2100.0,
+          "minimum": 1700.0
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Yearfrom",
+      "description": "Only return sections dated in or after this year. Combine with `yearTo` for a window. A section matches on the first of three years it carries: the most recent amendment the publisher credits in its own history note; else its effective year, for a section adopted once and never amended; else, for corpora dated by publication rather than amendment (Federal Register proposed rules, agency guidance, adjudications, the treaty record), the document's own publication or issue year. Every one of those tracks the LAW or the document, never when we last rebuilt the corpus. A section carrying none of the three is excluded once either bound is set, so an unbounded search returns strictly more."
+    },
+    "yearTo": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "maximum": 2100.0,
+          "minimum": 1700.0
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Yearto",
+      "description": "Only return sections dated in or before this year, on the same three years `yearFrom` describes. Note it filters the LAST such date, so a section amended in 2025 is excluded by `yearTo=2024` even though it existed in 2024. This is a currency filter, not point-in-time retrieval: the corpus holds one current text per citation."
+    },
+    "excludeRepealed": {
+      "type": "boolean",
+      "title": "Excluderepealed",
+      "description": "Drop sections whose own status says they are no longer operative: repealed, renumbered, transferred, recodified, rescinded, revoked, expired, superseded, omitted, reserved, and the rest of the dead and not-operative vocabulary (the full set is the one behind each result's `goodLawStatus`).\n\n**This removes what we KNOW is dead. It does not promise the remainder is good law.** A section survives this filter when its status is `in_force` OR when we hold no trustworthy repeal signal for its jurisdiction, and those two are not the same thing. Read `goodLawStatus` on each surviving result to tell them apart: `good_law` is checked, `unknown` is unchecked. Filtering on the status we store and reporting the verdict we derive are deliberately separate, because only the first is indexable.\n\n**The United States Code is served from a stored annual edition** (`year` 2024, `currentThrough` 2025-01-06), so a section repealed after that edition closed still carries `actStatus: in_force` and survives this filter. Every USC result therefore reports `goodLawStatus: unknown`, which is the honest answer and the one this field's second paragraph tells you to read. Use `/section/{actId}/changes` for the timeline on a section you depend on.",
+      "default": false
+    },
+    "actStatus": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "abolished",
+            "deleted",
+            "expired",
+            "in_force",
+            "inactive",
+            "non_precedential",
+            "not_funded",
+            "not_yet_effective",
+            "omitted",
+            "proposed",
+            "recodified",
+            "recompiled",
+            "rejected",
+            "relocated",
+            "removed",
+            "renumbered",
+            "repealed",
+            "rescinded",
+            "reserved",
+            "revoked",
+            "superseded",
+            "terminated",
+            "transferred",
+            "unconstitutional",
+            "vacant",
+            "vacated",
+            "vetoed",
+            "withdrawn"
+          ]
+        },
+        {
+          "items": {
+            "type": "string",
+            "enum": [
+              "abolished",
+              "deleted",
+              "expired",
+              "in_force",
+              "inactive",
+              "non_precedential",
+              "not_funded",
+              "not_yet_effective",
+              "omitted",
+              "proposed",
+              "recodified",
+              "recompiled",
+              "rejected",
+              "relocated",
+              "removed",
+              "renumbered",
+              "repealed",
+              "rescinded",
+              "reserved",
+              "revoked",
+              "superseded",
+              "terminated",
+              "transferred",
+              "unconstitutional",
+              "vacant",
+              "vacated",
+              "vetoed",
+              "withdrawn"
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Actstatus",
+      "description": "Positively scope to one or more raw publisher statuses, e.g. `\"repealed\"` to find only dead law, or `[\"in_force\"]` for only sections affirmatively marked current. This is the inverse of `excludeRepealed` and is what you want for a compliance diff that asks what was LOST rather than what remains.\n\nValues are the `actStatus` returned on each result. Combining a dead status here with `excludeRepealed: true` contradicts itself and is rejected with 422 rather than silently returning nothing."
+    },
+    "changedSince": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "format": "date",
+      "title": "Changedsince",
+      "description": "Only return sections we have OBSERVED change on or after this date (`YYYY-MM-DD`). This is the sync filter: it turns a lookup API into something a nightly job can poll, without creating a board watch per jurisdiction.\n\n**These are observed changes, not effective dates.** A refresh compared the publisher against the copy we held and found it different; the date is when we SAW it, an upper bound on when it took effect. It is the same event stream `GET /us/statutes/section/{actId}/changes` serves per section, so a hit here has a history there.\n\n**Coverage is bounded by capture, not by the age of the law.** Change capture began long after the corpus did, it is per-source, and events are swept at 24 months. An empty result means no captured change in the window, never that nothing was amended.\n\nNarrow with `corpusType` and `state` for a tighter window: the change set is resolved to concrete sections before the search runs, and a window matching too many sections is rejected with a 422 that says so rather than silently truncating your answer."
+    },
+    "agency": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Agency",
+      "description": "Federal Register agency slug, e.g. `environmental-protection-agency`. The agency's full name (`Environmental Protection Agency`) or its Federal Register acronym (`EPA`, `e.p.a.`) resolves to the same slug; an acronym the Federal Register gives to more than one agency (`FS`) or a value naming no agency the corpus holds is a 422, never a charge. Pass a list to match any of several. Applies to `FEDERAL_REGISTER` and `EXECUTIVE_ACTION`; other corpora carry no agency, so combining this with them returns nothing."
+    },
+    "documentType": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "final",
+            "proposed",
+            "presidential"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Documenttype",
+      "description": "Federal Register document stage: `final` (a rule in force), `proposed` (an NPRM), or `presidential` (a Presidential Document, the `EXECUTIVE_ACTION` corpus). The same distinction appears in each row's `actId` prefix (`FR_RULE_` vs `FR_PRORULE_`)."
+    },
+    "publishedFrom": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "format": "date",
+      "title": "Publishedfrom",
+      "description": "Only return Federal Register documents published on or after this date (`YYYY-MM-DD`). This is the PUBLICATION date, which is not the same as `yearFrom`: that filters the version year of a section."
+    },
+    "publishedTo": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "format": "date",
+      "title": "Publishedto",
+      "description": "Only return Federal Register documents published on or before this date."
+    },
+    "titleNumber": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 1.0
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Titlenumber",
+      "description": "Filter by USC/CFR title number (e.g., 17 for SEC, 42 for civil rights). Only meaningful for `USC`/`CFR`; ignored for state corpora whose titles are alphabetic (e.g. Texas `pe` = Penal Code)."
+    },
+    "chapter": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Chapter",
+      "description": "Scope a search to one or more chapters within a title or code, e.g. `21` for USC Title 42 Chapter 21. This is the search-side of the `parent` object on each result: pass a hit's `parent.chapter` straight back to search that hit's neighbors. Chapter numbers repeat across titles, so pair it with `titleNumber` (USC) or `code` (state); an unpaired chapter is rejected. String or list."
+    },
+    "part": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Part",
+      "description": "Scope a search to one or more parts within a title, e.g. `240` for 17 C.F.R. Part 240. The CFR counterpart to `chapter`: pass a hit's `parent.part` straight back to search within that part. Pair it with `titleNumber`; an unpaired part is rejected. String or list."
+    },
+    "source": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "administrative_guidance",
+            "ag_precedent",
+            "agency_guidance",
+            "bia_precedent",
+            "bis_advisory_opinion",
+            "cfpb_circular",
+            "cfpb_enforcement_action",
+            "cfpb_supervisory_guidance",
+            "cftc_staff_letter",
+            "cms_iom",
+            "copyright_circular",
+            "copyright_compendium",
+            "cpsc_advisory_opinion",
+            "cpsc_secg",
+            "ddtc_commodity_jurisdiction",
+            "ddtc_guidance",
+            "dfars",
+            "dfars_pgi",
+            "doe_appliance_guidance",
+            "doj_business_review",
+            "doj_justice_manual",
+            "doj_leniency",
+            "eeoc_guidance",
+            "far",
+            "fcc_declaratory_ruling",
+            "fdic_fil",
+            "ferc_policy_statement",
+            "fincen_amla_material",
+            "fincen_boi_compliance_guide",
+            "fincen_boi_faq",
+            "fincen_boi_rule_qa",
+            "fincen_guidance",
+            "fincen_ruling",
+            "frap",
+            "frb_sr_letter",
+            "frbp",
+            "frcp",
+            "frcrp",
+            "fre",
+            "ftc_administrative_decision",
+            "ftc_advisory_opinion",
+            "ftc_advocacy_filing",
+            "ftc_hsr_interpretation",
+            "ftc_policy_statement",
+            "hhs_ocr_hipaa_faq",
+            "hhs_ocr_hipaa_guidance",
+            "hhs_ocr_resolution_agreement",
+            "immigration_admin_precedent",
+            "irs_announcement",
+            "irs_irm",
+            "irs_notice",
+            "irs_rev_proc",
+            "irs_rev_rul",
+            "irs_written_determination",
+            "merger_guidelines",
+            "mpep",
+            "mspb_nonprecedential",
+            "mspb_precedential",
+            "nlrb_advice_memo",
+            "nlrb_board_decision",
+            "nlrb_gc_memo",
+            "occ_bulletin",
+            "occ_interpretive_letter",
+            "ofac_faq",
+            "olc_opinion",
+            "sct",
+            "sec_commission_opinion",
+            "senate_treaty",
+            "senate_treaty_document",
+            "senate_treaty_resolution",
+            "ssa_ruling",
+            "state_financial_bulletin",
+            "state_insurance_bulletin",
+            "tmep",
+            "us_tax_treaty",
+            "us_tax_treaty_technical_explanation",
+            "uscis_policy_manual",
+            "whd_foh",
+            "whd_opinion_letter"
+          ]
+        },
+        {
+          "items": {
+            "type": "string",
+            "enum": [
+              "administrative_guidance",
+              "ag_precedent",
+              "agency_guidance",
+              "bia_precedent",
+              "bis_advisory_opinion",
+              "cfpb_circular",
+              "cfpb_enforcement_action",
+              "cfpb_supervisory_guidance",
+              "cftc_staff_letter",
+              "cms_iom",
+              "copyright_circular",
+              "copyright_compendium",
+              "cpsc_advisory_opinion",
+              "cpsc_secg",
+              "ddtc_commodity_jurisdiction",
+              "ddtc_guidance",
+              "dfars",
+              "dfars_pgi",
+              "doe_appliance_guidance",
+              "doj_business_review",
+              "doj_justice_manual",
+              "doj_leniency",
+              "eeoc_guidance",
+              "far",
+              "fcc_declaratory_ruling",
+              "fdic_fil",
+              "ferc_policy_statement",
+              "fincen_amla_material",
+              "fincen_boi_compliance_guide",
+              "fincen_boi_faq",
+              "fincen_boi_rule_qa",
+              "fincen_guidance",
+              "fincen_ruling",
+              "frap",
+              "frb_sr_letter",
+              "frbp",
+              "frcp",
+              "frcrp",
+              "fre",
+              "ftc_administrative_decision",
+              "ftc_advisory_opinion",
+              "ftc_advocacy_filing",
+              "ftc_hsr_interpretation",
+              "ftc_policy_statement",
+              "hhs_ocr_hipaa_faq",
+              "hhs_ocr_hipaa_guidance",
+              "hhs_ocr_resolution_agreement",
+              "immigration_admin_precedent",
+              "irs_announcement",
+              "irs_irm",
+              "irs_notice",
+              "irs_rev_proc",
+              "irs_rev_rul",
+              "irs_written_determination",
+              "merger_guidelines",
+              "mpep",
+              "mspb_nonprecedential",
+              "mspb_precedential",
+              "nlrb_advice_memo",
+              "nlrb_board_decision",
+              "nlrb_gc_memo",
+              "occ_bulletin",
+              "occ_interpretive_letter",
+              "ofac_faq",
+              "olc_opinion",
+              "sct",
+              "sec_commission_opinion",
+              "senate_treaty",
+              "senate_treaty_document",
+              "senate_treaty_resolution",
+              "ssa_ruling",
+              "state_financial_bulletin",
+              "state_insurance_bulletin",
+              "tmep",
+              "us_tax_treaty",
+              "us_tax_treaty_technical_explanation",
+              "uscis_policy_manual",
+              "whd_foh",
+              "whd_opinion_letter"
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Source",
+      "description": "Scope to one or more of the following. The named source within `corpusType`, for corpora that fold several independently filterable bodies of law into one token.\n\n`FEDERAL_RULES` sources: `frcp` (Federal Rules of Civil Procedure), `frcrp` (Federal Rules of Criminal Procedure), `fre` (Federal Rules of Evidence), `frap` (Federal Rules of Appellate Procedure), `frbp` (Federal Rules of Bankruptcy Procedure), `sct` (Rules of the Supreme Court of the United States).\n\n`CFR` sources: `far` (Federal Acquisition Regulation (48 C.F.R. ch. 1)), `dfars` (Defense Federal Acquisition Regulation Supplement (48 C.F.R. ch. 2)) (both are already part of `CFR`; this only splits the existing Title 48 data by chapter, it does not add new sections).\n\n`AGENCY_GUIDANCE` sources: `administrative_guidance` (Synthesized administrative guidance (e.g. SALT cap, CTC, 401(k) limits)), `ssa_ruling` (Social Security Administration Rulings), `irs_rev_proc` (IRS Revenue Procedures), `irs_notice` (IRS Notices), `irs_rev_rul` (IRS Revenue Rulings), `irs_announcement` (IRS Announcements), `irs_irm` (Internal Revenue Manual (IRS internal procedure)), `merger_guidelines` (DOJ & FTC Merger Guidelines (2023)), `doj_leniency` (DOJ Antitrust Division Leniency Policy), `doj_business_review` (DOJ Antitrust Division Business Review Letters (1991-2021)), `cms_iom` (CMS Medicare Internet-Only Manuals (instruction to Medicare contractors, not a regulation)), `copyright_circular` (US Copyright Office Circulars), `copyright_compendium` (Compendium of U.S. Copyright Office Practices, Third Edition (2014, 2017 and 2021 editions)), `doj_justice_manual` (DOJ Justice Manual), `uscis_policy_manual` (USCIS Policy Manual), `mpep` (USPTO Manual of Patent Examining Procedure (MPEP)), `tmep` (USPTO Trademark Manual of Examining Procedure (TMEP)), `cftc_staff_letter` (CFTC Staff Letters (no-action, exemptive, interpretative; 2008-present)), `fincen_ruling` (FinCEN Administrative Rulings), `fincen_guidance` (FinCEN Guidance (alerts, advisories, notices, bulletins, fact sheets)), `fincen_boi_faq` (FinCEN Beneficial Ownership Information FAQs), `fincen_boi_rule_qa` (FinCEN BOI Rulemaking Q&As (final rule and interim final rule)), `fincen_boi_compliance_guide` (FinCEN Small Entity Compliance Guide (Beneficial Ownership Information Reporting)), `fincen_amla_material` (FinCEN Anti-Money Laundering Act of 2020 Implementation Material), `frb_sr_letter` (Federal Reserve Supervision and Regulation (SR) / Consumer Affairs (CA) Letters), `occ_bulletin` (OCC Bulletins), `occ_interpretive_letter` (OCC Interpretive Letters), `fdic_fil` (FDIC Financial Institution Letters (FILs)), `cfpb_supervisory_guidance` (CFPB Supervisory Guidance), `cfpb_circular` (CFPB Consumer Financial Protection Circulars), `dfars_pgi` (DFARS PGI (Procedures, Guidance, and Information)), `ftc_advisory_opinion` (FTC Advisory Opinions), `ftc_policy_statement` (FTC Policy Statements (1967-present)), `ftc_hsr_interpretation` (FTC HSR Premerger Notification Interpretations: the Commission's formal interpretations under 16 C.F.R. 803.30 (1978-2000, a closed series) and the Premerger Notification Office's informal interpretations (1983-present; the publisher serves none from 1997)), `ftc_advocacy_filing` (FTC Advocacy Filings: comments and letters to state legislatures, state courts, governors and other federal agencies on the competition effects of a proposed measure (1985-present). Advisory only: they bind nobody and decide no case), `nlrb_gc_memo` (NLRB General Counsel Memoranda), `nlrb_advice_memo` (NLRB Division of Advice Memoranda (rolling 10-year window, not the full archive)), `cpsc_advisory_opinion` (CPSC Office of General Counsel Advisory Opinions (historical, 1970s-2012)), `cpsc_secg` (CPSC Small Entity Compliance Guides), `whd_opinion_letter` (DOL Wage and Hour Division Opinion, Ruling and Administrator Interpretation Letters (FLSA, FMLA, DBRA, SCA, CCPA, MSPA; 1993-present)), `whd_foh` (DOL Wage and Hour Field Operations Handbook (WHD internal enforcement procedure, not law; 22 chapters)), `bis_advisory_opinion` (BIS (Bureau of Industry and Security) Advisory Opinions), `ddtc_commodity_jurisdiction` (DDTC (Directorate of Defense Trade Controls) Commodity Jurisdiction Determinations), `ddtc_guidance` (DDTC (Directorate of Defense Trade Controls) Policy Guidance Documents), `ofac_faq` (OFAC (Office of Foreign Assets Control) Frequently Asked Questions), `hhs_ocr_hipaa_faq` (HHS Office for Civil Rights HIPAA FAQs), `hhs_ocr_hipaa_guidance` (HHS Office for Civil Rights HIPAA Guidance Materials), `hhs_ocr_resolution_agreement` (HHS Office for Civil Rights HIPAA Resolution Agreements and Civil Money Penalties), `fcc_declaratory_ruling` (FCC (Federal Communications Commission) Declaratory Rulings), `ferc_policy_statement` (FERC (Federal Energy Regulatory Commission) Policy Statements), `doe_appliance_guidance` (DOE Appliance Standards Guidance and FAQs), `eeoc_guidance` (EEOC (Equal Employment Opportunity Commission) Enforcement and Policy Guidance, including Compliance Manual sections), `irs_written_determination` (IRS Written Determinations under 26 U.S.C. § 6110: Private Letter Rulings (PLR), Technical Advice Memoranda (TAM) and Chief Counsel Advice (CCA). Each is directed only to the taxpayer who requested it and, by § 6110(k)(3), may not be used or cited as precedent).\n\n`US_TAX_TREATY` sources: `us_tax_treaty` (U.S. Bilateral Income and Estate Tax Treaties), `us_tax_treaty_technical_explanation` (Treasury Technical Explanations (article-by-article commentary on a tax treaty)), `senate_treaty` (Senate Treaty Records (transmittal, parties and proceedings)), `senate_treaty_resolution` (Senate Resolutions of Advice and Consent, including the reservations, understandings and declarations that narrow a treaty's effect in US law), `senate_treaty_document` (Treaty Documents (CDOC TDOC series): the President's message transmitting a treaty to the Senate, with the instrument's text).\n\n`STATE_AGENCY_GUIDANCE` sources: `state_insurance_bulletin` (State Department of Insurance Bulletins), `state_financial_bulletin` (State Financial-Institutions Regulator Bulletins (banking, credit unions, trust companies, escrow agents, consumer lenders, money transmitters; AZ and OR only, where that regulator shares an index with the insurance regulator)).\n\n`AGENCY_ADJUDICATION` sources: `mspb_precedential` (MSPB Precedential Decisions), `mspb_nonprecedential` (MSPB Nonprecedential Orders), `olc_opinion` (DOJ Office of Legal Counsel Opinions (official bound volumes, 1933-2020)), `cfpb_enforcement_action` (CFPB Enforcement Actions), `sec_commission_opinion` (SEC Commission Opinions and Adjudicatory Orders), `bia_precedent` (BIA Precedent Decisions (I&N Dec.)), `ag_precedent` (Attorney General Immigration Decisions (I&N Dec.)), `immigration_admin_precedent` (INS and USCIS Administrative Precedent Decisions (I&N Dec.)), `nlrb_board_decision` (NLRB Board Decisions (bounded window; see coverage.mdx for the exact years covered)), `ftc_administrative_decision` (FTC Part 3 Administrative Decisions). Every result carries its own `source`, so you can pass a hit's value straight back. An unrecognized value is rejected with 422."
+    },
+    "fields": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string",
+            "enum": [
+              "abstract",
+              "actId",
+              "actStatus",
+              "action",
+              "adoptedAfterCurrentThrough",
+              "adoptingCitations",
+              "agencies",
+              "agencySlugs",
+              "alternateCitations",
+              "amendmentHistory",
+              "amendmentNote",
+              "amendmentYears",
+              "amendmentsCount",
+              "articleName",
+              "articleNumber",
+              "audience",
+              "body",
+              "breadcrumb",
+              "caseName",
+              "chapter",
+              "chapterName",
+              "citation",
+              "citationShort",
+              "committeeNote",
+              "corpusType",
+              "court",
+              "crossReferencesCfr",
+              "crossReferencesUsc",
+              "currencyNote",
+              "currencyYear",
+              "currentThrough",
+              "datesText",
+              "displayLabel",
+              "displayPath",
+              "documentNumber",
+              "documentSubtype",
+              "documentTypeLabel",
+              "docxUrl",
+              "edition",
+              "effectiveDate",
+              "effectiveDateRaw",
+              "excerpt",
+              "expirationDate",
+              "expirationDateRaw",
+              "externalUrl",
+              "federalRegisterCitations",
+              "forum",
+              "frCommentsCloseOn",
+              "frCorrectionOf",
+              "frCorrections",
+              "frDocketIds",
+              "frEffectiveOn",
+              "frEndPage",
+              "frRegulationIdNumbers",
+              "frRegulationsDotGovUrl",
+              "frRelatedDocuments",
+              "frSignificant",
+              "frStartPage",
+              "frVolume",
+              "goodLawStatus",
+              "govInfoHtmlUrl",
+              "govInfoPdfUrl",
+              "granuleId",
+              "history",
+              "historyEffectiveDate",
+              "htmlUrl",
+              "implementingRegulations",
+              "issueDate",
+              "issueDateRaw",
+              "issuingAgency",
+              "languageCode",
+              "lastAmendedDate",
+              "lastAmendedDateRaw",
+              "lastAmendedYear",
+              "lawImplemented",
+              "licenseNote",
+              "originalEnactmentDate",
+              "originalEnactmentDateRaw",
+              "packageId",
+              "parent",
+              "part",
+              "partName",
+              "pdfUrl",
+              "pendingAdoptions",
+              "popularName",
+              "president",
+              "priorEffectiveDates",
+              "program",
+              "publicLawCites",
+              "publicLaws",
+              "publicationDate",
+              "publicationDateRaw",
+              "publisherKey",
+              "referencedShortTitles",
+              "relatedCitations",
+              "relatedDocuments",
+              "releaseDate",
+              "releaseDateRaw",
+              "relevanceScore",
+              "renumberedTo",
+              "renumberedToLabel",
+              "requesters",
+              "rescindedOn",
+              "rescindedOnRaw",
+              "reviewDate",
+              "reviewDateRaw",
+              "ruleSet",
+              "ruleSetCode",
+              "sectionNumber",
+              "sectionTitle",
+              "settlementAmount",
+              "signingDate",
+              "signingDateRaw",
+              "source",
+              "sourceCharEnd",
+              "sourceCharStart",
+              "sourceCredit",
+              "sourceNote",
+              "sourcePageEnd",
+              "sourcePageStart",
+              "sourceUrl",
+              "state",
+              "stateHtmlUrl",
+              "statutoryAuthority",
+              "subchapter",
+              "subchapterName",
+              "subject",
+              "subjectNumber",
+              "subpart",
+              "subpartName",
+              "subtitle",
+              "subtitleName",
+              "supersededBy",
+              "supersedes",
+              "supersessionActions",
+              "textUrl",
+              "title",
+              "titleName",
+              "titleNumber",
+              "topLevelTitle",
+              "topics",
+              "transferredTo",
+              "transferredToLabel",
+              "versionId",
+              "volume",
+              "wordCount",
+              "xmlUrl",
+              "year"
+            ]
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        {
+          "items": {
+            "type": "string",
+            "enum": [
+              "abstract",
+              "actId",
+              "actStatus",
+              "action",
+              "adoptedAfterCurrentThrough",
+              "adoptingCitations",
+              "agencies",
+              "agencySlugs",
+              "alternateCitations",
+              "amendmentHistory",
+              "amendmentNote",
+              "amendmentYears",
+              "amendmentsCount",
+              "articleName",
+              "articleNumber",
+              "audience",
+              "body",
+              "breadcrumb",
+              "caseName",
+              "chapter",
+              "chapterName",
+              "citation",
+              "citationShort",
+              "committeeNote",
+              "corpusType",
+              "court",
+              "crossReferencesCfr",
+              "crossReferencesUsc",
+              "currencyNote",
+              "currencyYear",
+              "currentThrough",
+              "datesText",
+              "displayLabel",
+              "displayPath",
+              "documentNumber",
+              "documentSubtype",
+              "documentTypeLabel",
+              "docxUrl",
+              "edition",
+              "effectiveDate",
+              "effectiveDateRaw",
+              "excerpt",
+              "expirationDate",
+              "expirationDateRaw",
+              "externalUrl",
+              "federalRegisterCitations",
+              "forum",
+              "frCommentsCloseOn",
+              "frCorrectionOf",
+              "frCorrections",
+              "frDocketIds",
+              "frEffectiveOn",
+              "frEndPage",
+              "frRegulationIdNumbers",
+              "frRegulationsDotGovUrl",
+              "frRelatedDocuments",
+              "frSignificant",
+              "frStartPage",
+              "frVolume",
+              "goodLawStatus",
+              "govInfoHtmlUrl",
+              "govInfoPdfUrl",
+              "granuleId",
+              "history",
+              "historyEffectiveDate",
+              "htmlUrl",
+              "implementingRegulations",
+              "issueDate",
+              "issueDateRaw",
+              "issuingAgency",
+              "languageCode",
+              "lastAmendedDate",
+              "lastAmendedDateRaw",
+              "lastAmendedYear",
+              "lawImplemented",
+              "licenseNote",
+              "originalEnactmentDate",
+              "originalEnactmentDateRaw",
+              "packageId",
+              "parent",
+              "part",
+              "partName",
+              "pdfUrl",
+              "pendingAdoptions",
+              "popularName",
+              "president",
+              "priorEffectiveDates",
+              "program",
+              "publicLawCites",
+              "publicLaws",
+              "publicationDate",
+              "publicationDateRaw",
+              "publisherKey",
+              "referencedShortTitles",
+              "relatedCitations",
+              "relatedDocuments",
+              "releaseDate",
+              "releaseDateRaw",
+              "relevanceScore",
+              "renumberedTo",
+              "renumberedToLabel",
+              "requesters",
+              "rescindedOn",
+              "rescindedOnRaw",
+              "reviewDate",
+              "reviewDateRaw",
+              "ruleSet",
+              "ruleSetCode",
+              "sectionNumber",
+              "sectionTitle",
+              "settlementAmount",
+              "signingDate",
+              "signingDateRaw",
+              "source",
+              "sourceCharEnd",
+              "sourceCharStart",
+              "sourceCredit",
+              "sourceNote",
+              "sourcePageEnd",
+              "sourcePageStart",
+              "sourceUrl",
+              "state",
+              "stateHtmlUrl",
+              "statutoryAuthority",
+              "subchapter",
+              "subchapterName",
+              "subject",
+              "subjectNumber",
+              "subpart",
+              "subpartName",
+              "subtitle",
+              "subtitleName",
+              "supersededBy",
+              "supersedes",
+              "supersessionActions",
+              "textUrl",
+              "title",
+              "titleName",
+              "titleNumber",
+              "topLevelTitle",
+              "topics",
+              "transferredTo",
+              "transferredToLabel",
+              "versionId",
+              "volume",
+              "wordCount",
+              "xmlUrl",
+              "year"
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Fields",
+      "description": "Return only these result fields, e.g. `[\"title\", \"excerpt\"]`. A result carries 40+ fields and most are null on any given row, so a full page of 50 ships a lot of nulls. `actId` and `citation` are always included, because a row without them cannot be used or attributed. Unknown names are rejected with 422 so a typo does not silently drop a field you needed. Omit for the full object."
+    },
+    "limit": {
+      "type": "integer",
+      "maximum": 50.0,
+      "minimum": 1.0,
+      "title": "Limit",
+      "description": "Number of results to return per page.",
+      "default": 10
+    },
+    "offset": {
+      "type": "integer",
+      "maximum": 70.0,
+      "minimum": 0.0,
+      "title": "Offset",
+      "description": "How many results to skip, for paging. Every page of a given query is cut from one ranking, so results never repeat or go missing between pages, and a later page costs no more than the first. The deepest reachable result is `offset` + `limit`; check `hasMore` to know when there is nothing further.",
+      "default": 0
+    },
+    "includeBody": {
+      "type": "boolean",
+      "title": "Includebody",
+      "description": "Return the full text of every hit inline, on each result's `body`, instead of making you fetch it per section afterwards.\n\n**Why it exists.** Search returns a ranking preview, so the alternative is a search call plus one `/section/{actId}/body` call per hit. This collapses a whole page to a single round trip.\n\n**Cost**: the 4-credit search PLUS the ordinary 6-credit body price for each row that actually returns text. Ten rows with text is 4 + 60 = 64 credits. A row whose text cannot be resolved comes back with `body: null` and is NOT charged, so read `creditsConsumed` rather than computing it from `limit` -- it is the same price as fetching them yourself, so this buys latency, not a discount.\n\n⚠️ It multiplies with `limit`. `limit: 50` with this set is 304 credits in a single call. Page deliberately.\n\nPrefer this over raising `excerptChars`: the excerpt is windowed around the match and can begin mid-section, dropping a leading subsection marker, so it is not safe to quote. `body` is the publisher's text.",
+      "default": false
+    },
+    "excerptChars": {
+      "type": "integer",
+      "maximum": 4000.0,
+      "minimum": 100.0,
+      "title": "Excerptchars",
+      "description": "Characters of matching text to include in each result's `excerpt`. The excerpt is a ranking preview; use `/us/statutes/section/{actId}/body` for the full text. Default 500.",
+      "default": 500
+    },
+    "matchType": {
+      "type": "string",
+      "enum": [
+        "any",
+        "all",
+        "phrase"
+      ],
+      "title": "Matchtype",
+      "description": "Controls exact vs. semantic matching, so there is no need for a separate keyword-only search mode. `any` (default) is hybrid semantic + keyword ranking and suits natural-language questions. Use `all` for strict keyword matching (every query word must appear in the text) or `phrase` for an exact-phrase match (the query's words, contiguous and in order), e.g. a defined term or a statutory phrase, when you want lexical precision. Both match WHOLE words, case-insensitively, ignoring punctuation: `act` does not match `fact`, `10b-5` matches `10b 5`, and `§ 1983` matches `section 1983`. To pull up one specific section, pass its citation as the query (e.g. `42 U.S.C. § 1983`, `Cal. Civ. Code § 1950.5`) and it resolves to that section at rank 1.",
+      "default": "any"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "query"
+  ]
+}

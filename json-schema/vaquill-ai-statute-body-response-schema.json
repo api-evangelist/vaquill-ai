@@ -1,0 +1,660 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/vaquill-ai/main/json-schema/vaquill-ai-statute-body-response-schema.json",
+  "title": "StatuteBodyResponse",
+  "description": "Full text of a statute section in HTML and/or plain text.",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/vaquill-ai-openapi.yml#/components/schemas/StatuteBodyResponse",
+  "properties": {
+    "actId": {
+      "type": "string",
+      "title": "Actid",
+      "description": "The act_id of the section served. Equal to your request unless `resolvedFrom` is set, in which case it is the id your citation or cleaned-up input resolved to."
+    },
+    "html": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Html",
+      "description": "The section text as HTML. When `source` is `r2_render` this is our structured rendering of the publisher's source: real `<table>` elements (with `<caption>`, `colspan` and `rowspan`) and `<figure>` / `<img>` elements at the position the publisher prints them, with images hosted on `statutes-us.vaquill.ai`. When `source` is `r2_s3` this is the publisher's own markup (tables, paragraph structure, history lines), cut to the section's own content where we recognise the publisher's page layout. For any other `source` the text was not held as per-section HTML, and `html` carries the same text as `plain` with no markup."
+    },
+    "plain": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Plain",
+      "description": "Plain text version."
+    },
+    "source": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Source",
+      "description": "Which copy the text came from: `r2_render` (our structured rendering, carrying `markdown`, `tables` and `figures`), `r2_s3` (the publisher's page for this section), `r2_text` (our per-section text extraction), `qdrant_reconstructed` (reassembled from indexed passages), and on `asOf` requests `stored_edition` or `corpus_change_history`. A storage identifier, not a citation: cite `sourceUrl`."
+    },
+    "sourceUrl": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Sourceurl",
+      "description": "Where this text was published by the government, so the bytes you were served can be cited and verified against the official record. Null when we hold no publishable link for the section: a third-party compiler is never served here, and an absent link is the correct answer in that case. `source` is a storage identifier and is NOT a citation."
+    },
+    "content": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Content",
+      "description": "The OPERATIVE TEXT of the section, with the source credit and the notes apparatus removed. This is the law; `plain` is the law plus everything the publisher prints around it.\n\nPopulated for **United States Code** sections, where GPO delimits the fields in the granule it publishes. Null for CFR and for state corpora, whose sources carry no equivalent structure -- null means \"we cannot split this reliably\", never \"this section is empty\", and `plain` is still the whole body.\n\nWorth using if you feed sections to a model: the operative text is a median 46% of `plain` across USC and as little as 3.4% (`17 U.S.C. § 107`, where nearly all of the body is committee reports and amendment notes). A model handed the full body can quote a 1992 amendment note as the law in force."
+    },
+    "sourceCredit": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Sourcecredit",
+      "description": "The publisher's credit line for the section, e.g. `(Pub. L. 94-553, title I, §101, Oct. 19, 1976, 90 Stat. 2546; ...)`. Split out of the body rather than left inside it.\n\nThe same value is also on `GET /us/statutes/section/{actId}` as `sourceCredit`; it is repeated here so a caller fetching the text does not need a second call to know what enacted it."
+    },
+    "notes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Notes",
+      "description": "The notes apparatus the publisher prints after the section: Historical and Revision Notes, committee reports, Editorial Notes (codification and amendments), Statutory Notes and Related Subsidiaries (effective dates), and any guidelines reprinted by the editors.\n\nKept, not discarded: it is the legislative history, and it is the reason a section's body can be twenty times the length of the law. It is simply NOT the operative text, so it is served as its own field. Null where we cannot split the body.\n\nAlso null, deliberately, when you pass `format=operative`: that is the one format that asks us to leave the apparatus off the wire. Null there means \"not sent\", not \"none exists\" -- the same request at `format=content` returns it."
+    },
+    "available": {
+      "type": "boolean",
+      "title": "Available",
+      "description": "Whether full text is available.",
+      "default": true
+    },
+    "note": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Note",
+      "description": "Note if text is unavailable."
+    },
+    "markdown": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Markdown",
+      "description": "The body as GitHub-flavoured Markdown. When `source` is `r2_render` this is the structured rendering: tables as GFM pipe tables (a caption line above, footnotes below, multi-level headers joined as `Parent / Child`) and figures as `![alt](url)` at their position in the text. Returned only when `format` is `all` or `markdown`, not on the default `both`, where it would be a third full copy.\n\nFor a section with no structured rendering, `markdown` is null unless you pass `structured=true`, in which case it is the body as nested Markdown lists (the pre-existing behaviour). When both exist the structured rendering wins, because it is the one that keeps the tables; `subsections` is returned either way."
+    },
+    "tables": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/BodyTable"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Tables",
+      "description": "The tables in the body, in document order, with their size. An empty list means the section has none. Null means not known: the section's corpus has no structured rendering yet, so a table may still be present in `html`."
+    },
+    "figures": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/BodyFigure"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Figures",
+      "description": "The figures, equations and form images in the body, in document order, with hosted image urls and each one's offset into `markdown` and `plain`. An empty list means the section has none. Null means not known: the section's corpus has no structured rendering yet."
+    },
+    "hasTables": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Hastables",
+      "description": "True when the body contains at least one table, false when it contains none. Null when not known, because the section's corpus has no structured rendering yet."
+    },
+    "hasFigures": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Hasfigures",
+      "description": "True when the body contains at least one figure, equation or form image, false when it contains none. Null when not known, because the section's corpus has no structured rendering yet."
+    },
+    "subsections": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/SubsectionNode"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Subsections",
+      "description": "The section broken into its lettered and numbered subsections, nested as they appear in the text. Use it to quote or link a single clause rather than the whole section. Present only when `structured=true`."
+    },
+    "asOf": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AsOfProvenance"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Present only when the request passed `asOf`. Says WHICH version of the section you are holding and how far the evidence for it goes. Read `isBounded` before treating the text as the law on that date."
+    },
+    "resolvedFrom": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SectionIdentifierResolution"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Null when the section is exactly the act_id you sent. Otherwise how your input was matched: a citation, or an act_id with transport damage (whitespace, quotes, a trailing period) removed."
+    },
+    "processingTimeMs": {
+      "type": "number",
+      "title": "Processingtimems",
+      "description": "Server-side time for this request in milliseconds, excluding network transit. Useful for spotting a slow query; not billed on.",
+      "default": 0.0
+    },
+    "creditsConsumed": {
+      "type": "number",
+      "title": "Creditsconsumed",
+      "description": "Credits actually charged for this call. Read it rather than assuming the list price: failed and refunded work bills 0, and batch endpoints charge per item returned, so a partial result costs less than a full one.",
+      "default": 0.0
+    }
+  },
+  "type": "object",
+  "required": [
+    "actId"
+  ],
+  "$defs": {
+    "AsOfProvenance": {
+      "properties": {
+        "requested": {
+          "type": "string",
+          "title": "Requested",
+          "description": "The date you asked for, echoed back (`YYYY-MM-DD`)."
+        },
+        "engine": {
+          "type": "string",
+          "enum": [
+            "stored_edition",
+            "observed_change"
+          ],
+          "title": "Engine",
+          "description": "WHICH BACKEND ANSWERED. `asOf` is one parameter over two engines and they make different promises.\n\n`stored_edition`: the answer is a publisher's own printed edition of the text, held verbatim. Used wherever we hold published editions, which today is `corpusType=CFR_ANNUAL` (annual editions per title), the US Code, the Copyright Compendium and OFAC FAQs. The date is resolved to a held edition and that edition's text is returned as printed.\n\nCoverage under this engine is per corpus and is NOT continuous. The CFR annual editions tile the calendar per title; the others are ENUMERATED editions with gaps between them. A date that falls in a gap returns `source: \"unavailable\"` with `outOfCoverageReason` and NO text, rather than the neighbouring edition, because the text may have changed in the gap. For the US Code in particular, most dates are currently out of coverage: see `outOfCoverageReason` for which editions we hold.\n\n`observed_change`: the answer is RECONSTRUCTED from changes we observed, and reaches back only as far as capture began for that source. Every other corpus.\n\nRead this before `isBounded`, which does not make the same claim on both engines.",
+          "default": "observed_change"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "live",
+            "reconstructed",
+            "unavailable",
+            "published"
+          ],
+          "title": "Source",
+          "description": "The detail WITHIN the engine above.\n\nOn `observed_change` -- `live`: we captured no change to this section after your date, so today's text is what stood then as far as we ever saw. `reconstructed`: rebuilt from the before-side of the first change we captured after your date. `unavailable`: we know it changed but cannot rebuild the earlier text, so no text is returned. That is different from the section being empty, and different again from it not existing.\n\nOn `stored_edition` -- `published`: an edition we hold answered, verbatim. `unavailable`: the date is out of coverage for this section and no text is returned, and `outOfCoverageReason` says why in a sentence. Out of coverage means the date falls outside every edition we hold, or inside a gap between two of them; it is never answered from a neighbouring edition."
+        },
+        "existed": {
+          "type": "boolean",
+          "title": "Existed",
+          "description": "False when the earliest thing we ever captured for this section is its ADDITION and that addition postdates your date, so it demonstrably did not exist yet. A real answer, not a miss."
+        },
+        "basisChangeId": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Basischangeid",
+          "description": "The change event whose before-side supplied this text. Null when `source` is `live`. Pass it to `/us/statutes/section/{actId}/changes` to see the event this answer rests on."
+        },
+        "observedFrom": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observedfrom",
+          "description": "The earliest change we ever captured for this section. Null when we captured none. This is how far back the reconstruction can see, and it is a property of when capture began for this source, not of the age of the law."
+        },
+        "resolvedEditionYear": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Resolvededitionyear",
+          "description": "`stored_edition` only. The revision year actually served, read from the edition's own printed revision statement. 🔴 This is NOT always the year the schedule computes: a publisher reprints an unchanged volume into the next year without re-dating it, so the 2024 printing of 4 CFR is the January 1 2019 revision. Render THIS year, never `scheduledEditionYear`."
+        },
+        "scheduledEditionYear": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Schedulededitionyear",
+          "description": "`stored_edition` only. The edition the revision schedule says SHOULD cover your date. Differs from `resolvedEditionYear` whenever the publisher reprinted an unchanged volume. Exposed so the disagreement is auditable, not so it can be displayed."
+        },
+        "editionsObserved": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Editionsobserved",
+          "description": "`stored_edition` only. Every edition year in which this exact text was observed, enumerated. An ENUMERATION, not a range: a year between the first and last that is absent here is an edition nobody read, and a date resolving to it is reported out of coverage rather than answered from a neighbour."
+        },
+        "outOfCoverageReason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Outofcoveragereason",
+          "description": "Why no text was returned, in a sentence safe to show a reader. Null when text was returned."
+        },
+        "isBounded": {
+          "type": "boolean",
+          "title": "Isbounded",
+          "description": "⚠️ This flag does NOT make the same claim on both engines. Read `engine` first.\n\nOn `stored_edition`, TRUE means your date falls inside the editions we actually parsed for this title, so the text is a verified published printing rather than an inference. FALSE means out of coverage, and no text is returned.\n\nOn `observed_change`, TRUE means: we observed no change affecting your date, and that is NOT the same as there having been none.\n\nSet when your date predates `observedFrom`, or when we captured no change for this section at all. Change capture began long after the corpus did and is per-source, so a bounded answer is our best reconstruction rather than a verified historical text. Surface it. Rendering a bounded answer as authoritative point-in-time law makes a claim we did not make."
+        },
+        "coverage": {
+          "type": "string",
+          "title": "Coverage",
+          "description": "Prose statement of the same limit, safe to show a reader verbatim."
+        }
+      },
+      "type": "object",
+      "required": [
+        "requested",
+        "source",
+        "existed",
+        "isBounded",
+        "coverage"
+      ],
+      "title": "AsOfProvenance",
+      "description": "Where an `asOf` body came from, and how far the evidence reaches.\n\nEvery field but `text` on the parent exists so this answer cannot be\nover-read. The corpus holds ONE current text per citation; an earlier one is\nRECONSTRUCTED from observed changes, and observation started when it started."
+    },
+    "BodyFigure": {
+      "properties": {
+        "figureId": {
+          "type": "string",
+          "title": "Figureid",
+          "description": "Stable id for this figure, also carried on the `<figure data-figure-id>` element in `html`. Deterministic, so it does not change between renders of the same source."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "figure",
+            "equation",
+            "image",
+            "form"
+          ],
+          "title": "Kind",
+          "description": "What the image is. `equation` renders inline in the text.",
+          "default": "figure"
+        },
+        "caption": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Caption",
+          "description": "The publisher's caption, when it prints one."
+        },
+        "alt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Alt",
+          "description": "Alternative text for the image."
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Url",
+          "description": "Where the image is hosted, always on `statutes-us.vaquill.ai`. A format a browser cannot display (TIFF, EPS, PDF) is served as a PNG. Null when `status` is `unavailable`."
+        },
+        "sourceUrl": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sourceurl",
+          "description": "The image as the government publisher serves it. Use it for a \"view at source\" link, especially when `status` is `unavailable`. Null when we hold no publishable link."
+        },
+        "width": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Width",
+          "description": "Pixel width of the hosted image."
+        },
+        "height": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Height",
+          "description": "Pixel height of the hosted image."
+        },
+        "mimeType": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mimetype"
+        },
+        "order": {
+          "type": "integer",
+          "title": "Order",
+          "description": "1-based position among the section's figures.",
+          "default": 0
+        },
+        "offsetMarkdown": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Offsetmarkdown",
+          "description": "Character offset of this figure's placeholder in `markdown`, so a client can splice the image into its own layout."
+        },
+        "offsetPlain": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Offsetplain",
+          "description": "Character offset of this figure's `[Figure N: ...]` placeholder in `plain`."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "hosted",
+            "unavailable"
+          ],
+          "title": "Status",
+          "description": "`unavailable` means the publisher's image could not be fetched. The figure is still listed, and its caption and placeholder stay in the text, so a missing figure is never silently dropped.",
+          "default": "hosted"
+        }
+      },
+      "type": "object",
+      "required": [
+        "figureId"
+      ],
+      "title": "BodyFigure",
+      "description": "One figure, equation or form image inside a rendered section body."
+    },
+    "BodyTable": {
+      "properties": {
+        "tableId": {
+          "type": "string",
+          "title": "Tableid"
+        },
+        "order": {
+          "type": "integer",
+          "title": "Order",
+          "description": "1-based position among the section's tables.",
+          "default": 0
+        },
+        "caption": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Caption",
+          "description": "The table's caption, when it has one."
+        },
+        "rows": {
+          "type": "integer",
+          "title": "Rows",
+          "description": "Row count, header rows included.",
+          "default": 0
+        },
+        "cols": {
+          "type": "integer",
+          "title": "Cols",
+          "description": "Column count.",
+          "default": 0
+        }
+      },
+      "type": "object",
+      "required": [
+        "tableId"
+      ],
+      "title": "BodyTable",
+      "description": "One table inside a rendered section body."
+    },
+    "SectionIdentifierResolution": {
+      "properties": {
+        "input": {
+          "type": "string",
+          "title": "Input",
+          "description": "The identifier exactly as you sent it."
+        },
+        "actId": {
+          "type": "string",
+          "title": "Actid",
+          "description": "The act_id it matched. Send this next time to skip resolution."
+        },
+        "via": {
+          "type": "string",
+          "enum": [
+            "normalized_id",
+            "citation"
+          ],
+          "title": "Via",
+          "description": "`citation` -- your input was a citation, resolved with the same resolver as `GET /us/statutes/resolve`. Check it the way you would check a `/resolve` answer. `normalized_id` -- your input was an act_id carrying surrounding whitespace, quotes, a trailing period or double percent-encoding, which were removed."
+        },
+        "subsection": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Subsection",
+          "description": "The pincite your citation carried, e.g. `(h)(11)` for `26 U.S.C. § 1(h)(11)`. The WHOLE section is served; use `structured=true` on `/body` to address the subsection."
+        }
+      },
+      "type": "object",
+      "required": [
+        "input",
+        "actId",
+        "via"
+      ],
+      "title": "SectionIdentifierResolution",
+      "description": "How the identifier you sent was matched, when it was not an exact act_id.\n\nPresent only when the input did NOT match as sent. Absent (null) means the\nsection is exactly the act_id in your request."
+    },
+    "SubsectionNode": {
+      "properties": {
+        "label": {
+          "type": "string",
+          "title": "Label",
+          "description": "The marker as printed, e.g. `(b)` or `(2)`."
+        },
+        "pincite": {
+          "type": "string",
+          "title": "Pincite",
+          "description": "Full path to this subsection from the top of the section, e.g. `(b)(2)`. Append it to the section's citation to point at this exact passage: 42 U.S.C. § 1983(b)(2). Lawyers call that a pincite, a citation to the precise place rather than the whole section."
+        },
+        "type": {
+          "type": "string",
+          "title": "Type",
+          "description": "The drafting level of this node: `subsection`, `paragraph`, `subparagraph`, `clause`, or `subclause`. Use it to render the marker style (letters, numbers, roman).",
+          "default": "subsection"
+        },
+        "citation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Citation",
+          "description": "Full pinpoint citation when the section citation is known, e.g. `42 U.S.C. § 1983(b)(2)`."
+        },
+        "text": {
+          "type": "string",
+          "title": "Text",
+          "description": "This node's own text, excluding nested children.",
+          "default": ""
+        },
+        "children": {
+          "items": {
+            "$ref": "#/$defs/SubsectionNode"
+          },
+          "type": "array",
+          "title": "Children",
+          "description": "Nested subsections one level deeper."
+        }
+      },
+      "type": "object",
+      "required": [
+        "label",
+        "pincite"
+      ],
+      "title": "SubsectionNode",
+      "description": "One node in a section's subsection tree (see `/body?structured=true`)."
+    }
+  }
+}

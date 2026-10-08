@@ -1,0 +1,381 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/vaquill-ai/main/json-schema/vaquill-ai-statute-count-request-schema.json",
+  "title": "StatuteCountRequest",
+  "description": "Filter-only section count. See `POST /us/statutes/count`.\n\nDeliberately takes NO `query`. A count of \"sections matching this query\"\ndoes not exist: ranking runs over a bounded window, so the honest answer to\nthat question is the window size rather than a corpus figure. This counts a\nSCOPE, which is exact, cheap, and the number an acquisition job actually\nneeds before it starts walking.",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/vaquill-ai-openapi.yml#/components/schemas/StatuteCountRequest",
+  "properties": {
+    "corpusType": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "USC",
+            "CFR",
+            "STATE",
+            "CONSTITUTION",
+            "FEDERAL_RULES",
+            "FEDERAL_LOCAL_RULES",
+            "STATE_CONSTITUTION",
+            "STATE_RULES",
+            "EXECUTIVE_ACTION",
+            "REGULATION",
+            "FEDERAL_REGISTER",
+            "FEDERAL_REGISTER_NOTICE",
+            "AGENCY_GUIDANCE",
+            "SENTENCING_GUIDELINES",
+            "US_TAX_TREATY",
+            "STATE_AGENCY_GUIDANCE",
+            "STATE_AG_OPINION",
+            "SESSION_LAW",
+            "STATUTE_COMPILATION",
+            "AGENCY_ADJUDICATION",
+            "CFR_ANNUAL",
+            "USC_ANNUAL"
+          ]
+        },
+        {
+          "items": {
+            "type": "string",
+            "enum": [
+              "USC",
+              "CFR",
+              "STATE",
+              "CONSTITUTION",
+              "FEDERAL_RULES",
+              "FEDERAL_LOCAL_RULES",
+              "STATE_CONSTITUTION",
+              "STATE_RULES",
+              "EXECUTIVE_ACTION",
+              "REGULATION",
+              "FEDERAL_REGISTER",
+              "FEDERAL_REGISTER_NOTICE",
+              "AGENCY_GUIDANCE",
+              "SENTENCING_GUIDELINES",
+              "US_TAX_TREATY",
+              "STATE_AGENCY_GUIDANCE",
+              "STATE_AG_OPINION",
+              "SESSION_LAW",
+              "STATUTE_COMPILATION",
+              "AGENCY_ADJUDICATION",
+              "CFR_ANNUAL",
+              "USC_ANNUAL"
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Corpustype",
+      "description": "Corpus to count, single or list. Omit to count every corpus."
+    },
+    "state": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "federal",
+            "al",
+            "ak",
+            "az",
+            "ar",
+            "ca",
+            "co",
+            "ct",
+            "de",
+            "dc",
+            "fl",
+            "ga",
+            "gu",
+            "hi",
+            "id",
+            "il",
+            "in",
+            "ia",
+            "ks",
+            "ky",
+            "la",
+            "me",
+            "md",
+            "ma",
+            "mi",
+            "mn",
+            "ms",
+            "mo",
+            "mt",
+            "ne",
+            "nv",
+            "nh",
+            "nj",
+            "nm",
+            "ny",
+            "nc",
+            "nd",
+            "mp",
+            "oh",
+            "ok",
+            "or",
+            "pa",
+            "pr",
+            "ri",
+            "sc",
+            "sd",
+            "tn",
+            "tx",
+            "ut",
+            "vt",
+            "va",
+            "wa",
+            "wv",
+            "wi",
+            "wy"
+          ]
+        },
+        {
+          "items": {
+            "type": "string",
+            "enum": [
+              "federal",
+              "al",
+              "ak",
+              "az",
+              "ar",
+              "ca",
+              "co",
+              "ct",
+              "de",
+              "dc",
+              "fl",
+              "ga",
+              "gu",
+              "hi",
+              "id",
+              "il",
+              "in",
+              "ia",
+              "ks",
+              "ky",
+              "la",
+              "me",
+              "md",
+              "ma",
+              "mi",
+              "mn",
+              "ms",
+              "mo",
+              "mt",
+              "ne",
+              "nv",
+              "nh",
+              "nj",
+              "nm",
+              "ny",
+              "nc",
+              "nd",
+              "mp",
+              "oh",
+              "ok",
+              "or",
+              "pa",
+              "pr",
+              "ri",
+              "sc",
+              "sd",
+              "tn",
+              "tx",
+              "ut",
+              "vt",
+              "va",
+              "wa",
+              "wv",
+              "wi",
+              "wy"
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "State",
+      "description": "Two-letter jurisdiction code or `federal`, single or list."
+    },
+    "code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Code",
+      "description": "State code identifier, e.g. `tx_26`. With `corpusType=FEDERAL_RULES`, a rule set instead (`frcp`, `uscapp_t28a_fre`). Same values and checks as `code` on `/search`."
+    },
+    "article": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Article",
+      "description": "Article label (`Amendment XIV`) on CONSTITUTION / STATE_CONSTITUTION, or article number (`2-A`) on a STATE / REGULATION code divided by article. Same values and pairing rules as `article` on `/search`."
+    },
+    "titleNumber": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 1.0
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Titlenumber",
+      "description": "USC or CFR title number."
+    },
+    "chapter": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Chapter",
+      "description": "Chapter identifier. Pair with `titleNumber` or `code`."
+    },
+    "part": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Part",
+      "description": "CFR part identifier. Pair with `titleNumber`."
+    },
+    "actStatus": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "abolished",
+            "deleted",
+            "expired",
+            "in_force",
+            "inactive",
+            "non_precedential",
+            "not_funded",
+            "not_yet_effective",
+            "omitted",
+            "proposed",
+            "recodified",
+            "recompiled",
+            "rejected",
+            "relocated",
+            "removed",
+            "renumbered",
+            "repealed",
+            "rescinded",
+            "reserved",
+            "revoked",
+            "superseded",
+            "terminated",
+            "transferred",
+            "unconstitutional",
+            "vacant",
+            "vacated",
+            "vetoed",
+            "withdrawn"
+          ]
+        },
+        {
+          "items": {
+            "type": "string",
+            "enum": [
+              "abolished",
+              "deleted",
+              "expired",
+              "in_force",
+              "inactive",
+              "non_precedential",
+              "not_funded",
+              "not_yet_effective",
+              "omitted",
+              "proposed",
+              "recodified",
+              "recompiled",
+              "rejected",
+              "relocated",
+              "removed",
+              "renumbered",
+              "repealed",
+              "rescinded",
+              "reserved",
+              "revoked",
+              "superseded",
+              "terminated",
+              "transferred",
+              "unconstitutional",
+              "vacant",
+              "vacated",
+              "vetoed",
+              "withdrawn"
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Actstatus",
+      "description": "Count only sections carrying this status."
+    },
+    "excludeRepealed": {
+      "type": "boolean",
+      "title": "Excluderepealed",
+      "description": "Exclude sections whose status is affirmatively dead. A section with no recorded status is KEPT, because a missing status is not evidence of repeal. The US Code is served from a stored annual edition, so a section repealed after it closed is counted here; see the same field on `/search` for the measurement.",
+      "default": false
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

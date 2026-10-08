@@ -1,0 +1,29 @@
+generated: '2026-10-07'
+method: searched
+source: https://www.vaquill.ai/docs/api-guide/rate-limits
+name: Vaquill Legal Data API rate limits
+limit_count: 2
+status_on_exhaustion: 429
+headers:
+- Retry-After
+policy_text: Limits are enforced per API key and scale with your plan. When you exceed one the API returns `429` with a `Retry-After` header telling
+  you how many seconds to wait.
+limits:
+- name: Board watch cap (non-Business plans)
+  limit_text: the watch cap is 3 outside Business and 100 on Business
+  max: 3
+  scope: per account
+  kind: cap
+  plan: all plans except Business
+  endpoint: /api/v1/watches
+  operationId: create_watch_api_v1_watches_post
+- name: Board watch cap (Business plan)
+  limit_text: the watch cap is 3 outside Business and 100 on Business
+  max: 100
+  scope: per account
+  kind: cap
+  plan: Business
+  endpoint: /api/v1/watches
+  operationId: create_watch_api_v1_watches_post
+note: Numeric request-rate limits for the Data API are not published; the docs say only that limits are per API key and scale with plan, and that
+  429 carries Retry-After. The Workspace API publishes a full tier table in rate-limits/vaquill-ai-workspace-rate-limits.yml.

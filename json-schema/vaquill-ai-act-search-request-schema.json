@@ -1,0 +1,363 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/vaquill-ai/main/json-schema/vaquill-ai-act-search-request-schema.json",
+  "title": "ActSearchRequest",
+  "description": "Search Indian legislation by semantic query.",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActSearchRequest",
+  "properties": {
+    "query": {
+      "type": "string",
+      "maxLength": 1000,
+      "minLength": 2,
+      "title": "Query",
+      "description": "Search query."
+    },
+    "category": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "central",
+            "state",
+            "regulatory",
+            "repealed",
+            "spent"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Category",
+      "description": "Jurisdictional class. `repealed` and `spent` are accepted for backward compatibility and resolve against `actStatus` instead. Values: `central`, `state`, `regulatory`, `repealed`, `spent`."
+    },
+    "state": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "andaman-and-nicobar-islands",
+            "andaman-nicobar",
+            "andhra-pradesh",
+            "arunachal-pradesh",
+            "assam",
+            "bihar",
+            "central",
+            "chandigarh",
+            "chhattisgarh",
+            "dadra-and-nagar-haveli-and-daman-and-diu",
+            "dadra-nagar-haveli",
+            "delhi",
+            "goa",
+            "gujarat",
+            "haryana",
+            "himachal-pradesh",
+            "jammu-and-kashmir",
+            "jammu-kashmir",
+            "jharkhand",
+            "karnataka",
+            "kerala",
+            "ladakh",
+            "lakshadweep",
+            "madhya-pradesh",
+            "maharashtra",
+            "manipur",
+            "meghalaya",
+            "mizoram",
+            "nagaland",
+            "odisha",
+            "puducherry",
+            "punjab",
+            "rajasthan",
+            "sikkim",
+            "tamil-nadu",
+            "telangana",
+            "tripura",
+            "uttar-pradesh",
+            "uttarakhand",
+            "west-bengal"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "State",
+      "description": "Jurisdiction slug. `central` is a value here, for Union legislation. Live counts per jurisdiction are on GET /acts/coverage."
+    },
+    "department": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Department",
+      "description": "Issuing body. Deliberately NOT an enumerated list: this field holds 943 distinct values and mixes clean regulator slugs (`sebi`, `rbi`, `moefcc`) with free-text state department names (`Law Department`). Read GET /acts/filters for the values with the most data behind them."
+    },
+    "actStatus": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "in_force",
+            "repealed",
+            "superseded",
+            "spent"
+          ]
+        },
+        {
+          "items": {
+            "type": "string",
+            "enum": [
+              "in_force",
+              "repealed",
+              "superseded",
+              "spent"
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Actstatus",
+      "description": "Filter by the publisher's lifecycle status. Accepts one value or a list. This is the publisher's claim, not our verdict: see GET /acts/{actId}/status. Values: `in_force`, `repealed`, `superseded`, `spent`."
+    },
+    "excludeRepealed": {
+      "type": "boolean",
+      "title": "Excluderepealed",
+      "description": "Drop provisions whose act the publisher records as repealed or spent. Off by default, because repealed law is still law that was in force and is routinely the thing being researched.",
+      "default": false
+    },
+    "isSubordinate": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Issubordinate",
+      "description": "True for subordinate instruments only (rules, notifications, circulars, orders); false for principal acts only. Omit for both."
+    },
+    "provisionType": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "mandatory",
+            "general",
+            "prohibitory",
+            "overriding",
+            "discretionary",
+            "declaratory"
+          ]
+        },
+        {
+          "items": {
+            "type": "string",
+            "enum": [
+              "mandatory",
+              "general",
+              "prohibitory",
+              "overriding",
+              "discretionary",
+              "declaratory"
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Provisiontype",
+      "description": "Filter by what the provision DOES. Accepts one value or a list. Values: `mandatory`, `general`, `prohibitory`, `overriding`, `discretionary`, `declaratory`."
+    },
+    "sectionType": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "amendment_provision",
+            "article",
+            "body",
+            "chapter_heading",
+            "definition_clause",
+            "definitions",
+            "part_heading",
+            "preamble",
+            "schedule",
+            "section",
+            "short_title",
+            "sub_section"
+          ]
+        },
+        {
+          "items": {
+            "type": "string",
+            "enum": [
+              "amendment_provision",
+              "article",
+              "body",
+              "chapter_heading",
+              "definition_clause",
+              "definitions",
+              "part_heading",
+              "preamble",
+              "schedule",
+              "section",
+              "short_title",
+              "sub_section"
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Sectiontype",
+      "description": "Filter by structural kind of the passage. Accepts one value or a list. Values: `amendment_provision`, `article`, `body`, `chapter_heading`, `definition_clause`, `definitions`, `part_heading`, `preamble`, `schedule`, `section`, `short_title`, `sub_section`."
+    },
+    "legalSubject": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "administrative_law",
+            "banking_finance",
+            "civil_procedure",
+            "constitutional_law",
+            "corporate_law",
+            "criminal_law",
+            "environmental_law",
+            "family_law",
+            "general",
+            "information_technology",
+            "intellectual_property",
+            "labour_law",
+            "property_law",
+            "tax_law"
+          ]
+        },
+        {
+          "items": {
+            "type": "string",
+            "enum": [
+              "administrative_law",
+              "banking_finance",
+              "civil_procedure",
+              "constitutional_law",
+              "corporate_law",
+              "criminal_law",
+              "environmental_law",
+              "family_law",
+              "general",
+              "information_technology",
+              "intellectual_property",
+              "labour_law",
+              "property_law",
+              "tax_law"
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Legalsubject",
+      "description": "Filter by subject area, classified at ingest. Accepts one value or a list. Values: `administrative_law`, `banking_finance`, `civil_procedure`, `constitutional_law`, `corporate_law`, `criminal_law`, `environmental_law`, `family_law`, `general`, `information_technology`, `intellectual_property`, `labour_law`, `property_law`, `tax_law`."
+    },
+    "matchType": {
+      "type": "string",
+      "enum": [
+        "any",
+        "all",
+        "phrase"
+      ],
+      "title": "Matchtype",
+      "description": "How query terms must appear in the provision text. `any` (the default) leaves hybrid ranking to do the work; `all` keeps only provisions containing EVERY query term; `phrase` keeps only those containing the exact phrase.\n\n⚠️ It narrows the ranked candidate pool rather than re-querying the index, so a `phrase` search returns phrase matches WITHIN the top candidates, not every phrase match in the corpus. For an exhaustive phrase search, narrow with the structured filters first.\n\nValues: `any`, `all`, `phrase`.",
+      "default": "any"
+    },
+    "page": {
+      "type": "integer",
+      "minimum": 1.0,
+      "title": "Page",
+      "description": "1-based page number. `page * pageSize` may not exceed 100; narrow the query with filters to reach deeper matches.",
+      "default": 1
+    },
+    "yearFrom": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "maximum": 2100.0
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Yearfrom",
+      "description": "Earliest year of enactment to include, inclusive. Matched against the publisher's own year field, which is occasionally corrupt, so there is no lower bound and a value below 1800 is a legitimate way to find those rows."
+    },
+    "yearTo": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "maximum": 2100.0
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Yearto",
+      "description": "Latest year of enactment to include, inclusive."
+    },
+    "sectionNumber": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Sectionnumber",
+      "description": "Filter by exact section number. The publisher's own numbering, which is not an integer: `498A`, `376DA` and `2-A` all occur, and the alphabetic suffix is part of the number rather than a sub-provision."
+    },
+    "actTitle": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Acttitle",
+      "description": "Filter by words in the act's title. Each word must appear, so `Bharatiya Nyaya` narrows to the Sanhita."
+    },
+    "pageSize": {
+      "type": "integer",
+      "maximum": 50.0,
+      "minimum": 1.0,
+      "title": "Pagesize",
+      "description": "Results per page (1-50).",
+      "default": 10
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "query"
+  ]
+}

@@ -1,0 +1,1295 @@
+openapi: 3.2.0
+info:
+  title: Vaquill Ai Board Watches API
+  version: 1.0.0
+  contact:
+    name: Vaquill API Support
+    url: https://www.vaquill.ai
+    email: support@vaquill.ai
+  license:
+    name: Proprietary
+    url: https://www.vaquill.ai/terms
+  termsOfService: https://www.vaquill.ai/terms
+  description: 'Operations tagged Board Watches across 2 of this provider''s published API definitions: vaquill-ai-openapi.json, vaquill-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.vaquill.ai
+  description: Production
+security:
+- ApiKeyAuth: []
+- ApiKeyHeader: []
+- ApiKeyQuery: []
+tags:
+- name: Board Watches
+  description: Law-change alerts.
+paths:
+  /api/v1/boards:
+    get:
+      tags:
+      - Board Watches
+      summary: List watchable boards
+      description: 'List every board (a tracked corpus source, identified by corpusType + state) available to watch. A board''s refresh cadence is fixed by what we already track; watching it does not change how often it refreshes.
+
+
+        Narrow with `corpusType` and/or `state` when you already know what you want to watch, rather than paging the whole registry: `?corpusType=state_regulation&state=tx` is one board, and `?state=federal` is every federal one. `corpusType` is matched case-insensitively, and `state=federal` selects the boards that have no state.
+
+
+        `total` is the number of boards matching your filters BEFORE paging, and `hasMore` is true when another page exists, matching the paging contract on `/us/statutes/search` and the change feeds.
+
+
+        `lastRetrievedAt` says when we last pulled that source from its publisher, and `retrievalStatus` says whether we are still polling it. Read them together with `cadence` before treating silence on a watch as ''nothing changed''.
+
+
+        `publishesSourceChangedOn` says whether this board''s change events can carry the publisher''s own date for a change. It is false on most boards, and there it means the date is never present rather than sometimes missing, so check it before writing code that waits for `sourceChangedOn` to appear. True today on `cfr` only.
+
+
+        **Free.** Requires an API key and is rate-limited, but costs no credits.'
+      operationId: list_boards_api_v1_boards_get
+      parameters:
+      - name: corpusType
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Only boards for this corpus type, matched case-insensitively so the uppercase spelling used by the statutes endpoints (`CFR`) finds the board (`cfr`). An unknown value is an empty page with `total: 0`, not an error.'
+          examples:
+          - state_regulation
+          title: Corpustype
+        description: 'Only boards for this corpus type, matched case-insensitively so the uppercase spelling used by the statutes endpoints (`CFR`) finds the board (`cfr`). An unknown value is an empty page with `total: 0`, not an error.'
+      - name: state
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            enum:
+            - federal
+            - al
+            - ak
+            - az
+            - ar
+            - ca
+            - co
+            - ct
+            - de
+            - dc
+            - fl
+            - ga
+            - gu
+            - hi
+            - id
+            - il
+            - in
+            - ia
+            - ks
+            - ky
+            - la
+            - me
+            - md
+            - ma
+            - mi
+            - mn
+            - ms
+            - mo
+            - mt
+            - ne
+            - nv
+            - nh
+            - nj
+            - nm
+            - ny
+            - nc
+            - nd
+            - mp
+            - oh
+            - ok
+            - or
+            - pa
+            - pr
+            - ri
+            - sc
+            - sd
+            - tn
+            - tx
+            - ut
+            - vt
+            - va
+            - wa
+            - wv
+            - wi
+            - wy
+          - type: 'null'
+          description: Only boards for this jurisdiction. Pass `federal` for the boards that have no state (USC, eCFR, the Federal Register). Omit for no jurisdiction filter -- which is NOT the same as `federal`.
+          examples:
+          - tx
+          title: State
+        description: Only boards for this jurisdiction. Pass `federal` for the boards that have no state (USC, eCFR, the Federal Register). Omit for no jurisdiction filter -- which is NOT the same as `federal`.
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          description: Max boards to return. The default covers the whole registry today; check `total` rather than assuming it always will.
+          default: 500
+          title: Limit
+        description: Max boards to return. The default covers the whole registry today; check `total` rather than assuming it always will.
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of boards to skip, for paging.
+          default: 0
+          title: Offset
+        description: Number of boards to skip, for paging.
+      responses:
+        '200':
+          description: The list of watchable boards.
+          content:
+            application/json:
+              schema: {}
+              example:
+                data:
+                  boards:
+                  - corpusType: state
+                    state: wa
+                    label: Washington statutes
+                    cadence: weekly
+                    lastRetrievedAt: '2026-08-16T19:35:23.038075+00:00'
+                    retrievalStatus: current
+                    publishesSourceChangedOn: false
+                    changeSignal: continuous
+                  - corpusType: federal_register
+                    label: Federal Register
+                    cadence: daily
+                    lastRetrievedAt: '2026-08-17T06:10:09.637043+00:00'
+                    retrievalStatus: current
+                    publishesSourceChangedOn: false
+                    changeSignal: continuous
+                  total: 216
+                  hasMore: false
+                meta:
+                  processingTimeMs: 12.4
+                  creditsConsumed: 0
+        '401':
+          description: Invalid or missing API key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '403':
+          description: API key lacks `research:read` scope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '429':
+          description: Rate limit exceeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    servers:
+    - url: https://api.vaquill.ai
+      description: Production
+  /api/v1/watches:
+    get:
+      tags:
+      - Board Watches
+      summary: List your board watches
+      description: 'List every board watch you own, across every channel and board. Use this to check a watch''s `id` for the update/delete/test/deliveries routes below, or to see `lastNotifiedAt`/`lastStatus` for a quick health check without opening the deliveries endpoint.
+
+
+        **Free.**'
+      operationId: list_watches_api_v1_watches_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: Max watches to return.
+          default: 100
+          title: Limit
+        description: Max watches to return.
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of watches to skip, for paging.
+          default: 0
+          title: Offset
+        description: Number of watches to skip, for paging.
+      responses:
+        '200':
+          description: Your board watches.
+          content:
+            application/json:
+              schema: {}
+              example:
+                data:
+                  watches:
+                  - id: 9f2b1e0a-1234-4a11-8b1c-abcdef123456
+                    corpusType: state
+                    state: wa
+                    channel: webhook
+                    webhookUrl: https://example.com/hooks/law-changes
+                    isActive: true
+                    createdAt: '2026-08-01T12:00:00Z'
+                    updatedAt: '2026-08-01T12:00:00Z'
+                    lastNotifiedAt: '2026-08-05T07:00:00Z'
+                    lastStatus: 200
+                    changeSignal: continuous
+                    webhookAuth:
+                      scheme: header
+                      headerName: X-Api-Key
+                      hasSecret: true
+                meta:
+                  processingTimeMs: 9.1
+                  creditsConsumed: 0
+        '401':
+          description: Invalid or missing API key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '403':
+          description: API key lacks `research:read` scope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '429':
+          description: Rate limit exceeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - Board Watches
+      summary: Create a board watch
+      description: 'Subscribe to a board. `webhookUrl` is validated against an SSRF blocklist (loopback/private/link-local/cloud-metadata ranges) before acceptance and again on every dispatch. Every `board.updated` delivery body includes a `deliveryId` (stable per watch per refresh event, even across our own internal retries) so you can dedup safely on your end.
+
+
+        Each item in the body''s `changes[]` carries the same `id` and `detectedAt` that `GET /watches/{watchId}/changes` returns, so a webhook item is directly usable: pass its `id` as `sinceId` to page the rest of a change set that overflowed `changesOverflowCount`, or to `GET /watches/{watchId}/changes/{changeId}/diff` for the before and after text.
+
+
+        **The two sets of counters in that body measure different things over different populations, and they are not reconcilable against each other.** Read `sections*`, and read `rows*` only if you already built on it:
+
+
+        - `sectionsAdded` / `sectionsAmended` / `sectionsRemoved` count SECTIONS, one per change event, which is the same unit as `changes[]` and as `GET /watches/{watchId}/changes`. They are narrowed by this watch''s `scope`, which the body echoes back so you can see what they were counted over. They are omitted entirely when the refresh classified no change events, because there is then no honest section count to give.
+
+        - `rowsAdded` / `rowsUpdated` / `rowsDeleted` are the refresh''s raw storage counters for the WHOLE BOARD. They are never narrowed by `scope`, and they do not share a unit with each other: added and deleted count storage chunks (a long section is stored as several), while updated counts sections. One amended multi-section document therefore lands in all three at once, so a run that amended three sections can truthfully report 12 added, 3 updated and 12 removed.
+
+
+        Both can be true in the same body: a watch scoped to 21 CFR part 314 can receive `rowsUpdated: 480` next to `sectionsAmended: 1`, because the first counts the eCFR refresh''s whole run and the second counts what happened inside your scope. The `rows*` keys are kept unchanged for receivers already built on them; do not present them to anyone as three populations of sections.
+
+
+        **Free.**'
+      operationId: create_watch_api_v1_watches_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWatchRequest'
+      responses:
+        '201':
+          description: The created watch.
+          content:
+            application/json:
+              schema: {}
+              example:
+                data:
+                  id: 9f2b1e0a-1234-4a11-8b1c-abcdef123456
+                  corpusType: state
+                  state: wa
+                  channel: webhook
+                  webhookUrl: https://example.com/hooks/law-changes
+                  isActive: true
+                  createdAt: '2026-08-07T09:00:00Z'
+                  updatedAt: '2026-08-07T09:00:00Z'
+                  webhookAuth:
+                    scheme: bearer
+                    hasSecret: true
+                  changeSignal: continuous
+                meta:
+                  processingTimeMs: 45.2
+                  creditsConsumed: 0
+        '400':
+          description: Invalid request (bad channel/URL combo, rejected webhook target, or an invalid or unsupported scope).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '401':
+          description: Invalid or missing API key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '403':
+          description: API key lacks `research:read` scope, or the plan does not include webhook delivery (Business only; email delivery is available on every plan).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '404':
+          description: No enabled board for that corpusType + state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '409':
+          description: You already have a watch on this board for this channel.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '429':
+          description: Rate limit exceeded, or you have reached the maximum number of watches your plan allows (3 outside the Business plan).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    servers:
+    - url: https://api.vaquill.ai
+      description: Production
+  /api/v1/watches/{watch_id}/test:
+    post:
+      tags:
+      - Board Watches
+      summary: Send a test delivery
+      description: 'Fire a one-off test delivery for a watch you own, so you can verify your webhook endpoint or email address before relying on it for real notifications. Sent with `X-Vaquill-Event: board.test` so your handler can tell it apart from a real `board.updated` event. Not persisted to delivery history and does not affect the watch''s real last-notified state. Limited to one test send per watch every 30 seconds.
+
+
+        **Free.**'
+      operationId: test_watch_api_v1_watches__watch_id__test_post
+      parameters:
+      - name: watch_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Watch Id
+      responses:
+        '200':
+          description: Test delivery attempted (check `data` for per-channel outcome).
+          content:
+            application/json:
+              schema: {}
+              example:
+                data:
+                  channel: webhook
+                  webhook:
+                    success: true
+                    statusCode: 200
+                meta:
+                  processingTimeMs: 210.5
+                  creditsConsumed: 0
+        '401':
+          description: Invalid or missing API key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '404':
+          description: Watch not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '429':
+          description: Rate limit exceeded, or a test delivery was already sent for this watch within the cooldown window.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    servers:
+    - url: https://api.vaquill.ai
+      description: Production
+  /api/v1/watches/{watch_id}:
+    patch:
+      tags:
+      - Board Watches
+      summary: Update a board watch
+      description: 'Partially update a watch you own. Omitted fields are left unchanged. Use `isActive: false` to pause and `isActive: true` to resume -- a paused watch is skipped by every future notification but keeps its history and config. `webhookUrl`/`webhookSecret` (webhook/both channel) and `emailAddress` (email/both channel) can be rotated, but not cleared, and not set on a watch whose channel does not use them. To change channel itself, delete and recreate the watch.
+
+
+        **Free.**'
+      operationId: update_watch_api_v1_watches__watch_id__patch
+      parameters:
+      - name: watch_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Watch Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWatchRequest'
+      responses:
+        '200':
+          description: The updated watch.
+          content:
+            application/json:
+              schema: {}
+              example:
+                data:
+                  id: 9f2b1e0a-1234-4a11-8b1c-abcdef123456
+                  corpusType: state
+                  state: wa
+                  channel: webhook
+                  webhookUrl: https://example.com/hooks/law-changes
+                  isActive: false
+                  createdAt: '2026-08-01T12:00:00Z'
+                  updatedAt: '2026-08-07T09:05:00Z'
+                  lastNotifiedAt: '2026-08-05T07:00:00Z'
+                  lastStatus: 200
+                  changeSignal: continuous
+                meta:
+                  processingTimeMs: 22.7
+                  creditsConsumed: 0
+        '400':
+          description: Invalid update (field does not apply to this channel, a rejected webhook target, or an invalid scope).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '401':
+          description: Invalid or missing API key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '403':
+          description: API key lacks `research:read` scope, or the plan does not include webhook delivery (Business only). Repointing a webhook is the same entitlement as creating one.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '404':
+          description: Watch not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '409':
+          description: The new scope collides with another watch you already hold on this board and channel.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '429':
+          description: Rate limit exceeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Board Watches
+      summary: Delete a board watch
+      description: 'Delete a board watch you own. Immediate and permanent -- its delivery history is deleted with it. To temporarily stop notifications without losing the watch''s config or history, use `PATCH /watches/{id}` with `isActive: false` instead.
+
+
+        **Free.**'
+      operationId: delete_watch_api_v1_watches__watch_id__delete
+      parameters:
+      - name: watch_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Watch Id
+      responses:
+        '204':
+          description: Deleted. No response body.
+        '401':
+          description: Invalid or missing API key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '403':
+          description: API key lacks `research:read` scope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '404':
+          description: Watch not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '429':
+          description: Rate limit exceeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    servers:
+    - url: https://api.vaquill.ai
+      description: Production
+  /api/v1/watches/{watch_id}/changes:
+    get:
+      tags:
+      - Board Watches
+      summary: List what changed on a watch's source
+      description: 'The sections this watch''s source added, amended, or removed, newest first. This is the per-item detail behind the counts in a notification: not "3 sections changed" but which three.
+
+
+        Covers the source''s whole captured history, not just the period since you subscribed, so a watch created today can still read back what the source did before it. For the narrower ''what has my alert actually covered'' view, pass `since=` the watch''s own `createdAt`.
+
+
+        History is bounded by capture, not by the age of the law: events exist only from when change capture began for that source, and are swept at 5 years. An empty list means no captured change, never ''never amended'' -- the publisher''s own history, where there is one, is on the section''s `amendmentHistory`.
+
+
+        **Safe to poll alongside a webhook or email watch.** This endpoint is read-only and there is no server-side ''last checked'' state to interfere with: notifications fire when a corpus refresh completes, not by comparing against a watermark, and nothing here writes one. Polling cannot suppress, advance, or double-fire a delivery. (`lastNotifiedAt` on the watch records the outcome of the last delivery attempt for your visibility; it is never an input.)
+
+
+        **Paging.** Pass `sinceId` with `meta.cursor` from your previous page to get only what is new. `meta.hasMore` is true when the page filled to `limit`, so keep calling with the new cursor until it is false. Use `order=asc` while catching up.
+
+
+        `changeKind` is `added` (a new section), `amended` (its content was replaced), or `removed` (it disappeared from a full refresh of the source). `citation` and `title` are null for corpora that do not carry them.
+
+
+        `detectedAt` is when OUR refresh saw the change. `sourceChangedOn`, the publisher''s own date for it, is a much narrower field: we carry it on `cfr` and on no other board, so on everything else it is absent from every event. That absence is about our capture, not about the publisher, and it never licenses reading `detectedAt` as the amendment date. Check `publishesSourceChangedOn` on `GET /boards` to know which case a board is in.
+
+
+        **Free.**'
+      operationId: list_watch_changes_api_v1_watches__watch_id__changes_get
+      parameters:
+      - name: watch_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Watch Id
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: Max changes to return.
+          default: 50
+          title: Limit
+        description: Max changes to return.
+      - name: sinceId
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+            minimum: 0
+          - type: 'null'
+          description: 'Return only changes with an `id` greater than this. The cursor to build on: ids are a monotonic sequence, so this is exact, immune to clock skew, and cannot drop two changes that share a timestamp. Carry `meta.cursor` forward from your last page.'
+          title: Sinceid
+        description: 'Return only changes with an `id` greater than this. The cursor to build on: ids are a monotonic sequence, so this is exact, immune to clock skew, and cannot drop two changes that share a timestamp. Carry `meta.cursor` forward from your last page.'
+      - name: beforeId
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+            minimum: 0
+          - type: 'null'
+          description: 'Return only changes with an `id` less than this: the cursor for walking BACK through history, where `sinceId` walks forward into new changes. A newest-first reader needs this one, since paging down a descending list means asking for what sits below the lowest id already held. Pass the smallest `id` on your last page.'
+          title: Beforeid
+        description: 'Return only changes with an `id` less than this: the cursor for walking BACK through history, where `sinceId` walks forward into new changes. A newest-first reader needs this one, since paging down a descending list means asking for what sits below the lowest id already held. Pass the smallest `id` on your last page.'
+      - name: since
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Return only changes detected strictly after this ISO-8601 timestamp. Coarser than `sinceId` (a single refresh writes many rows at the same instant, and this drops all of them), but useful when all you kept was the `detectedAt` off a `changes[]` item in a webhook body. Prefer that item's `id` as `sinceId` where you still have it. Both may be combined.
+          examples:
+          - '2026-08-07T04:10:00Z'
+          title: Since
+        description: Return only changes detected strictly after this ISO-8601 timestamp. Coarser than `sinceId` (a single refresh writes many rows at the same instant, and this drops all of them), but useful when all you kept was the `detectedAt` off a `changes[]` item in a webhook body. Prefer that item's `id` as `sinceId` where you still have it. Both may be combined.
+      - name: changeKind
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: array
+            items:
+              enum:
+              - added
+              - amended
+              - removed
+              type: string
+          - type: 'null'
+          description: Filter to these kinds. Repeat the parameter to pass several (`?changeKind=added&changeKind=amended`). Omit for all three.
+          title: Changekind
+        description: Filter to these kinds. Repeat the parameter to pass several (`?changeKind=added&changeKind=amended`). Omit for all three.
+      - name: order
+        in: query
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+          description: '`desc` (default) is newest first, for showing a recent-activity list. Use `asc` when catching up from a cursor: walking forward means a page that hits `limit` leaves the gap at a known end.'
+          default: desc
+          title: Order
+        description: '`desc` (default) is newest first, for showing a recent-activity list. Use `asc` when catching up from a cursor: walking forward means a page that hits `limit` leaves the gap at a known end.'
+      responses:
+        '200':
+          description: What changed, newest first.
+          content:
+            application/json:
+              schema: {}
+              example:
+                data:
+                  changes:
+                  - id: 91
+                    refreshLogId: 4412
+                    corpusType: cfr
+                    changeKind: amended
+                    actId: CFR_T21_P314_S314_50
+                    citation: 21 CFR 314.50
+                    title: Content and format of an NDA
+                    detectedAt: '2026-08-07T04:10:00Z'
+                    sourceChangedOn: '2026-08-05'
+                    hasDiff: false
+                meta:
+                  processingTimeMs: 12.0
+                  creditsConsumed: 0
+                  cursor: 91
+                  hasMore: false
+        '400':
+          description: Invalid changeKind, order, or since timestamp.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '401':
+          description: Invalid or missing API key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '403':
+          description: API key lacks `research:read` scope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '404':
+          description: Watch not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '429':
+          description: Rate limit exceeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    servers:
+    - url: https://api.vaquill.ai
+      description: Production
+  /api/v1/watches/{watch_id}/changes/{change_id}/diff:
+    get:
+      tags:
+      - Board Watches
+      summary: Old-vs-new text for one change
+      description: 'The section''s text before and after this specific change, when available (see `hasDiff` on the change list above).
+
+
+        How many sides a change has depends on its kind, and each is a complete answer:
+
+
+        - `amended` -- both sides. This is the only kind where one side alone is not a partial answer but no answer.
+
+        - `added` -- after side only. There is no before side by definition, and the full text of a newly published section is precisely what the notification is for.
+
+        - `removed` -- before side only, the last text we held.
+
+
+        A missing side is not an error: `hasBefore`/`hasAfter` say which text is actually present, so a caller can render a graceful ''diff unavailable'' state for older changes or a snapshot that failed to capture, instead of treating null as a failure.
+
+
+        **Cost**: 4 credits per call (see `/api-credits/pricing`). This is the only metered route in the alerts family: every other board and watch endpoint, including the `/changes` list this reads from, is free.
+
+
+        You are charged only for a diff that answers the question its kind asks, and `creditsConsumed` always reports what was actually billed. Refunded in full (`creditsConsumed: 0`): an `amended` change missing either side, an `amended` change whose two sides resolve to identical text (a capture artifact on our side, not a change on the publisher''s), and any change resolving no text at all. A one-sided `added` or `removed` diff is the complete answer and is charged normally.'
+      operationId: get_watch_change_diff_api_v1_watches__watch_id__changes__change_id__diff_get
+      parameters:
+      - name: watch_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Watch Id
+      - name: change_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Change Id
+      responses:
+        '200':
+          description: The change's before/after text (either side may be absent).
+          content:
+            application/json:
+              schema: {}
+              example:
+                data:
+                  changeId: 91
+                  changeKind: amended
+                  beforeText: An application for approval of a new drug...
+                  afterText: An application for approval of a new drug or amended new drug...
+                  hasBefore: true
+                  hasAfter: true
+                meta:
+                  processingTimeMs: 41.0
+                  creditsConsumed: 4
+        '401':
+          description: Invalid or missing API key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '402':
+          description: Insufficient API credits.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '403':
+          description: API key lacks `research:read` scope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '404':
+          description: Watch not found, or the change is not covered by this watch.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '429':
+          description: Rate limit exceeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    servers:
+    - url: https://api.vaquill.ai
+      description: Production
+  /api/v1/watches/{watch_id}/deliveries:
+    get:
+      tags:
+      - Board Watches
+      summary: List delivery history for a watch
+      description: 'The most recent webhook delivery attempts for a watch you own, newest first. Only webhook/both channel watches have delivery history; an email-only watch always returns an empty list here (email sends are not logged per-attempt). Test deliveries (`POST /watches/{id}/test`) never appear -- they are deliberately not persisted.
+
+
+        `consecutiveFailures` counts how many of the most recent attempts failed in a row, and `deliveryHealth` is `failing` once that reaches 3. Read them before reading the list: a watch can keep firing on schedule and delivering nothing, and the streak is the only field that distinguishes that from a bad day. `consecutiveFailuresTruncated` is true when the streak fills the whole page, meaning the real run is at least this long.
+
+
+        **Nothing notifies you when a webhook starts failing. Poll this route.** We alert ourselves after 3 consecutive failures, but we send you no email and no callback, and a failing receiver is in your infrastructure rather than ours. A watch stays active and keeps being dispatched while every delivery fails, so silence from your endpoint is not evidence that the law did not change. Check `deliveryHealth` on a schedule of your own.
+
+
+        `error` on each attempt says WHY it failed, including the redirect target when an endpoint answered 3xx. Deliveries do not follow redirects: a 3xx is a failed delivery, not a delivered one, so register the endpoint''s final URL.
+
+
+        **Free.**'
+      operationId: list_watch_deliveries_api_v1_watches__watch_id__deliveries_get
+      parameters:
+      - name: watch_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Watch Id
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: Max deliveries to return.
+          default: 50
+          title: Limit
+        description: Max deliveries to return.
+      responses:
+        '200':
+          description: The watch's delivery history, newest first.
+          content:
+            application/json:
+              schema: {}
+              example:
+                data:
+                  deliveries:
+                  - id: 42
+                    watchId: 9f2b1e0a-1234-4a11-8b1c-abcdef123456
+                    refreshLogId: 1587
+                    attemptedAt: '2026-08-05T07:00:03Z'
+                    statusCode: 200
+                    success: true
+                    attemptNumber: 1
+                  consecutiveFailures: 0
+                  consecutiveFailuresTruncated: false
+                  deliveryHealth: ok
+                meta:
+                  processingTimeMs: 15.0
+                  creditsConsumed: 0
+        '401':
+          description: Invalid or missing API key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '403':
+          description: API key lacks `research:read` scope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '404':
+          description: Watch not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '429':
+          description: Rate limit exceeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDetailError'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    servers:
+    - url: https://api.vaquill.ai
+      description: Production
+components:
+  schemas:
+    ApiFieldError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Loc
+          description: 'Where the bad value is: `body`, `query` or `path`, then the parameter name exactly as you send it (camelCase), then list indexes. A bare `["body"]` means the body as a whole was not a JSON object.'
+          examples:
+          - - body
+            - corpusType
+        msg:
+          type: string
+          title: Msg
+          description: What is wrong with the value, in plain English.
+          examples:
+          - Input should be 'USC', 'CFR' or 'STATE'
+        type:
+          type: string
+          title: Type
+          description: Machine-readable error kind, e.g. `missing`, `literal_error`, `json_invalid`.
+          examples:
+          - literal_error
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ApiFieldError
+      description: One rejected field in a 422 response.
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    CreateWatchRequest:
+      properties:
+        corpusType:
+          type: string
+          title: Corpustype
+          description: Board's corpus_type (e.g. `state`, `state_regulation`, `federal_register`, `agency_guidance`). Matched case-insensitively, so the uppercase spelling the statutes endpoints use for the same body of law (`USC`, `CFR`) works here too. Call GET /boards for the authoritative, current list -- corpus_type is a growing set as new corpora are added, not a fixed enum, and not every corpus we serve is a watchable board.
+          examples:
+          - state
+        state:
+          anyOf:
+          - type: string
+            enum:
+            - federal
+            - al
+            - ak
+            - az
+            - ar
+            - ca
+            - co
+            - ct
+            - de
+            - dc
+            - fl
+            - ga
+            - gu
+            - hi
+            - id
+            - il
+            - in
+            - ia
+            - ks
+            - ky
+            - la
+            - me
+            - md
+            - ma
+            - mi
+            - mn
+            - ms
+            - mo
+            - mt
+            - ne
+            - nv
+            - nh
+            - nj
+            - nm
+            - ny
+            - nc
+            - nd
+            - mp
+            - oh
+            - ok
+            - or
+            - pa
+            - pr
+            - ri
+            - sc
+            - sd
+            - tn
+            - tx
+            - ut
+            - vt
+            - va
+            - wa
+            - wv
+            - wi
+            - wy
+          - type: 'null'
+          title: State
+          description: Board's state (2-letter, case-insensitive). For a federal board (USC, eCFR, the Federal Register) pass `federal` or omit this entirely; the two are equivalent. Must otherwise match the `state` GET /boards returned for this corpusType -- `GET /boards?corpusType=<type>` lists exactly those.
+          examples:
+          - wa
+        channel:
+          type: string
+          enum:
+          - webhook
+          - email
+          - both
+          title: Channel
+          default: webhook
+        webhookUrl:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Webhookurl
+          description: Required when channel is webhook or both.
+        webhookSecret:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Webhooksecret
+          description: 'Optional signing secret, stored encrypted and never returned. When set, every delivery carries an `X-Vaquill-Signature: sha256=<hex>` header: HMAC-SHA256 of the raw request body bytes, keyed with this secret. To verify, compute the same HMAC over the raw body you received (before parsing JSON) and compare it, constant-time, to the hex digest after `sha256=`.'
+        emailAddress:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Emailaddress
+          description: Required when channel is email or both.
+        scope:
+          anyOf:
+          - additionalProperties:
+              type: string
+            type: object
+          - type: 'null'
+          title: Scope
+          description: 'Optional narrowing so this alert covers one citation instead of an entire source. Four mutually exclusive forms.
+
+
+            **Hierarchy prefix** -- keys `title`, `chapter`, `part`, `section`, e.g. `{"title": "21", "part": "314"}` for 21 CFR part 314. Every level you set must match, so each one narrows further. `title` is required whenever any narrower level is set, and `section` also needs `chapter` or `part`: a bare part number matches across unrelated titles. Only sources whose documents carry a title/chapter/part hierarchy accept this form; the rest return 400.
+
+
+            **Exact section** -- `{"actId": "CFR_T21_P314_S314_50"}`, using the `actId` returned by search results and change events. Case-sensitive, and validated at create time against the corpus: an act_id we do not hold, or one belonging to a different source, is a 400 rather than a watch that could never fire. This form works on EVERY source, including flat ones with no hierarchy, so it is the only way to follow a single Federal Register document.
+
+
+            **Named source** -- `{"source": "fdic_fil"}`, for the corpora that fold several independent bodies of law behind one `corpusType`. The `agency_guidance` board alone carries 47 named sources across 24 agencies, so an unscoped watch on it delivers FDIC letters, IRS notices, OFAC FAQs and DOE appliance standards together. Accepted on `agency_adjudication`, `agency_guidance`, `agency_manuals`, `cfr`, `federal_rules`; anything else returns 400. The pickable values for a given board are on that board''s `sources` array in `GET /boards` -- deliberately narrower than the `source` filter published on `POST /us/statutes/search`, because `agency_guidance` and `agency_manuals` are two boards reading one `corpusType` and each emits only its own half.
+
+
+            **Publishing agency** -- `{"agency": "irs"}`, covering every source that agency issues on the board. `source` is the unit we ingest and it is finer than the unit most callers think in: the IRS alone publishes 5 named series, so following it by source means one watch per series and a gap if you miss one. An agency scope is expanded WHEN AN EVENT IS MATCHED rather than when the watch is created, so a source registered after your watch is covered by it automatically, with no action from you. Accepted on `agency_adjudication`, `agency_guidance`, `agency_manuals`; the pickable values are on that board''s `agencies` array in `GET /boards`.
+
+
+            Omit entirely to watch the whole source, which is the default and the pre-existing behavior.'
+          examples:
+          - part: '314'
+            title: '21'
+        webhookAuth:
+          anyOf:
+          - $ref: '#/components/schemas/WebhookAuthRequest'
+          - type: 'null'
+          description: 'Optional outbound credential sent on every delivery, so your gateway can authenticate us with the header it already reads. Independent of `webhookSecret`: set neither, either, or both. Only valid on a webhook or both channel watch.'
+      type: object
+      required:
+      - corpusType
+      title: CreateWatchRequest
+    UpdateWatchRequest:
+      properties:
+        isActive:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Isactive
+          description: Pause (false) or resume (true) the watch.
+        webhookUrl:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Webhookurl
+          description: New webhook URL. Only valid on a webhook/both channel watch. Re-validated against the SSRF blocklist. Cannot be cleared.
+        webhookSecret:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Webhooksecret
+          description: New signing secret, or empty string to stop signing deliveries. Only valid on a webhook/both channel watch.
+        scope:
+          anyOf:
+          - additionalProperties:
+              type: string
+            type: object
+          - type: 'null'
+          title: Scope
+          description: 'Optional narrowing so this alert covers one citation instead of an entire source. Four mutually exclusive forms.
+
+
+            **Hierarchy prefix** -- keys `title`, `chapter`, `part`, `section`, e.g. `{"title": "21", "part": "314"}` for 21 CFR part 314. Every level you set must match, so each one narrows further. `title` is required whenever any narrower level is set, and `section` also needs `chapter` or `part`: a bare part number matches across unrelated titles. Only sources whose documents carry a title/chapter/part hierarchy accept this form; the rest return 400.
+
+
+            **Exact section** -- `{"actId": "CFR_T21_P314_S314_50"}`, using the `actId` returned by search results and change events. Case-sensitive, and validated at create time against the corpus: an act_id we do not hold, or one belonging to a different source, is a 400 rather than a watch that could never fire. This form works on EVERY source, including flat ones with no hierarchy, so it is the only way to follow a single Federal Register document.
+
+
+            **Named source** -- `{"source": "fdic_fil"}`, for the corpora that fold several independent bodies of law behind one `corpusType`. The `agency_guidance` board alone carries 47 named sources across 24 agencies, so an unscoped watch on it delivers FDIC letters, IRS notices, OFAC FAQs and DOE appliance standards together. Accepted on `agency_adjudication`, `agency_guidance`, `agency_manuals`, `cfr`, `federal_rules`; anything else returns 400. The pickable values for a given board are on that board''s `sources` array in `GET /boards` -- deliberately narrower than the `source` filter published on `POST /us/statutes/search`, because `agency_guidance` and `agency_manuals` are two boards reading one `corpusType` and each emits only its own half.
+
+
+            **Publishing agency** -- `{"agency": "irs"}`, covering every source that agency issues on the board. `source` is the unit we ingest and it is finer than the unit most callers think in: the IRS alone publishes 5 named series, so following it by source means one watch per series and a gap if you miss one. An agency scope is expanded WHEN AN EVENT IS MATCHED rather than when the watch is created, so a source registered after your watch is covered by it automatically, with no action from you. Accepted on `agency_adjudication`, `agency_guidance`, `agency_manuals`; the pickable values are on that board''s `agencies` array in `GET /boards`.
+
+
+            Omit entirely to watch the whole source, which is the default and the pre-existing behavior.'
+          examples:
+          - part: '314'
+            title: '21'
+        emailAddress:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Emailaddress
+          description: New email address. Only valid on an email/both channel watch. Cannot be cleared.
+        webhookAuth:
+          anyOf:
+          - $ref: '#/components/schemas/WebhookAuthRequest'
+          - type: 'null'
+          description: 'Replace the outbound credential config. Sent as a whole object, not field by field: a scheme without a credential is not a partial edit, it is a broken config. Send `{"scheme": "none"}` to remove auth entirely. Keeping the same scheme and omitting `secret` retains the stored credential, so you can rename a header without re-entering the token.'
+      type: object
+      title: UpdateWatchRequest
+    ApiDetailError:
+      properties:
+        detail:
+          type: string
+          title: Detail
+          description: 'Human-readable reason, safe to surface to an end user. Branch on the HTTP status rather than on this string: the wording is not part of the contract and may be reworded, but 401 (bad key), 402 (out of credits), 403 (missing scope), 404 (no such resource) and 429 (rate limited) are stable.'
+          examples:
+          - Insufficient API credits.
+        errors:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/ApiFieldError'
+            type: array
+          - type: 'null'
+          title: Errors
+          description: 'Present on 422 only: every field that failed validation.'
+      type: object
+      required:
+      - detail
+      title: ApiDetailError
+      description: 'Error envelope the API actually returns.
+
+
+        Every error (400/401/402/403/404/405/422/429/5xx) carries a `detail`
+
+        string, e.g. `{"detail": "Insufficient API credits."}`, on every mount of
+
+        the API. A 422 adds `errors`, one entry per rejected field. Some 404s add
+
+        endpoint-specific diagnosis beside `detail` (the statutes section routes
+
+        add `actId`, `reason` and `didYouMean`); treat unknown keys as optional.'
+    WebhookAuthRequest:
+      properties:
+        scheme:
+          type: string
+          enum:
+          - none
+          - bearer
+          - basic
+          - header
+          title: Scheme
+          description: '`bearer` sends `Authorization: Bearer <secret>`. `basic` sends `Authorization: Basic <secret>` with the secret already base64-encoded by you. `header` sends `<headerName>: <secret>`, for gateways that read something like `X-Api-Key`. `none` removes any credential currently stored.'
+          default: none
+        secret:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Secret
+          description: The credential value. Stored encrypted and never returned. Required when setting a scheme for the first time or changing scheme; on PATCH you may omit it to keep the stored one while changing only `headerName`.
+        headerName:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Headername
+          description: Header to send the credential on. Required for `header`, and rejected for every other scheme. Cannot be `Authorization` (use `bearer`/`basic`), a transport header, or one of ours.
+          examples:
+          - X-Api-Key
+      type: object
+      title: WebhookAuthRequest
+      description: 'How a delivery should authenticate itself to your endpoint.
+
+
+        SEPARATE FROM `webhookSecret`, and the distinction is the point.
+
+        `webhookSecret` signs the body so you can prove it is intact and ours.
+
+        This sends a credential so your gateway can reject anything else before
+
+        it reaches your handler. Most integrations want the second, many want
+
+        both, and the two are set independently.'
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+  securitySchemes:
+    ApiKeyAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: vq_key_*
+      description: 'API key issued from the developer dashboard. Pass as `Authorization: Bearer vq_key_...` (preferred).'
+    ApiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: 'The same API key as a bare header value: `X-API-Key: vq_key_...`. Equivalent to the Bearer form.'
+    ApiKeyQuery:
+      type: apiKey
+      in: query
+      name: api_key
+      description: 'The same API key as a query parameter: `?api_key=vq_key_...`. Use only where you cannot set a header. A URL can end up in proxy and server logs, browser history and shared links, so prefer either header form, and rotate a key that has leaked.'
+externalDocs:
+  description: Full API Reference
+  url: https://www.vaquill.ai/docs/api-reference/
+x-refined-from:
+- vaquill-ai-openapi.json
+- vaquill-ai-openapi.yml

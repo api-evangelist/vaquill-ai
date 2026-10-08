@@ -1,0 +1,32 @@
+generated: '2026-10-07'
+method: searched
+source: https://pypi.org/pypi/vaquill-mcp/json; https://www.vaquill.ai/docs/integrations/mcp/vaquill; https://github.com/Vaquill-AI/vaquill-plugin
+name: Vaquill packages
+packages:
+- name: vaquill-mcp
+  registry: pypi
+  url: https://pypi.org/project/vaquill-mcp/
+  language: python
+  official: true
+  version: 0.4.0
+  published: '2026-09-02'
+  repository: https://github.com/Vaquill-AI/vaquill-mcp
+  license: MIT
+  kind: mcp-server
+  install: uvx vaquill-mcp
+  note: Author Vaquill <dev@vaquill.ai>; homepage www.vaquill.ai. Local stdio MCP server over the Developer API; --jurisdiction IN serves the
+    India corpus.
+- name: primary-law (Claude Code plugin)
+  registry: github
+  url: https://github.com/Vaquill-AI/vaquill-plugin
+  language: markdown
+  official: true
+  version: 0.2.0
+  published: null
+  kind: agent-plugin
+  install: /plugin marketplace add Vaquill-AI/vaquill-plugin && /plugin install primary-law
+  note: Version read from plugins/primary-law/.claude-plugin/plugin.json; the marketplace is a git repo with no release metadata endpoint, so
+    published is null. Bundles the hosted MCP server, ten commands and the us-statute-research skill.
+note: No REST client SDK is published on npm, PyPI, Maven, NuGet, RubyGems, Packagist, crates.io or pkg.go.dev (npm search for "vaquill" returned
+  nothing; pypi vaquill / vaquill-ai 404). The docs ship raw HTTP examples in cURL, Python requests and JavaScript fetch. canlii-mcp (npm) and
+  courtlistener-mcp in the GitHub org wrap third-party databases, not the Vaquill API.

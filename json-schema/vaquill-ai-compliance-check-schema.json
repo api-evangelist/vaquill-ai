@@ -1,0 +1,387 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/vaquill-ai/main/json-schema/vaquill-ai-compliance-check-schema.json",
+  "title": "ComplianceCheck",
+  "description": "One compliance check: its findings, or its progress toward them.",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/vaquill-ai-workspace-openapi.yml#/components/schemas/ComplianceCheck",
+  "properties": {
+    "id": {
+      "type": "string",
+      "title": "Id",
+      "description": "Public identifier, `cck_` followed by 32 hex characters."
+    },
+    "matterId": {
+      "type": "string",
+      "title": "Matterid",
+      "description": "`mat_` identifier of the matter this check belongs to."
+    },
+    "status": {
+      "$ref": "#/$defs/OperationStatus",
+      "description": "Check status, using the same five public values as an operation. While `queued` or `running`, `requirements` is empty and the scalar fields are absent. That is the truthful shape of a check that has not happened yet, not an error."
+    },
+    "regulationType": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Regulationtype",
+      "description": "Regulation checked against, echoed from the request."
+    },
+    "documentCategory": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Documentcategory",
+      "description": "Document category, echoed from the request."
+    },
+    "overallStatus": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Overallstatus",
+      "description": "Overall verdict: `compliant`, `partially_compliant`, `non_compliant`, or `not_applicable`."
+    },
+    "complianceScore": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Compliancescore",
+      "description": "Compliance as a percentage, 0 to 100."
+    },
+    "summary": {
+      "type": "string",
+      "title": "Summary",
+      "description": "Overall assessment, in prose.",
+      "default": ""
+    },
+    "requirements": {
+      "items": {
+        "$ref": "#/$defs/ComplianceRequirement"
+      },
+      "type": "array",
+      "title": "Requirements",
+      "description": "Every requirement checked, and the verdict on each."
+    },
+    "compliantCount": {
+      "type": "integer",
+      "title": "Compliantcount",
+      "description": "Requirements fully met.",
+      "default": 0
+    },
+    "partiallyCompliantCount": {
+      "type": "integer",
+      "title": "Partiallycompliantcount",
+      "description": "Requirements partly met.",
+      "default": 0
+    },
+    "nonCompliantCount": {
+      "type": "integer",
+      "title": "Noncompliantcount",
+      "description": "Requirements not met.",
+      "default": 0
+    },
+    "notApplicableCount": {
+      "type": "integer",
+      "title": "Notapplicablecount",
+      "description": "Requirements that do not apply to this document.",
+      "default": 0
+    },
+    "gaps": {
+      "items": {
+        "$ref": "#/$defs/ComplianceGap"
+      },
+      "type": "array",
+      "title": "Gaps",
+      "description": "The gaps found."
+    },
+    "remediationActions": {
+      "items": {
+        "$ref": "#/$defs/ComplianceRemediationAction"
+      },
+      "type": "array",
+      "title": "Remediationactions",
+      "description": "What to do about them, in priority order."
+    },
+    "responseTimeline": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Responsetimeline",
+      "description": "A regulatory deadline that applies, where one does."
+    },
+    "deterministicCoverage": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Deterministiccoverage",
+      "description": "Fraction of requirements with keyword evidence in the document, 0 to 1. Low coverage means more of the verdict rests on the model than on the text."
+    },
+    "preCheckFlags": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "title": "Precheckflags",
+      "description": "Where the model and a deterministic keyword scan disagreed. Each one is worth a human glance."
+    },
+    "parseWarning": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Parsewarning",
+      "description": "Set when the model's output only partly parsed, which means the findings may be incomplete."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Createdat",
+      "description": "When the check was created (RFC 3339)."
+    },
+    "completedAt": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Completedat",
+      "description": "When the check reached a terminal status (RFC 3339)."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "id",
+    "matterId",
+    "status",
+    "createdAt"
+  ],
+  "$defs": {
+    "ComplianceGap": {
+      "properties": {
+        "gapName": {
+          "type": "string",
+          "title": "Gapname",
+          "description": "Short name for the gap."
+        },
+        "description": {
+          "type": "string",
+          "title": "Description",
+          "description": "What is missing, and why it matters."
+        },
+        "regulationReference": {
+          "type": "string",
+          "title": "Regulationreference",
+          "description": "The provision the gap is measured against."
+        },
+        "riskLevel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Risklevel",
+          "description": "How risky the gap is: `critical`, `high`, `medium` or `low`."
+        },
+        "remediation": {
+          "type": "string",
+          "title": "Remediation",
+          "description": "Suggested language or action to close it."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "gapName",
+        "description",
+        "regulationReference",
+        "remediation"
+      ],
+      "title": "ComplianceGap",
+      "description": "One compliance gap, named so it can be tracked."
+    },
+    "ComplianceRemediationAction": {
+      "properties": {
+        "action": {
+          "type": "string",
+          "title": "Action",
+          "description": "What needs to be done."
+        },
+        "priority": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Priority",
+          "description": "`critical`, `high`, `medium` or `low`."
+        },
+        "effort": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Effort",
+          "description": "`high`, `medium` or `low`."
+        },
+        "deadlineGuidance": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Deadlineguidance",
+          "description": "Suggested timeline, for example `Within 30 days`."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "action"
+      ],
+      "title": "ComplianceRemediationAction",
+      "description": "One thing to do, in priority order."
+    },
+    "ComplianceRequirement": {
+      "properties": {
+        "requirementId": {
+          "type": "string",
+          "title": "Requirementid",
+          "description": "Stable identifier of this requirement."
+        },
+        "requirementName": {
+          "type": "string",
+          "title": "Requirementname",
+          "description": "What the requirement is."
+        },
+        "regulationReference": {
+          "type": "string",
+          "title": "Regulationreference",
+          "description": "Where it comes from, for example `GDPR Article 28(3)(a)`."
+        },
+        "status": {
+          "type": "string",
+          "title": "Status",
+          "description": "Whether the document meets it: `compliant`, `partially_compliant`, `non_compliant`, or `not_applicable`."
+        },
+        "findings": {
+          "type": "string",
+          "title": "Findings",
+          "description": "What the document actually says."
+        },
+        "gapDescription": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gapdescription",
+          "description": "What is missing, where the document does not meet it."
+        },
+        "recommendation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Recommendation",
+          "description": "What to change to meet it."
+        },
+        "priority": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Priority",
+          "description": "How urgent the remediation is: `critical`, `high`, `medium` or `low`."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "requirementId",
+        "requirementName",
+        "regulationReference",
+        "status",
+        "findings"
+      ],
+      "title": "ComplianceRequirement",
+      "description": "One requirement of the regulation, and whether the document meets it."
+    },
+    "OperationStatus": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "running",
+        "succeeded",
+        "failed",
+        "cancelled"
+      ],
+      "title": "OperationStatus",
+      "description": "The public five. There is no sixth, and there are no synonyms.\n\nInternal vocabularies spell terminal success `completed`, `ready`,\n`extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;\nqueued `pending`, `queued` and `draft`. All of that is collapsed here by\n`app.workspace_api.adapters.status_map`, which refuses to guess."
+    }
+  }
+}

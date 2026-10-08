@@ -1,0 +1,48 @@
+generated: '2026-10-07'
+method: searched
+probe: true
+source: https://www.vaquill.ai/security
+url: https://www.vaquill.ai/security
+name: Vaquill AI Trust Center
+certifications: []
+certifications_note: 'The Trust Center lists NO held certification: "ISO 27001 - On Roadmap - Not currently certified. We track ISO 27001 controls
+  internally and may pursue certification in future." It states "No certifications are listed here that we do not hold or are not actively pursuing."
+  A prior script run recorded ISO 27001 as a certification from a keyword match; corrected 2026-10-07.'
+attestations:
+- name: HIPAA Business Associate Agreement
+  status: Available on Request
+  note: A Business Associate Agreement is available for firms handling protected health information
+- name: GDPR / UK GDPR data-subject assistance
+  status: Live
+  source: https://www.vaquill.ai/dpa
+- name: US state privacy laws (CCPA/CPRA, VCDPA, CPA, CTDPA, TDPSA, UCPA)
+  status: Live
+  note: We honor consumer rights under California, Virginia, Colorado, Connecticut, Texas, and Utah privacy laws
+- name: ISO 27001
+  status: On Roadmap
+  note: Not currently certified
+- name: Annual third-party audit summaries
+  status: Committed in the DPA
+  note: customers may request a written security-questionnaire response or a summary of our internal security reviews in the meantime
+controls:
+- AES-256 encryption at rest
+- TLS 1.3 in transit
+- Managed KMS keys with automatic rotation
+- Row-level security on every database query and object-store read (tenant isolation)
+- PII anonymized before the model sees it
+- Zero-data-retention agreements with LLM providers
+- No training on customer data
+- US data residency (AWS US regions)
+- Incident notification within 72 hours
+dpa: https://www.vaquill.ai/dpa
+privacy: https://www.vaquill.ai/privacy
+contact: contact@vaquill.ai
+evidence:
+- source: https://www.vaquill.ai/security
+  keywords:
+  - trust center
+  - ISO 27001 On Roadmap Not currently certified
+  - HIPAA (BAA) Available on Request
+  - GDPR
+  - zero data retention
+  - US data residency

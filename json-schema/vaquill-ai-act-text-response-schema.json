@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/vaquill-ai/main/json-schema/vaquill-ai-act-text-response-schema.json",
+  "title": "ActTextResponse",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/vaquill-ai-india-openapi.yml#/components/schemas/ActTextResponse",
+  "properties": {
+    "actId": {
+      "type": "string",
+      "title": "Actid"
+    },
+    "resolvedFrom": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IdentifierResolution"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Null when the act is exactly the `actId` you sent. Otherwise how your input was matched after copy damage (whitespace, quotes, a trailing period) was removed."
+    },
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "year": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Year"
+    },
+    "category": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Category"
+    },
+    "textUrl": {
+      "type": "string",
+      "title": "Texturl"
+    },
+    "pdfUrl": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Pdfurl"
+    },
+    "htmlUrl": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Htmlurl"
+    },
+    "chunksCount": {
+      "type": "integer",
+      "title": "Chunkscount",
+      "default": 0
+    },
+    "isSubordinate": {
+      "type": "boolean",
+      "title": "Issubordinate",
+      "description": "True for subordinate legislation: notifications, rules, circulars, orders. False for principal acts.",
+      "default": false
+    },
+    "issuedDate": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Issueddate",
+      "description": "Date the instrument was issued by the publisher, where known."
+    },
+    "meta": {
+      "$ref": "#/$defs/ActMeta"
+    },
+    "currencyStatus": {
+      "type": "string",
+      "title": "Currencystatus",
+      "description": "How far the currency of this document can be vouched for. `repeal_tracked`: the publisher records a repeal flag for this document, so a repealed instrument is identifiable. `as_issued`: served as issued on `issuedDate`, and it MAY HAVE BEEN SUPERSEDED since. India Code publishes no supersession status for subordinate legislation, and a superseding instrument names its predecessor only in prose, so this API cannot tell you whether a notification is still in force. Treat `as_issued` documents as evidence of what was issued on a date, not as a statement of current law.",
+      "default": "unknown"
+    }
+  },
+  "type": "object",
+  "required": [
+    "actId",
+    "title",
+    "textUrl"
+  ],
+  "$defs": {
+    "ActMeta": {
+      "properties": {
+        "processingTimeMs": {
+          "type": "number",
+          "title": "Processingtimems",
+          "description": "Server-side time in milliseconds, excluding network transit. Not billed on.",
+          "default": 0.0
+        },
+        "creditsConsumed": {
+          "type": "number",
+          "title": "Creditsconsumed",
+          "description": "Credits ACTUALLY charged for this call. Read this rather than assuming the list price: refunded work bills 0.",
+          "default": 0.0
+        }
+      },
+      "type": "object",
+      "title": "ActMeta",
+      "description": "What this call cost and how long it took.\n\n🔴 Added 2026-09-06. Five of the six original routes returned NO statement\nof what they billed: `/text` (3 credits), `/amendments` (5), `/list` (1),\n`/filters` (0) and `/corresponding-provisions` (1). The house rule on the\nUS surface is that `creditsConsumed` is the CONTRACT and the list price is\nnot, and it matters most exactly where refunds happen -- `/text` refunds on\na missing act, `/corresponding-provisions` refunds when a mapping does not\nexist yet. Without this field a caller cannot tell a refunded call from a\ncharged one, and has to reconcile against the ledger to find out."
+    },
+    "IdentifierResolution": {
+      "properties": {
+        "input": {
+          "type": "string",
+          "title": "Input",
+          "description": "The act identifier exactly as you sent it."
+        },
+        "actId": {
+          "type": "string",
+          "title": "Actid",
+          "description": "The act_id it matched. Send this next time."
+        },
+        "sectionInput": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sectioninput",
+          "description": "The section number exactly as you sent it, on a section route."
+        },
+        "sectionNumber": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sectionnumber",
+          "description": "The section number as the publisher writes it. Send this next time."
+        },
+        "via": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Via",
+          "description": "What was done to your input, in order. `normalized_id`: the act_id carried surrounding whitespace, quotes, backticks, an invisible character, a trailing period or double percent-encoding, which were removed. `normalized_section`: the section number was written differently from the publisher (a `s.` / `Sec.` / `Section` prefix, a hyphen or space before an alphabetic suffix, a lowercase suffix, or a trailing sub-provision), and matched one stored number and only one."
+        },
+        "subProvision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Subprovision",
+          "description": "The sub-provision your section number carried, e.g. `(1)(a)` for `302(1)(a)`. The WHOLE section is served: sub-provisions are not addressed separately."
+        }
+      },
+      "type": "object",
+      "required": [
+        "input",
+        "actId"
+      ],
+      "title": "IdentifierResolution",
+      "description": "How the act_id or section number you sent was matched, when not as sent.\n\nPresent only when the input did NOT match exactly. Absent (null) means the\nresponse is about exactly the act_id and section number in your request.\nSame idea, and the same field name, as `resolvedFrom` on the US surface."
+    }
+  }
+}

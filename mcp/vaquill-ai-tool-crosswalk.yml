@@ -1,0 +1,311 @@
+generated: '2026-10-07'
+method: derived
+source: mcp/vaquill-ai-mcp.yml + openapi/vaquill-ai-openapi.yml + openapi/vaquill-ai-india-openapi.yml; tool table at https://www.vaquill.ai/docs/integrations/mcp/vaquill
+name: Vaquill MCP to REST crosswalk
+surfaces:
+  openapi:
+  - openapi/vaquill-ai-openapi.yml
+  - openapi/vaquill-ai-india-openapi.yml
+  mcp:
+    url: https://mcp.vaquill.ai/mcp
+    gated: true
+    note: tools/list requires OAuth or an API key; mapping is by documented tool name to operationId, each tool inheriting its operation's parameters and requestBody
+      as its input schema.
+  graphql: null
+crosswalk:
+- tool: list_statutes_coverage
+  category: Discovery
+  rest:
+  - list_statutes_coverage_api_v1_us_statutes_coverage_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: list_statute_divisions
+  category: Discovery
+  rest:
+  - list_statute_divisions_api_v1_us_statutes_divisions_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: get_sections_batch
+  category: Search and retrieval
+  rest:
+  - get_sections_batch_api_v1_us_statutes_sections_post
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: resolve_statute_citation
+  category: Search and retrieval
+  rest:
+  - resolve_statute_citation
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: resolve_statute_citations_batch
+  category: Search and retrieval
+  rest:
+  - resolve_statute_citations_batch
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: get_section_changes
+  category: Section intelligence
+  rest:
+  - get_section_changes_api_v1_us_statutes_section__act_id__changes_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: get_section_neighbors
+  category: Section intelligence
+  rest:
+  - get_section_neighbors_api_v1_us_statutes_section__act_id__related_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: get_section_cited_by
+  category: Section intelligence
+  rest:
+  - get_section_cited_by_api_v1_us_statutes_section__act_id__cited_by_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: get_section_definitions
+  category: Section intelligence
+  rest:
+  - get_section_definitions_api_v1_us_statutes_section__act_id__definitions_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: get_section_cross_state
+  category: Section intelligence
+  rest:
+  - get_section_cross_state_api_v1_us_statutes_section__act_id__cross_state_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: list_session_laws
+  category: State session laws
+  rest:
+  - list_session_laws_api_v1_us_session_laws_list_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: get_session_law
+  category: State session laws
+  rest:
+  - get_session_law_api_v1_us_session_laws__session_law_id__get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: get_session_law_body
+  category: State session laws
+  rest:
+  - get_session_law_body_api_v1_us_session_laws__session_law_id__body_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: create_watch
+  category: Law change alerts
+  rest:
+  - create_watch_api_v1_watches_post
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: update_watch
+  category: Law change alerts
+  rest:
+  - update_watch_api_v1_watches__watch_id__patch
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: delete_watch
+  category: Law change alerts
+  rest:
+  - delete_watch_api_v1_watches__watch_id__delete
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: list_watches
+  category: Law change alerts
+  rest:
+  - list_watches_api_v1_watches_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: test_watch
+  category: Law change alerts
+  rest:
+  - test_watch_api_v1_watches__watch_id__test_post
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: list_watch_changes
+  category: Law change alerts
+  rest:
+  - list_watch_changes_api_v1_watches__watch_id__changes_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: list_watch_deliveries
+  category: Law change alerts
+  rest:
+  - list_watch_deliveries_api_v1_watches__watch_id__deliveries_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: get_watch_change_diff
+  category: Law change alerts
+  rest:
+  - get_watch_change_diff_api_v1_watches__watch_id__changes__change_id__diff_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: search_acts
+  category: India mount
+  rest:
+  - search_acts_api_v1_in_acts_search_post
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: list_acts
+  category: India mount
+  rest:
+  - list_acts_api_v1_in_acts_list_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: list_act_filters
+  category: India mount
+  rest:
+  - list_act_filters_api_v1_in_acts_filters_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: get_act_text
+  category: India mount
+  rest:
+  - get_act_text_api_v1_in_acts__act_id__text_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: get_act_amendments
+  category: India mount
+  rest:
+  - get_act_amendments_api_v1_in_acts__act_id__amendments_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: get_corresponding_provisions
+  category: India mount
+  rest:
+  - get_corresponding_provisions_api_v1_in_acts_corresponding_provisions__act_code__get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: get_pricing
+  category: Pricing
+  rest:
+  - get_pricing_api_v1_api_credits_pricing_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: search_us_statutes
+  category: US Statutes
+  rest:
+  - search_statutes_api_v1_us_statutes_search_post
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: get_us_statute_section
+  category: US Statutes
+  rest:
+  - get_section_api_v1_us_statutes_section__act_id__get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: get_us_statute_section_text
+  category: US Statutes
+  rest:
+  - get_section_body_api_v1_us_statutes_section__act_id__body_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+- tool: list_boards
+  category: Board Watches
+  rest:
+  - list_boards_api_v1_boards_get
+  binding: direct
+  confidence: high
+  note: The docs state every tool maps directly to one Developer API endpoint and the set is generated from the live OpenAPI at startup.
+mcp_only:
+- tool: search
+  reason: ChatGPT/Codex compatibility tool with a single-string interface; a composite over search/resolve/fetch rather than one public operation.
+- tool: fetch
+  reason: ChatGPT/Codex compatibility tool with a single-string interface; a composite over search/resolve/fetch rather than one public operation.
+rest_only:
+- operationId: count_statute_sections_api_v1_us_statutes_count_post
+  method: POST
+  path: /api/v1/us/statutes/count
+- operationId: get_section_enactments_api_v1_us_statutes_section__act_id__enactments_get
+  method: GET
+  path: /api/v1/us/statutes/section/{act_id}/enactments
+- operationId: get_credit_balance_api_v1_credits_balance_get
+  method: GET
+  path: /api/v1/credits/balance
+- operationId: get_session_law_changes_api_v1_us_session_laws_changes_get
+  method: GET
+  path: /api/v1/us/session-laws/changes
+- operationId: get_session_laws_batch_api_v1_us_session_laws_batch_post
+  method: POST
+  path: /api/v1/us/session-laws/batch
+- operationId: search_session_laws_api_v1_us_session_laws_search_post
+  method: POST
+  path: /api/v1/us/session-laws/search
+- operationId: get_pricing_in_api_v1_in_api_credits_pricing_get
+  method: GET
+  path: /api/v1/in/api-credits/pricing
+- operationId: get_india_credit_balance_api_v1_in_credits_balance_get
+  method: GET
+  path: /api/v1/in/credits/balance
+- operationId: get_coverage_api_v1_in_acts_coverage_get
+  method: GET
+  path: /api/v1/in/acts/coverage
+- operationId: resolve_india_citation
+  method: GET
+  path: /api/v1/in/acts/resolve
+- operationId: resolve_india_citations_batch
+  method: POST
+  path: /api/v1/in/acts/resolve
+- operationId: get_act_structure_api_v1_in_acts__act_id__structure_get
+  method: GET
+  path: /api/v1/in/acts/{act_id}/structure
+- operationId: get_act_section_api_v1_in_acts__act_id__sections__section_number__get
+  method: GET
+  path: /api/v1/in/acts/{act_id}/sections/{section_number}
+- operationId: get_act_section_body_api_v1_in_acts__act_id__sections__section_number__body_get
+  method: GET
+  path: /api/v1/in/acts/{act_id}/sections/{section_number}/body
+- operationId: get_section_history_api_v1_in_acts__act_id__sections__section_number__history_get
+  method: GET
+  path: /api/v1/in/acts/{act_id}/sections/{section_number}/history
+- operationId: get_act_status_api_v1_in_acts__act_id__status_get
+  method: GET
+  path: /api/v1/in/acts/{act_id}/status
+- operationId: india_section_references
+  method: GET
+  path: /api/v1/in/acts/{act_id}/sections/{section_number}/references
+- operationId: india_act_cited_by
+  method: GET
+  path: /api/v1/in/acts/{act_id}/cited-by
+- operationId: india_act_subordinate
+  method: GET
+  path: /api/v1/in/acts/{act_id}/subordinate
+- operationId: india_act_definitions
+  method: GET
+  path: /api/v1/in/acts/{act_id}/definitions
+coverage:
+  tools_documented: 34
+  tools_mapped: 32
+  tools_mcp_only: 2
+  rest_operations: 52
+  rest_only: 20

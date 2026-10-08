@@ -1,0 +1,308 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/vaquill-ai/main/json-schema/vaquill-ai-session-law-body-response-schema.json",
+  "title": "SessionLawBodyResponse",
+  "description": "Response for `GET /us/session-laws/{sessionLawId}/body`.",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/vaquill-ai-openapi.yml#/components/schemas/SessionLawBodyResponse",
+  "properties": {
+    "processingTimeMs": {
+      "type": "number",
+      "title": "Processingtimems",
+      "description": "Server-side time for this request in milliseconds, excluding network transit. Not billed on.",
+      "default": 0.0
+    },
+    "creditsConsumed": {
+      "type": "integer",
+      "title": "Creditsconsumed",
+      "description": "Credits actually charged for this call, never the list price. It includes the `/us/statutes/resolve` fee when a citation was sent where an id goes. 0 when the call was not charged or was refunded (a body that answers `available: false`).",
+      "default": 0
+    },
+    "sessionLawId": {
+      "type": "string",
+      "title": "Sessionlawid",
+      "description": "The law this page belongs to."
+    },
+    "citation": {
+      "type": "string",
+      "title": "Citation",
+      "description": "The act's citation as its publisher prints it, the same as `citation` on `GET /us/session-laws/{sessionLawId}`. Carried here so a page is attributable on its own, with no second call."
+    },
+    "jurisdiction": {
+      "type": "string",
+      "title": "Jurisdiction",
+      "description": "Lowercase two-letter code of the state, `dc` or `pr`."
+    },
+    "session": {
+      "$ref": "#/$defs/SessionLawSession",
+      "description": "The legislative session the law was enacted in."
+    },
+    "approvedDate": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Approveddate",
+      "description": "Date the governor approved the act, ISO 8601, as on `GET /us/session-laws/{sessionLawId}`: never an effective date. Null when none is held. See `approvedDateDerived`."
+    },
+    "approvedDateDerived": {
+      "type": "boolean",
+      "title": "Approveddatederived",
+      "description": "True only when `approvedDate` was filled from the publisher's dated signature label rather than held as the approval date. See the same field on `GET /us/session-laws/{sessionLawId}`.",
+      "default": false
+    },
+    "sourceUrl": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Sourceurl",
+      "description": "The official page or file this text was collected from, on a government publisher's host. Present on EVERY outcome, a withheld or not-held law included, so a reader is never at a dead end: where we do not serve the text, this is where to read it. Null only when we hold no government text source for the law."
+    },
+    "available": {
+      "type": "boolean",
+      "title": "Available",
+      "description": "False when we do not serve this law's text; `reason` says why. A page with `available: false` is not charged."
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Reason",
+      "description": "Why `available` is false: `not_held`, `withheld`, `pending` or `empty_text`. Null when the text is served."
+    },
+    "textStatus": {
+      "type": "string",
+      "enum": [
+        "held",
+        "withheld",
+        "not_held",
+        "pending"
+      ],
+      "title": "Textstatus",
+      "description": "Whether we serve this law's text. `held`: the text is served by `/us/session-laws/{sessionLawId}/body`. `withheld`: we hold the text but a measured defect keeps it from being served, and `withheldReason` says what. `not_held`: we know the act exists and do not hold its text. `pending`: collected and not yet verified."
+    },
+    "withheldReason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Withheldreason",
+      "description": "Present only when `textStatus` is `withheld`: what is wrong with the text we hold. A plain sentence to show, not an enum to branch on."
+    },
+    "text": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Text",
+      "description": "This page of the act's text, exactly as printed, in reading order. Concatenating every page's `text` in order reproduces the whole text. Where `amendatoryMarkup` is `preserved`, struck and inserted language is in the text in the convention `markupConvention` names. Null when `available` is false."
+    },
+    "pageStart": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Pagestart",
+      "description": "Character offset in the full text where this page starts (0-based). Pages are contiguous: the next page's `pageStart` equals this page's `pageEnd`."
+    },
+    "pageEnd": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Pageend",
+      "description": "Character offset just past this page. A page is about 30,000 characters, cut back to a paragraph break where one is near, so the length varies."
+    },
+    "totalChars": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Totalchars",
+      "description": "Length of the whole text in characters. This page is the last when `pageEnd` equals it."
+    },
+    "totalPages": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Totalpages",
+      "description": "Estimated pages in the whole text: `totalChars` divided by the page size, rounded up. Pages are cut back to a paragraph break, so a long act can run a few percent over. Null when no text is served."
+    },
+    "pagePrice": {
+      "type": "integer",
+      "title": "Pageprice",
+      "description": "Credits charged for the page in this response, the same as `creditsConsumed` on this route: the price of one page when a page was served, 0 when none was (`available` is false). Each further page costs the same.",
+      "default": 0
+    },
+    "estimatedRemainingCredits": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Estimatedremainingcredits",
+      "description": "Estimated credits to read the rest of the text from `pageEnd`: the pages still to come (`totalChars` less `pageEnd`, over the page size, rounded up) times the price of a page. 0 on the last page. Null when no text is served. An estimate: a page cut back to a paragraph break can add a page on a long act. Reading a whole law costs `estimatedBodyPages` times the price of one body page (6 credits per page on `GET /us/session-laws/{sessionLawId}/body`). Ohio's 2025 budget act (HB 96) is 9,571,132 characters, about 320 pages or 1,920 credits to read in full; most acts are a page or two."
+    },
+    "textSha256": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Textsha256",
+      "description": "SHA-256 (hex) of the full text of this law. It changes only when the text does, so it is the cheap way to tell whether a copy you hold is current. Body pages carry the same value."
+    },
+    "amendatoryMarkup": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Amendatorymarkup",
+      "description": "Whether the language an amending act strikes and inserts survives in the text. `preserved`: it is in `text`, in the convention `markupConvention` names. `lost`: the publisher printed it and our text does not keep it, so deleted words can read as law: check the source before quoting. `absent`: the act carries no such markup that we found. `not_applicable`: there is no text to carry it."
+    },
+    "markupConvention": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Markupconvention",
+      "description": "How preserved markup is written, set only when `amendatoryMarkup` is `preserved`. `wdiff`: deleted language is `[-like this-]` and inserted language `{+like this+}`. `publisher_literal`: the publisher's own words are left as printed (Minnesota prints `new text begin` / `new text end` and `deleted text begin` / `deleted text end` markers). `mixed`: both in one text."
+    },
+    "nextCursor": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Nextcursor",
+      "description": "Opaque cursor for the next page: send it as `cursor` on the same path. Null on the last page. It is tied to this exact text, so a cursor from before the text was re-collected is a 409."
+    },
+    "hasMore": {
+      "type": "boolean",
+      "title": "Hasmore",
+      "description": "True when more pages follow; fetch them with `nextCursor`. Each page is charged.",
+      "default": false
+    }
+  },
+  "type": "object",
+  "required": [
+    "sessionLawId",
+    "citation",
+    "jurisdiction",
+    "session",
+    "available",
+    "textStatus"
+  ],
+  "$defs": {
+    "SessionLawSession": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code",
+          "description": "Session code, `{year}{type}{ordinal}`. `type` is `R` regular, `S` special, `X` extraordinary, `F` fiscal, `V` veto, `U` unknown. A regular session has no ordinal (`2025R`); a numbered special session carries it (`2025S1`, the first special session of 2025); a lettered one carries its letter (`2025SC`, Florida's Special Session C). `year` is the year the publisher numbers the session by, which for a period spanning two years is the first (District of Columbia Council Period 25 is `2023R`). Pass it as `session` to `GET /us/session-laws/list`."
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Label",
+          "description": "The session's canonical label, as the publisher names it."
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Type",
+          "description": "`regular`, `special`, `extraordinary`, `fiscal`, `veto` or `unknown`."
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Year",
+          "description": "The year the session convened, the same year `code` starts with."
+        }
+      },
+      "type": "object",
+      "required": [
+        "code"
+      ],
+      "title": "SessionLawSession",
+      "description": "The legislative session a law was enacted in."
+    }
+  }
+}

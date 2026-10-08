@@ -1,0 +1,1695 @@
+openapi: 3.2.0
+info:
+  title: Vaquill Ai Uploads API
+  version: 1.0.0
+  description: 'Operations tagged Uploads across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.vaquill.ai/workspace
+  description: Vaquill Legal Workspace API (production)
+- url: /workspace
+  description: Vaquill Legal Workspace API (relative to the mount)
+security:
+- WorkspaceAuth: []
+tags:
+- name: Uploads
+  description: Getting files in. One presigned multipart flow at every size, with the bytes going straight to storage and never through this API. Initiate, PUT each part, then complete.
+paths:
+  /v1/uploads:
+    post:
+      tags:
+      - Uploads
+      summary: Start an upload
+      description: 'Open an upload session and return a presigned URL for every part.
+
+
+        `sizeBytes` must be exact: it fixes the part size and part count for the
+
+        life of the session, and a wrong value is not detected until assembly fails.
+
+        Split the file on exactly `partSize` and PUT each part to its own URL,
+
+        keeping the `ETag` each one returns. Bytes go straight to storage and never
+
+        through this API.
+
+
+        A small file is a one-part upload rather than a separate code path, so there
+
+        is one flow to implement at every size.'
+      operationId: uploads.initiate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadInitiateRequest'
+            example:
+              matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+              filename: msa-acme-v3.docx
+              contentType: application/pdf
+              sizeBytes: 248193
+              folderId: fld_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+              handwritten: false
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadSession'
+              example:
+                uploadId: upl_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                partSize: 5242880
+                totalParts: 3
+                parts:
+                - partNumber: 1
+                  url: https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+                  expiresAt: '2026-08-19T14:32:10Z'
+                expiresAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    get:
+      tags:
+      - Uploads
+      summary: List upload sessions
+      description: 'Every upload session in your organization, newest first.
+
+
+        No part URLs. A list of them would be a page of presigned capabilities for
+
+        files you are not currently uploading; sign the parts you still need with
+
+        `uploads.presignPart`.
+
+
+        Pass `status=in_progress` to find sessions you left open. A session past its
+
+        `expiresAt` cannot be completed even if it still reads `in_progress`:
+
+        storage discards the parts, and the upload has to start again.'
+      operationId: uploads.list
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: How many rows to return, 1 to 200. Defaults to 50.
+          default: 50
+          title: Limit
+        description: How many rows to return, 1 to 200. Defaults to 50.
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+          default: 0
+          title: Offset
+        description: 'How many rows to skip before returning any. Combine with `limit` to page: `offset=0`, then `offset=50`, and so on. Offsets are positional, not stable, so a set that changes while you page can show a row twice or not at all.'
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Narrow to one session status, for example `in_progress` to find uploads left open. Omit for every session in the organization.
+          title: Status
+        description: Narrow to one session status, for example `in_progress` to find uploads left open. Omit for every session in the organization.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_UploadSummary_'
+              example:
+                data:
+                - uploadId: upl_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  filename: msa-acme-v3.docx
+                  contentType: application/pdf
+                  sizeBytes: 248193
+                  totalParts: 3
+                  status: completed
+                  createdAt: '2026-08-19T14:32:10Z'
+                  expiresAt: '2026-08-19T14:32:10Z'
+                pagination:
+                  limit: 50
+                  offset: 0
+                  total: 128
+                  hasMore: false
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/uploads/{uploadId}/parts/{partNumber}:
+    get:
+      tags:
+      - Uploads
+      summary: Re-sign one upload part
+      description: 'Re-sign one part, for an upload that outlived its original URLs.
+
+
+        Part URLs expire well before the session does, so a large upload is expected
+
+        to re-sign as it goes. Parts already uploaded stay valid and do not need
+
+        re-sending; only sign the ones still outstanding.'
+      operationId: uploads.presignPart
+      parameters:
+      - name: uploadId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Uploadid
+        description: '`upl_` identifier of the upload session, returned when the upload was initiated. This is NOT the storage provider''s own upload id.'
+      - name: partNumber
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+          title: Partnumber
+        description: Which part of a multipart upload to sign, counting from 1. Must be one of the parts the session was opened for.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadPartLink'
+              example:
+                partNumber: 1
+                url: https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+                expiresAt: '2026-08-19T14:32:10Z'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/uploads/{uploadId}/complete:
+    post:
+      tags:
+      - Uploads
+      summary: Finish an upload and start ingesting
+      description: 'Assemble the parts and start ingesting. Always a 202 with an operation.
+
+
+        Ordered assemble-then-mint. The assembly is guarded by the session''s own
+
+        status, so a retry after a lost response skips it; the launcher then
+
+        recognises the derived key and returns the first operation with
+
+        `is_new=False`, and the dispatch is skipped with it. Minting first would
+
+        mean a transient storage failure produced an operation whose retry found it
+
+        and declined to dispatch.'
+      operationId: uploads.complete
+      parameters:
+      - name: uploadId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Uploadid
+        description: '`upl_` identifier of the upload session, returned when the upload was initiated. This is NOT the storage provider''s own upload id.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadCompleteRequest'
+            example:
+              parts:
+              - partNumber: 1
+                etag: '"d41d8cd98f00b204e9800998ecf8427e"'
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operation'
+              example:
+                id: op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                type: matrix.run
+                status: succeeded
+                createdAt: '2026-08-19T14:32:10Z'
+                completedAt: '2026-08-19T14:32:10Z'
+                matterId: mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                resource:
+                  kind: matrix
+                  id: mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+                  url: https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+                progress:
+                  done: 24
+                  total: 128
+                  unit: cells
+                requestId: req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/uploads/formats:
+    get:
+      tags:
+      - Uploads
+      summary: List supported upload formats
+      description: 'What this API will accept for an upload, and how it cuts files into parts.
+
+
+        Read this once at build time rather than discovering the list from `415`s.
+
+        It is the same list the `unsupported-media-type` error carries, from the
+
+        same constant, so the two cannot disagree.
+
+
+        Media types are matched case-insensitively. `minPartSizeBytes` applies to
+
+        every part except the last, which is why a small file is a one-part upload
+
+        rather than a different flow.'
+      operationId: uploads.formats
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadFormats'
+              example:
+                mediaTypes:
+                - value
+                extensions:
+                - value
+                maxBytes: 1
+                minPartSizeBytes: 1
+                maxParts: 1
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+  /v1/uploads/{uploadId}:
+    delete:
+      tags:
+      - Uploads
+      summary: Abort an upload
+      description: 'Abandon an upload and clean up after it.
+
+
+        Cancels the upload in storage, discards whatever parts were sent, and
+
+        removes the placeholder document the session created. Nothing else is
+
+        touched: the placeholder has no bytes and no extracted text.
+
+
+        Refused with `409 upload-not-completable` once the session is `completed`.
+
+        At that point the document is real and the ingest has started, so the thing
+
+        to remove is the document; use `documents.delete`, which also clears its
+
+        stored file and its vectors.
+
+
+        The session itself stays visible in `GET /v1/uploads` with `status:
+
+        aborted`, so your own reconciliation can see that it ended rather than
+
+        finding it simply gone.
+
+
+        A repeated abort answers `404`. If an abort timed out, treat a subsequent
+
+        `404` as success.'
+      operationId: uploads.abort
+      parameters:
+      - name: uploadId
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Uploadid
+        description: '`upl_` identifier of the upload session, returned when the upload was initiated. This is NOT the storage provider''s own upload id.'
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: The request does not match the published schema. `errors` names each rejected field and why. The submitted value is never echoed back.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '401':
+          description: The credential is missing, malformed, unknown, revoked or expired. `type` is `invalid-credential`, or `wrong-product-credential` when a `vq_key_` Data API key was sent to this API.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: The credential does not carry a scope this operation requires (`insufficient-scope`), or the organization's installation is suspended (`installation-inactive`).
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            WWW-Authenticate:
+              description: RFC 9110 authentication challenge.
+              schema:
+                type: string
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: The resource does not exist, is not this organization's, or is outside this installation's matter allowlist. The three are deliberately indistinguishable, so the status code cannot be used to discover which ids exist in another organization. Each resource has its own `type`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too many requests for this credential's tier. Honour `Retry-After`.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: An unexpected error on our side. The body carries a stable `type` and the request id and nothing else; the cause is in our logs.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: A dependency this request needs is unavailable, so nothing was done. Retryable. Authentication fails closed rather than admitting the request, so this is never a statement about your credential.
+          headers:
+            X-Request-ID:
+              description: The id of this request. The same value appears as `requestId` in the body. Quote it when contacting support.
+              schema:
+                type: string
+                examples:
+                - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    servers:
+    - url: https://api.vaquill.ai/workspace
+      description: Vaquill Legal Workspace API (production)
+    - url: /workspace
+      description: Vaquill Legal Workspace API (relative to the mount)
+components:
+  schemas:
+    UploadCompleteRequest:
+      properties:
+        parts:
+          items:
+            $ref: '#/components/schemas/CompletedPart'
+          type: array
+          minItems: 1
+          title: Parts
+          description: Every part that was uploaded, each with the ETag storage returned for it. All parts must be listed; a missing one is not detected until assembly fails.
+      additionalProperties: false
+      type: object
+      required:
+      - parts
+      title: UploadCompleteRequest
+      description: Assemble the parts into the final object and start ingesting it.
+    OperationStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: OperationStatus
+      description: 'The public five. There is no sixth, and there are no synonyms.
+
+
+        Internal vocabularies spell terminal success `completed`, `ready`,
+
+        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+
+        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+
+        `app.workspace_api.adapters.status_map`, which refuses to guess.'
+    UploadInitiateRequest:
+      properties:
+        matterId:
+          type: string
+          title: Matterid
+          description: '`mat_` identifier of the matter to upload into. Must belong to your organization.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        filename:
+          type: string
+          maxLength: 255
+          minLength: 1
+          title: Filename
+          description: Filename to store, including its extension. Trimmed; whitespace alone is refused. This exact string is used to build the stored object, so it cannot be changed afterwards.
+          examples:
+          - msa-acme-v3.docx
+        contentType:
+          type: string
+          maxLength: 255
+          minLength: 1
+          title: Contenttype
+          description: IANA media type of the file, for example `application/pdf`. Must be on the supported list or the request is refused before any URL is signed.
+          examples:
+          - application/pdf
+        sizeBytes:
+          type: integer
+          maximum: 2147483648.0
+          exclusiveMinimum: 0.0
+          title: Sizebytes
+          description: 'Exact size of the file in bytes. Not advisory: it fixes the part size and part count for the life of the session, and a wrong value fails at complete time. Must be greater than zero.'
+          examples:
+          - 248193
+        folderId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Folderid
+          description: '`fld_` identifier to file the document under on the way in. Saves a second call. Must belong to your organization.'
+          examples:
+          - fld_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        handwritten:
+          type: boolean
+          title: Handwritten
+          description: Set true for scanned or handwritten pages to route the file through vision OCR instead of the text-layer reader. Leaving it false on a scanned exhibit ingests it badly.
+          default: false
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - matterId
+      - filename
+      - contentType
+      - sizeBytes
+      title: UploadInitiateRequest
+      description: 'Ask for somewhere to put a file.
+
+
+        `sizeBytes` is required and is not advisory: it decides the part size and
+
+        the part count, both of which are fixed for the life of the session. R2
+
+        cannot be asked to assemble parts it was not told to expect, so a size that
+
+        turns out to be wrong fails at complete time rather than corrupting a
+
+        document.'
+    Page_UploadSummary_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/UploadSummary'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[UploadSummary]
+    CompletedPart:
+      properties:
+        partNumber:
+          type: integer
+          maximum: 10000.0
+          minimum: 1.0
+          title: Partnumber
+          description: The part number this ETag belongs to. Send each part number exactly once; a repeat silently changes which bytes are assembled.
+          examples:
+          - 1
+        etag:
+          type: string
+          maxLength: 255
+          minLength: 1
+          title: Etag
+          description: The `ETag` header storage returned when this part was uploaded. Quoted or unquoted are both accepted, so it can be passed through from any HTTP client unchanged.
+          examples:
+          - '"d41d8cd98f00b204e9800998ecf8427e"'
+      additionalProperties: false
+      type: object
+      required:
+      - partNumber
+      - etag
+      title: CompletedPart
+      description: One uploaded part, as R2 acknowledged it.
+    UploadFormats:
+      properties:
+        mediaTypes:
+          items:
+            type: string
+          type: array
+          title: Mediatypes
+          description: 'Every IANA media type this API will accept for an upload, sorted. Compare case-insensitively: media types are case-insensitive per RFC 2045, and this API folds both sides.'
+          examples:
+          - - value
+        extensions:
+          items:
+            type: string
+          type: array
+          title: Extensions
+          description: Every filename extension this API will accept, sorted and lowercase, each including its leading dot.
+          examples:
+          - - value
+        maxBytes:
+          type: integer
+          title: Maxbytes
+          description: Largest single file this API will open a session for. A larger `sizeBytes` is refused at initiate, before any URL is signed.
+          examples:
+          - 1
+        minPartSizeBytes:
+          type: integer
+          title: Minpartsizebytes
+          description: The floor storage applies to every part EXCEPT the last. A one-part upload of any size is legal, which is why a small file is not a separate code path.
+          examples:
+          - 1
+        maxParts:
+          type: integer
+          title: Maxparts
+          description: Most parts a single upload may be cut into. The part size is chosen server-side from the file size and returned on the session.
+          examples:
+          - 1
+      additionalProperties: false
+      type: object
+      required:
+      - mediaTypes
+      - extensions
+      - maxBytes
+      - minPartSizeBytes
+      - maxParts
+      title: UploadFormats
+      description: 'What this API will accept, and how it will cut it into parts.
+
+
+        Derived from `adapters/upload_media`, which is itself derived from
+
+        `app.core.file_validation`, rather than from the web app''s
+
+        `get_supported_formats()`. That catalogue carries categories and security
+
+        risk levels and INCLUDES macro-enabled formats the upload path refuses, so
+
+        publishing it would tell a caller a `.docm` is supported and then answer 415
+
+        when they sent one.
+
+
+        `supportedMediaTypes` here is the same list `unsupported-media-type` carries
+
+        in its problem document, from the same constant. A test asserts the two are
+
+        equal, because the day they drift the error becomes the more accurate one
+
+        and this endpoint becomes the lie.'
+    OperationProgress:
+      properties:
+        done:
+          type: integer
+          minimum: 0.0
+          title: Done
+          description: How many units are finished.
+          examples:
+          - 24
+        total:
+          type: integer
+          minimum: 0.0
+          title: Total
+          description: How many units there are in total. Can legitimately be zero for an empty run.
+          examples:
+          - 128
+        unit:
+          type: string
+          enum:
+          - cells
+          - steps
+          - documents
+          - files
+          - rows
+          - percent
+          title: Unit
+          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
+          examples:
+          - cells
+      additionalProperties: false
+      type: object
+      required:
+      - done
+      - total
+      - unit
+      title: OperationProgress
+      description: 'How far along, and in what units.
+
+
+        The unit is not decoration. A workflow run stores only a percentage while a
+
+        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
+
+        as 43 of 100 documents and a client builds a wrong estimate from it.'
+    Operation:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `op_` followed by 32 hex characters. Poll `GET /v1/operations/{operationId}` with it.
+          examples:
+          - op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        type:
+          type: string
+          title: Type
+          description: What kind of work this is, for example `matrix.run` or `draft.generate`.
+          examples:
+          - matrix.run
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: 'One of five values: `queued`, `running`, `succeeded`, `failed`, `cancelled`. There is no sixth and there are no synonyms. Stop polling once it is `succeeded`, `failed` or `cancelled`.'
+          examples:
+          - succeeded
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the operation was accepted (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        completedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Completedat
+          description: When the operation reached a terminal status (RFC 3339). Present if and only if the status is terminal.
+          examples:
+          - '2026-08-19T14:32:10Z'
+        matterId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matterid
+          description: '`mat_` identifier of the matter this work belongs to, when it belongs to one.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        resource:
+          anyOf:
+          - $ref: '#/components/schemas/OperationResource'
+          - type: 'null'
+          description: What the operation produced. Absent until the underlying job row exists, which an idempotent replay can briefly observe, so treat absence as 'not yet' rather than 'never'.
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/OperationError'
+          - type: 'null'
+          description: Why the work failed. Present only when `status` is `failed`. Partial success is `succeeded` with `progress.done < progress.total`, never an error.
+        progress:
+          anyOf:
+          - $ref: '#/components/schemas/OperationProgress'
+          - type: 'null'
+          description: How far along the work is, when the underlying job reports it. Absent does not mean no progress.
+        requestId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Requestid
+          description: The `X-Request-ID` of the request that created this operation. Quote it in a support ticket.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - type
+      - status
+      - createdAt
+      title: Operation
+      description: 'One long-running operation, whatever kind of work it is.
+
+
+        Readable for `OPERATION_RETENTION_DAYS` after creation, per AIP-151.'
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
+          examples:
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
+
+
+        `total` is the count of rows matching the filter, not the count returned,
+
+        so a caller can size a job before running it.'
+    OperationResource:
+      properties:
+        kind:
+          type: string
+          title: Kind
+          description: What sort of thing was produced, for example `matrix` or `document`.
+          examples:
+          - matrix
+        id:
+          type: string
+          title: Id
+          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
+          examples:
+          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+      additionalProperties: false
+      type: object
+      required:
+      - kind
+      - id
+      title: OperationResource
+      description: 'What the operation produced, or is producing.
+
+
+        `url` is a path on this API rather than an absolute URL, because the service
+
+        is mounted today and gets its own hostname later (docs 07.5). A relative
+
+        path survives that move; a baked-in host does not.'
+    OperationError:
+      properties:
+        code:
+          type: string
+          title: Code
+          description: Stable, machine-readable failure code. Branch on this, never on `message`.
+          examples:
+          - EXTRACTION_FAILED
+        message:
+          type: string
+          title: Message
+          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
+          examples:
+          - The upstream extraction did not finish.
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - message
+      title: OperationError
+      description: 'Why a failed operation failed, in terms a customer can act on.
+
+
+        `code` is stable and machine-readable. `message` is sanitized: the internal
+
+        job tables store stack traces and file paths in their `error_message`
+
+        columns, and forwarding those verbatim leaks our internals into a customer''s
+
+        logs.'
+    UploadSession:
+      properties:
+        uploadId:
+          type: string
+          title: Uploadid
+          description: Public identifier for this upload session, `upl_` followed by 32 hex characters. Use it to presign a part and to complete the upload.
+          examples:
+          - upl_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        partSize:
+          type: integer
+          title: Partsize
+          description: Size in bytes of every part except the last. Split the file on exactly this boundary or the assembled object will not match.
+          examples:
+          - 5242880
+        totalParts:
+          type: integer
+          title: Totalparts
+          description: 'How many parts to upload. Always at least 1: a small file is a one-part upload rather than a separate code path.'
+          examples:
+          - 3
+        parts:
+          items:
+            $ref: '#/components/schemas/UploadPartLink'
+          type: array
+          title: Parts
+          description: One presigned URL per part, in order.
+        expiresAt:
+          type: string
+          format: date-time
+          title: Expiresat
+          description: When the whole SESSION expires (RFC 3339), which is much later than any individual part URL. Past this, storage discards the parts and the upload has to start again.
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - uploadId
+      - partSize
+      - totalParts
+      - parts
+      - expiresAt
+      title: UploadSession
+      description: 'An open upload, and every URL needed to fill it.
+
+
+        Two things are deliberately not here.
+
+
+        The R2 object KEY. It is inside each presigned URL and cannot not be, since
+
+        an S3 presigned URL is a signed PATH. What is refused is publishing it as a
+
+        FIELD: a field is a stable, structured handle a client would build on and we
+
+        could never withdraw, whereas the URL is a fifteen-minute capability for one
+
+        object the caller was already granted. Nothing cross-tenant is disclosed
+
+        either way; the uuids in that path are the caller''s own.
+
+
+        The DOCUMENT ID. There is no document until the bytes land, only an
+
+        intention to create one, and publishing an id for a row that may never be
+
+        filled invites a customer to store it and then poll something that never
+
+        starts. It arrives on the operation''s `resource` at complete time, which is
+
+        the first moment it means anything.'
+    UploadSummary:
+      properties:
+        uploadId:
+          type: string
+          title: Uploadid
+          description: Public identifier for the session, `upl_` followed by 32 hex characters.
+          examples:
+          - upl_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        matterId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matterid
+          description: '`mat_` identifier of the matter this upload is going into. Absent on older sessions.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        filename:
+          type: string
+          title: Filename
+          description: Filename the session was opened for.
+          examples:
+          - msa-acme-v3.docx
+        contentType:
+          type: string
+          title: Contenttype
+          description: IANA media type the session was opened for.
+          examples:
+          - application/pdf
+        sizeBytes:
+          type: integer
+          title: Sizebytes
+          description: Exact size the session was planned against, in bytes.
+          examples:
+          - 248193
+        totalParts:
+          type: integer
+          title: Totalparts
+          description: How many parts this session expects.
+          examples:
+          - 3
+        status:
+          type: string
+          title: Status
+          description: 'Where the session is: `in_progress`, `completed` or `aborted`. Published as a plain string, so do not branch on it without a fallback.'
+          examples:
+          - completed
+        createdAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Createdat
+          description: When the session was opened (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        expiresAt:
+          type: string
+          format: date-time
+          title: Expiresat
+          description: When the session expires (RFC 3339). Past this, storage discards the parts and the upload has to start again.
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - uploadId
+      - filename
+      - contentType
+      - sizeBytes
+      - totalParts
+      - status
+      - expiresAt
+      title: UploadSummary
+      description: 'One upload session as a LIST publishes it: no URLs, ever.
+
+
+        `UploadSession` carries a presigned URL per part, and a list that returned
+
+        it would mint `parts x page` signatures for sessions the caller is not
+
+        currently filling. A presigned URL IS the object key, since an S3 presigned
+
+        URL is a signed path, so a page of them is a page of capabilities handed out
+
+        for no reason. A caller resuming an upload signs the parts it still needs
+
+        through `uploads.presignPart`, which is the route that exists for it.
+
+
+        `status` is the raw `multipart_uploads.status` and NOT the five public
+
+        operation statuses. An upload session is not a job: it is a place to put
+
+        bytes, and it ends in `completed`, `aborted` or expiry rather than in
+
+        success or failure. The ingest that follows a completion is the job, and it
+
+        has an operation of its own.'
+    Problem:
+      type: object
+      title: Problem
+      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: true
+    UploadPartLink:
+      properties:
+        partNumber:
+          type: integer
+          minimum: 1.0
+          title: Partnumber
+          description: Which part this URL is for. Parts are numbered from 1 and must be uploaded under the number given here.
+          examples:
+          - 1
+        url:
+          type: string
+          title: Url
+          description: Presigned URL to `PUT` this part's bytes to, directly to storage. No bytes pass through the Vaquill API. Keep the `ETag` the response returns.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+        expiresAt:
+          type: string
+          format: date-time
+          title: Expiresat
+          description: When this part URL stops working (RFC 3339). Re-sign an expired part with `uploads.presignPart`; parts already uploaded stay valid.
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - partNumber
+      - url
+      - expiresAt
+      title: UploadPartLink
+      description: 'Where to PUT one part, and how long that stays true.
+
+
+        `expiresAt` is on every part rather than on the session, because a large
+
+        upload outlives a single signature: a client re-signs the parts it has not
+
+        finished through `uploads.presignPart` and keeps the ones it has.'
+  securitySchemes:
+    WorkspaceAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: vq_ws_*
+      description: 'Workspace credential issued from the automation console at `/automation`. Send it as `Authorization: Bearer vq_ws_...`. This is NOT a Data API key: a `vq_key_` credential is refused here and names the other product in the error.'
+externalDocs:
+  description: Getting started guide and error reference
+  url: https://vaquill.ai/docs/workspace-api
+x-refined-from:
+- vaquill-ai-workspace-openapi.json
+- vaquill-ai-workspace-openapi.yml

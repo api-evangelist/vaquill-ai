@@ -1,0 +1,69 @@
+generated: '2026-10-07'
+method: searched
+source: https://www.vaquill.ai/security; https://www.vaquill.ai/dpa; https://www.vaquill.ai/privacy; https://www.vaquill.ai/delete-data; https://www.vaquill.ai/accessibility;
+  https://www.vaquill.ai/docs/api-guide/data-privacy
+name: Vaquill regulatory posture
+signals:
+  accessibility_conformance:
+    url: https://www.vaquill.ai/accessibility
+    standard: WCAG 2.2 Level AA
+    status: Partially conformant
+    stated: 'We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.2 Level AA. Conformance status: Partially conformant.'
+    method: self-evaluation plus automated scanning; not yet reviewed by a qualified external accessibility auditor
+    vpat: false
+    known_limitations_listed: true
+  data_subject_request:
+    url: https://www.vaquill.ai/delete-data
+    channel: email contact@vaquill.ai, subject "Data Deletion Request"
+    stated_timelines: 'Acknowledgement: Within 48 hours of receiving your request; deletion of account, documents, research history, matters,
+      memories, API usage data and MCP server data: Within 7 days'
+    retained: Billing and payment records ... retained for up to 7 years under applicable tax regulation
+    regimes_named:
+    - GDPR
+    - CCPA
+  global_privacy_control:
+    url: https://www.vaquill.ai/privacy
+    honored: true
+    stated: We honor Global Privacy Control signals sent by your browser as a valid opt-out of "sale" and "sharing" as those terms are defined
+      under the CCPA/CPRA and parallel state laws.
+    note: Set from the published statement in Section 9 of the privacy policy, not from a probe.
+  incident_notification:
+    url: https://www.vaquill.ai/dpa
+    stated_sla: Vaquill AI will notify affected customers without undue delay and, in any event, within 72 hours of becoming aware of a personal-data
+      breach that affects their Customer Data.
+    also: 'https://www.vaquill.ai/security: we notify affected customers within 72 hours of confirmation, in line with GDPR Article 33 and applicable
+      US state breach-notification laws'
+  data_residency:
+    url: https://www.vaquill.ai/dpa
+    stated: All primary Customer Data is stored and processed in Amazon Web Services (AWS) United States regions.
+    regions:
+    - AWS United States
+    change_notice: the DPA requires written notice before any change
+  subprocessors:
+    url: https://www.vaquill.ai/dpa
+    published: false
+    stated: A current list of authorized sub-processors is available to customers and their counsel on request at contact@vaquill.ai. Vaquill
+      AI will give customers at least 30 days' advance notice before adding a new sub-processor.
+    named_in_text:
+    - OpenAI (LLM, zero-data-retention)
+    - Anthropic (LLM, zero-data-retention)
+    - Amazon Web Services (hosting)
+    note: No dated public register; the names above are the ones the DPA and security pages mention. Recorded as not published.
+  exit_assistance:
+    url: https://www.vaquill.ai/dpa
+    stated: On termination of the subscription, customers have a 30-day window to export Customer Data. After the export window, Customer Data
+      is deleted from production systems and anonymized in backups according to our standard backup-rotation schedule.
+  ai_transparency:
+    url: https://www.vaquill.ai/dpa
+    stated: The DPA contractually commits Vaquill AI and its sub-processors not to use Customer Data or Outputs to train, fine-tune, or improve
+      any AI or machine-learning model.
+    note: A no-training commitment and zero-data-retention statement, not a model/training-data summary; training_data_summary is absent.
+absent:
+- sbom
+- support_lifetime
+- training_data_summary
+- age_assurance
+- notice_and_action
+- transparency_report
+note: Signals are harvested from the provider's own pages; whether a regime applies is decided by the Kin Score regime map, not here. The API
+  data-privacy page states query text is never persisted and webhook delivery attempts are kept 90 days.

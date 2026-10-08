@@ -1,0 +1,63 @@
+generated: '2026-10-07'
+method: generated
+source: openapi/vaquill-ai-openapi.yml; openapi/vaquill-ai-india-openapi.yml; https://github.com/Vaquill-AI/vaquill-plugin
+name: Vaquill agent skills
+skills:
+- name: vaquill-ai-citation-resolution
+  file: skills/vaquill-ai-citation-resolution.md
+  description: Resolve a US statutory citation to its exact section and read the governing text, with batch resolution for many citations
+  api: Vaquill Legal Data API
+  operations:
+  - resolve_statute_citation
+  - resolve_statute_citations_batch
+  - get_section_api_v1_us_statutes_section__act_id__get
+  - get_section_body_api_v1_us_statutes_section__act_id__body_get
+  - get_section_changes_api_v1_us_statutes_section__act_id__changes_get
+  method: generated
+- name: vaquill-ai-statute-search
+  file: skills/vaquill-ai-statute-search.md
+  description: Search US statutes, regulations, constitutions and court rules across 54 jurisdictions, page the ranked results, and pull full
+    text
+  api: Vaquill Legal Data API
+  operations:
+  - list_statutes_coverage_api_v1_us_statutes_coverage_get
+  - search_statutes_api_v1_us_statutes_search_post
+  - get_section_body_api_v1_us_statutes_section__act_id__body_get
+  - get_section_neighbors_api_v1_us_statutes_section__act_id__related_get
+  - get_section_cross_state_api_v1_us_statutes_section__act_id__cross_state_get
+  method: generated
+- name: vaquill-ai-law-change-watch
+  file: skills/vaquill-ai-law-change-watch.md
+  description: Subscribe to a body of law and receive email or HMAC-signed webhook deliveries when it changes, with a test delivery and a per-change
+    diff
+  api: Vaquill Legal Data API
+  operations:
+  - list_boards_api_v1_boards_get
+  - create_watch_api_v1_watches_post
+  - test_watch_api_v1_watches__watch_id__test_post
+  - list_watch_changes_api_v1_watches__watch_id__changes_get
+  - get_watch_change_diff_api_v1_watches__watch_id__changes__change_id__diff_get
+  - update_watch_api_v1_watches__watch_id__patch
+  - delete_watch_api_v1_watches__watch_id__delete
+  - list_watch_deliveries_api_v1_watches__watch_id__deliveries_get
+  method: generated
+- name: vaquill-ai-india-act-lookup
+  file: skills/vaquill-ai-india-act-lookup.md
+  description: Search Indian central and state legislation, resolve a citation to a provision, read its text and amendment history
+  api: Vaquill India API
+  operations:
+  - list_act_filters_api_v1_in_acts_filters_get
+  - search_acts_api_v1_in_acts_search_post
+  - resolve_india_citation
+  - get_act_section_body_api_v1_in_acts__act_id__sections__section_number__body_get
+  - get_act_amendments_api_v1_in_acts__act_id__amendments_get
+  - get_act_status_api_v1_in_acts__act_id__status_get
+  method: generated
+- name: us-statute-research
+  file: skills/_provider/us-statute-research-SKILL.md
+  description: Provider-published Claude Code skill from the primary-law plugin, saved verbatim (31,558 bytes). Teaches corpus rules, citation
+    discipline and point-in-time reads over the MCP tools.
+  api: Vaquill MCP Server
+  method: searched
+  source: https://github.com/Vaquill-AI/vaquill-plugin/blob/main/plugins/primary-law/skills/us-statute-research/SKILL.md
+  operations: []

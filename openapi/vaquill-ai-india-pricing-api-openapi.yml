@@ -1,0 +1,218 @@
+openapi: 3.2.0
+info:
+  title: Vaquill Ai India Pricing API
+  version: 1.0.0
+  contact:
+    name: Vaquill API Support
+    url: https://www.vaquill.ai
+    email: support@vaquill.ai
+  license:
+    name: Proprietary
+    url: https://www.vaquill.ai/terms
+  termsOfService: https://www.vaquill.ai/terms
+  description: 'Operations tagged India Pricing across 2 of this provider''s published API definitions: vaquill-ai-india-openapi.json, vaquill-ai-india-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.vaquill.ai
+  description: Production
+security:
+- ApiKeyAuth: []
+- ApiKeyHeader: []
+- ApiKeyQuery: []
+tags:
+- name: India Pricing
+paths:
+  /api/v1/in/api-credits/pricing:
+    get:
+      tags:
+      - India Pricing
+      summary: Get India API credit pricing
+      description: 'Credit-to-price conversion rate and per-endpoint costs for the India legislation surface (`/in/acts/*`).
+
+
+        **No authentication required.** 1 credit = $0.01 USD, billed in USD.
+
+
+        Pass `?region=US` to price the United States primary-law surface instead: it is the same credit balance and the same key.'
+      operationId: get_pricing_in_api_v1_in_api_credits_pricing_get
+      parameters:
+      - name: region
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - US
+            - IN
+            type: string
+          - type: 'null'
+          description: Jurisdiction to price. `US` for the United States primary-law surface, `IN` for the India legislation surface. Defaults to the jurisdiction of the document you are reading, so a caller who does not set it gets the prices for the endpoints that document describes and nothing else.
+          title: Region
+        description: Jurisdiction to price. `US` for the United States primary-law surface, `IN` for the India legislation surface. Defaults to the jurisdiction of the document you are reading, so a caller who does not set it gets the prices for the endpoints that document describes and nothing else.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiCreditPricingResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    servers:
+    - url: https://api.vaquill.ai
+      description: Production
+components:
+  schemas:
+    ApiCreditCostResponse:
+      properties:
+        endpoint:
+          type: string
+          title: Endpoint
+          description: API endpoint path.
+          examples:
+          - /us/statutes/search
+        operation:
+          type: string
+          title: Operation
+          description: Human-readable operation name.
+          examples:
+          - US Statutes Search
+        credits:
+          type: number
+          title: Credits
+          description: Credits consumed per call (1 credit = $0.01 USD).
+          examples:
+          - 4
+        usdCost:
+          type: number
+          title: Usdcost
+          description: Cost in USD per call.
+          examples:
+          - 0.04
+        description:
+          type: string
+          title: Description
+          description: What the endpoint does.
+          examples:
+          - Hybrid semantic + keyword search across the United States Code (USC), Code of Federal Regulations (CFR), and supported state statutory codes.
+        category:
+          type: string
+          enum:
+          - account
+          - acts
+          - alerts
+          - session_laws
+          - statutes
+          title: Category
+          description: Endpoint category.
+          examples:
+          - statutes
+        regions:
+          items:
+            type: string
+          type: array
+          title: Regions
+          description: Jurisdictions this endpoint serves (e.g. ['US']).
+          examples:
+          - - US
+      type: object
+      required:
+      - endpoint
+      - operation
+      - credits
+      - usdCost
+      - description
+      - category
+      title: ApiCreditCostResponse
+      description: Single endpoint credit cost for the pricing matrix.
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    ApiCreditPricingResponse:
+      properties:
+        dollarPerCredit:
+          type: number
+          title: Dollarpercredit
+          description: USD cost per 1 credit (0.01 means 1 credit = $0.01).
+          examples:
+          - 0.01
+        minCredits:
+          type: number
+          title: Mincredits
+          description: Minimum credits per purchase.
+          examples:
+          - 500.0
+        maxCredits:
+          type: number
+          title: Maxcredits
+          description: Maximum credits per purchase.
+          examples:
+          - 1000000.0
+        costs:
+          items:
+            $ref: '#/components/schemas/ApiCreditCostResponse'
+          type: array
+          title: Costs
+          description: Per-endpoint credit costs (USD).
+      type: object
+      required:
+      - dollarPerCredit
+      - minCredits
+      - maxCredits
+      - costs
+      title: ApiCreditPricingResponse
+      description: Full pricing information for the API credit system. USD only.
+  securitySchemes:
+    ApiKeyAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: vq_key_*
+      description: 'API key issued from the developer dashboard. Pass as `Authorization: Bearer vq_key_...` (preferred).'
+    ApiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: 'The same API key as a bare header value: `X-API-Key: vq_key_...`. Equivalent to the Bearer form.'
+    ApiKeyQuery:
+      type: apiKey
+      in: query
+      name: api_key
+      description: 'The same API key as a query parameter: `?api_key=vq_key_...`. Use only where you cannot set a header. A URL can end up in proxy and server logs, browser history and shared links, so prefer either header form, and rotate a key that has leaked.'
+x-refined-from:
+- vaquill-ai-india-openapi.json
+- vaquill-ai-india-openapi.yml

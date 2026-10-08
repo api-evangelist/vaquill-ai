@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "vaquill-us": {
+      "type": "http",
+      "url": "https://mcp.vaquill.ai/mcp"
+    }
+  }
+}
