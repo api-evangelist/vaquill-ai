@@ -262,3 +262,16 @@ notes:
 - The Vaquill AI workspace product is priced per seat (Plus, Power, Enterprise; 7-day free trial) at https://www.vaquill.ai/docs/guides/plans-and-limits
   with no numeric prices on that page; /pricing redirects to /legal-api.
 - Legal aid and civil-justice organisations can apply for free access (https://www.vaquill.ai/legal-api).
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - hybrid
+  units: []
+  plans:
+  - name: API credits (pay as you go)
+    access: other
+    model: hybrid
+    model_how: derived
+    units: []
+    periods: []
