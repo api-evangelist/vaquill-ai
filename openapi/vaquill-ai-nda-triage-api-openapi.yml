@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai NDA triage API
+  title: Vaquill Legal Workspace NDA triage API
+  description: 'Organization-scoped API for driving your legal workspace from your own backend: matters, documents, drafting, review, compare and matrices.'
   version: 1.0.0
-  description: 'Operations tagged NDA triage across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai/workspace
   description: Vaquill Legal Workspace API (production)
@@ -192,11 +192,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/nda-triages/{ndaTriageId}:
     get:
       tags:
@@ -373,11 +368,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/nda-triages/{ndaTriageId}/exports:
     post:
       tags:
@@ -533,144 +523,38 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
 components:
   schemas:
-    ToolReportExportRequest:
+    OperationError:
       properties:
-        format:
+        code:
           type: string
-          enum:
-          - pdf
-          - docx
-          title: Format
-          description: Format to render. `pdf` for something a person reads and forwards, `docx` for something an editor opens.
-          default: pdf
+          title: Code
+          description: Stable, machine-readable failure code. Branch on this, never on `message`.
           examples:
-          - pdf
-      additionalProperties: false
-      type: object
-      title: ToolReportExportRequest
-      description: Which format to render the finished analysis in.
-    OperationStatus:
-      type: string
-      enum:
-      - queued
-      - running
-      - succeeded
-      - failed
-      - cancelled
-      title: OperationStatus
-      description: 'The public five. There is no sixth, and there are no synonyms.
-
-
-        Internal vocabularies spell terminal success `completed`, `ready`,
-
-        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
-
-        queued `pending`, `queued` and `draft`. All of that is collapsed here by
-
-        `app.workspace_api.adapters.status_map`, which refuses to guess.'
-    NdaPlaybookAssessment:
-      properties:
-        verdict:
+          - EXTRACTION_FAILED
+        message:
           type: string
-          title: Verdict
-          description: 'How this criterion measures against the playbook: `meets_standard`, `within_acceptable_range`, `outside_range`, `deal_breaker_hit`, or `not_assessed` when the playbook has no entry for it.'
+          title: Message
+          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
           examples:
-          - meets_standard
-        playbookPosition:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Playbookposition
-          description: The standard position this criterion was measured against.
-          examples:
-          - Cap liability at fees paid in the preceding twelve months.
-        deviationSummary:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Deviationsummary
-          description: 'How this NDA differs from the standard, in one line. For example `Your standard: 5y term cap; this NDA: 10y`.'
-          examples:
-          - 'Your standard: confidentiality obligations expire five years after disclosure.'
-        triggeredEscalations:
-          items:
-            type: string
-          type: array
-          title: Triggeredescalations
-          description: Which of the playbook's escalation triggers fired on this criterion.
-          examples:
-          - - value
+          - The upstream extraction did not finish.
       additionalProperties: false
       type: object
       required:
-      - verdict
-      title: NdaPlaybookAssessment
-      description: 'One criterion measured against the organization''s own positions.
+      - code
+      - message
+      title: OperationError
+      description: 'Why a failed operation failed, in terms a customer can act on.
 
 
-        Computed deterministically from the playbook, not by the model: the LLM
+        `code` is stable and machine-readable. `message` is sanitized: the internal
 
-        knows what a market NDA looks like and only the playbook knows what this
+        job tables store stack traces and file paths in their `error_message`
 
-        firm will sign.'
-    ToolReportExport:
-      properties:
-        format:
-          type: string
-          enum:
-          - pdf
-          - docx
-          title: Format
-          description: Format of the exported file.
-          examples:
-          - pdf
-        filename:
-          type: string
-          title: Filename
-          description: Suggested filename for the download.
-          examples:
-          - msa-acme-v3.docx
-        url:
-          type: string
-          title: Url
-          description: Short-lived signed URL to download the report. Fetch it promptly and do not store it.
-          examples:
-          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
-        expiresAt:
-          type: string
-          format: date-time
-          title: Expiresat
-          description: When the URL stops working (RFC 3339).
-          examples:
-          - '2026-08-19T14:32:10Z'
-        sizeBytes:
-          type: integer
-          title: Sizebytes
-          description: Size of the exported file in bytes.
-          examples:
-          - 248193
-      additionalProperties: false
-      type: object
-      required:
-      - format
-      - filename
-      - url
-      - expiresAt
-      - sizeBytes
-      title: ToolReportExport
-      description: 'A short-lived URL to the rendered report.
+        columns, and forwarding those verbatim leaks our internals into a customer''s
 
-
-        The route declares a response model and a PDF is not one, so the bytes live
-
-        in object storage and the customer fetches them directly.'
+        logs.'
     NdaTriageCriterion:
       properties:
         criterionId:
@@ -727,84 +611,42 @@ components:
       - findings
       title: NdaTriageCriterion
       description: One of the ten screening criteria, and what the NDA said about it.
-    Operation:
+    OperationResource:
       properties:
+        kind:
+          type: string
+          title: Kind
+          description: What sort of thing was produced, for example `matrix` or `document`.
+          examples:
+          - matrix
         id:
           type: string
           title: Id
-          description: Public identifier, `op_` followed by 32 hex characters. Poll `GET /v1/operations/{operationId}` with it.
+          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
           examples:
-          - op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        type:
-          type: string
-          title: Type
-          description: What kind of work this is, for example `matrix.run` or `draft.generate`.
-          examples:
-          - matrix.run
-        status:
-          $ref: '#/components/schemas/OperationStatus'
-          description: 'One of five values: `queued`, `running`, `succeeded`, `failed`, `cancelled`. There is no sixth and there are no synonyms. Stop polling once it is `succeeded`, `failed` or `cancelled`.'
-          examples:
-          - succeeded
-        createdAt:
-          type: string
-          format: date-time
-          title: Createdat
-          description: When the operation was accepted (RFC 3339).
-          examples:
-          - '2026-08-19T14:32:10Z'
-        completedAt:
-          anyOf:
-          - type: string
-            format: date-time
-          - type: 'null'
-          title: Completedat
-          description: When the operation reached a terminal status (RFC 3339). Present if and only if the status is terminal.
-          examples:
-          - '2026-08-19T14:32:10Z'
-        matterId:
+          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        url:
           anyOf:
           - type: string
           - type: 'null'
-          title: Matterid
-          description: '`mat_` identifier of the matter this work belongs to, when it belongs to one.'
+          title: Url
+          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
           examples:
-          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        resource:
-          anyOf:
-          - $ref: '#/components/schemas/OperationResource'
-          - type: 'null'
-          description: What the operation produced. Absent until the underlying job row exists, which an idempotent replay can briefly observe, so treat absence as 'not yet' rather than 'never'.
-        error:
-          anyOf:
-          - $ref: '#/components/schemas/OperationError'
-          - type: 'null'
-          description: Why the work failed. Present only when `status` is `failed`. Partial success is `succeeded` with `progress.done < progress.total`, never an error.
-        progress:
-          anyOf:
-          - $ref: '#/components/schemas/OperationProgress'
-          - type: 'null'
-          description: How far along the work is, when the underlying job reports it. Absent does not mean no progress.
-        requestId:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Requestid
-          description: The `X-Request-ID` of the request that created this operation. Quote it in a support ticket.
-          examples:
-          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
       additionalProperties: false
       type: object
       required:
+      - kind
       - id
-      - type
-      - status
-      - createdAt
-      title: Operation
-      description: 'One long-running operation, whatever kind of work it is.
+      title: OperationResource
+      description: 'What the operation produced, or is producing.
 
 
-        Readable for `OPERATION_RETENTION_DAYS` after creation, per AIP-151.'
+        `url` is a path on this API rather than an absolute URL, because the service
+
+        is mounted today and gets its own hostname later (docs 07.5). A relative
+
+        path survives that move; a baked-in host does not.'
     ValidationProblem:
       type: object
       title: ValidationProblem
@@ -868,50 +710,65 @@ components:
                 type: string
                 description: The validation rule that failed.
       additionalProperties: true
-    OperationProgress:
+    NdaTriageCreateRequest:
       properties:
-        done:
-          type: integer
-          minimum: 0.0
-          title: Done
-          description: How many units are finished.
-          examples:
-          - 24
-        total:
-          type: integer
-          minimum: 0.0
-          title: Total
-          description: How many units there are in total. Can legitimately be zero for an empty run.
-          examples:
-          - 128
-        unit:
+        documentText:
           type: string
-          enum:
-          - cells
-          - steps
-          - documents
-          - files
-          - rows
-          - percent
-          title: Unit
-          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
+          maxLength: 200000
+          minLength: 100
+          title: Documenttext
+          description: 'The full NDA text to screen, 100 to 200,000 characters. Text rather than a document id: a triage reads one agreement end to end and the caller usually has it in hand, having just received it.'
           examples:
-          - cells
+          - 'MASTER SERVICES AGREEMENT
+
+
+            This Master Services Agreement is entered into as of 1 September 2026 between Acme Corporation, a Delaware corporation, and the Supplier identified on the signature page.
+
+
+            8. LIMITATION OF LIABILITY. Supplier''s total liability shall be unlimited for any claim arising out of this Agreement.
+
+
+            12. GOVERNING LAW. This Agreement is governed by the laws of the State of Delaware.'
+        counterpartyName:
+          anyOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+          title: Counterpartyname
+          description: Who sent it. Echoed back on the triage so a queue of screened NDAs is readable without a second lookup.
+          examples:
+          - Acme Corporation
+        businessContext:
+          anyOf:
+          - type: string
+            maxLength: 1000
+          - type: 'null'
+          title: Businesscontext
+          description: What the NDA is for, in a sentence. Sharpens the routing recommendation; omitting it costs only specificity.
+          examples:
+          - Mutual NDA ahead of diligence on a possible platform integration with Acme Corporation.
+        playbookId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Playbookid
+          description: '`pbk_` identifier of an NDA playbook to screen against. Must be a playbook whose `contractType` is `nda`; any other type is refused. Omit to screen against the built-in default NDA positions for `jurisdiction`.'
+          examples:
+          - pbk_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        jurisdiction:
+          type: string
+          pattern: ^([A-Z]{2}|INTL)$
+          title: Jurisdiction
+          description: Two-letter uppercase jurisdiction code, or `INTL`. Selects the built-in default NDA positions when no playbook is named, and is ignored when one is.
+          default: US
+          examples:
+          - US
       additionalProperties: false
       type: object
       required:
-      - done
-      - total
-      - unit
-      title: OperationProgress
-      description: 'How far along, and in what units.
-
-
-        The unit is not decoration. A workflow run stores only a percentage while a
-
-        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
-
-        as 43 of 100 documents and a client builds a wrong estimate from it.'
+      - documentText
+      title: NdaTriageCreateRequest
+      description: Screen one inbound NDA, optionally against one of your own playbooks.
     NdaTriage:
       properties:
         id:
@@ -1086,131 +943,259 @@ components:
       - createdAt
       title: NdaTriage
       description: 'One NDA triage: its screen, or its progress toward one.'
-    OperationResource:
+    NdaPlaybookAssessment:
       properties:
-        kind:
+        verdict:
           type: string
-          title: Kind
-          description: What sort of thing was produced, for example `matrix` or `document`.
+          title: Verdict
+          description: 'How this criterion measures against the playbook: `meets_standard`, `within_acceptable_range`, `outside_range`, `deal_breaker_hit`, or `not_assessed` when the playbook has no entry for it.'
           examples:
-          - matrix
+          - meets_standard
+        playbookPosition:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Playbookposition
+          description: The standard position this criterion was measured against.
+          examples:
+          - Cap liability at fees paid in the preceding twelve months.
+        deviationSummary:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Deviationsummary
+          description: 'How this NDA differs from the standard, in one line. For example `Your standard: 5y term cap; this NDA: 10y`.'
+          examples:
+          - 'Your standard: confidentiality obligations expire five years after disclosure.'
+        triggeredEscalations:
+          items:
+            type: string
+          type: array
+          title: Triggeredescalations
+          description: Which of the playbook's escalation triggers fired on this criterion.
+          examples:
+          - - value
+      additionalProperties: false
+      type: object
+      required:
+      - verdict
+      title: NdaPlaybookAssessment
+      description: 'One criterion measured against the organization''s own positions.
+
+
+        Computed deterministically from the playbook, not by the model: the LLM
+
+        knows what a market NDA looks like and only the playbook knows what this
+
+        firm will sign.'
+    Operation:
+      properties:
         id:
           type: string
           title: Id
-          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
+          description: Public identifier, `op_` followed by 32 hex characters. Poll `GET /v1/operations/{operationId}` with it.
           examples:
-          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        url:
+          - op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        type:
+          type: string
+          title: Type
+          description: What kind of work this is, for example `matrix.run` or `draft.generate`.
+          examples:
+          - matrix.run
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: 'One of five values: `queued`, `running`, `succeeded`, `failed`, `cancelled`. There is no sixth and there are no synonyms. Stop polling once it is `succeeded`, `failed` or `cancelled`.'
+          examples:
+          - succeeded
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the operation was accepted (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        completedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Completedat
+          description: When the operation reached a terminal status (RFC 3339). Present if and only if the status is terminal.
+          examples:
+          - '2026-08-19T14:32:10Z'
+        matterId:
           anyOf:
           - type: string
           - type: 'null'
+          title: Matterid
+          description: '`mat_` identifier of the matter this work belongs to, when it belongs to one.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        resource:
+          anyOf:
+          - $ref: '#/components/schemas/OperationResource'
+          - type: 'null'
+          description: What the operation produced. Absent until the underlying job row exists, which an idempotent replay can briefly observe, so treat absence as 'not yet' rather than 'never'.
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/OperationError'
+          - type: 'null'
+          description: Why the work failed. Present only when `status` is `failed`. Partial success is `succeeded` with `progress.done < progress.total`, never an error.
+        progress:
+          anyOf:
+          - $ref: '#/components/schemas/OperationProgress'
+          - type: 'null'
+          description: How far along the work is, when the underlying job reports it. Absent does not mean no progress.
+        requestId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Requestid
+          description: The `X-Request-ID` of the request that created this operation. Quote it in a support ticket.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - type
+      - status
+      - createdAt
+      title: Operation
+      description: 'One long-running operation, whatever kind of work it is.
+
+
+        Readable for `OPERATION_RETENTION_DAYS` after creation, per AIP-151.'
+    ToolReportExport:
+      properties:
+        format:
+          type: string
+          enum:
+          - pdf
+          - docx
+          title: Format
+          description: Format of the exported file.
+          examples:
+          - pdf
+        filename:
+          type: string
+          title: Filename
+          description: Suggested filename for the download.
+          examples:
+          - msa-acme-v3.docx
+        url:
+          type: string
           title: Url
-          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
+          description: Short-lived signed URL to download the report. Fetch it promptly and do not store it.
           examples:
           - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+        expiresAt:
+          type: string
+          format: date-time
+          title: Expiresat
+          description: When the URL stops working (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        sizeBytes:
+          type: integer
+          title: Sizebytes
+          description: Size of the exported file in bytes.
+          examples:
+          - 248193
       additionalProperties: false
       type: object
       required:
-      - kind
-      - id
-      title: OperationResource
-      description: 'What the operation produced, or is producing.
+      - format
+      - filename
+      - url
+      - expiresAt
+      - sizeBytes
+      title: ToolReportExport
+      description: 'A short-lived URL to the rendered report.
 
 
-        `url` is a path on this API rather than an absolute URL, because the service
+        The route declares a response model and a PDF is not one, so the bytes live
 
-        is mounted today and gets its own hostname later (docs 07.5). A relative
-
-        path survives that move; a baked-in host does not.'
-    NdaTriageCreateRequest:
+        in object storage and the customer fetches them directly.'
+    ToolReportExportRequest:
       properties:
-        documentText:
+        format:
           type: string
-          maxLength: 200000
-          minLength: 100
-          title: Documenttext
-          description: 'The full NDA text to screen, 100 to 200,000 characters. Text rather than a document id: a triage reads one agreement end to end and the caller usually has it in hand, having just received it.'
+          enum:
+          - pdf
+          - docx
+          title: Format
+          description: Format to render. `pdf` for something a person reads and forwards, `docx` for something an editor opens.
+          default: pdf
           examples:
-          - 'MASTER SERVICES AGREEMENT
-
-
-            This Master Services Agreement is entered into as of 1 September 2026 between Acme Corporation, a Delaware corporation, and the Supplier identified on the signature page.
-
-
-            8. LIMITATION OF LIABILITY. Supplier''s total liability shall be unlimited for any claim arising out of this Agreement.
-
-
-            12. GOVERNING LAW. This Agreement is governed by the laws of the State of Delaware.'
-        counterpartyName:
-          anyOf:
-          - type: string
-            maxLength: 200
-          - type: 'null'
-          title: Counterpartyname
-          description: Who sent it. Echoed back on the triage so a queue of screened NDAs is readable without a second lookup.
-          examples:
-          - Acme Corporation
-        businessContext:
-          anyOf:
-          - type: string
-            maxLength: 1000
-          - type: 'null'
-          title: Businesscontext
-          description: What the NDA is for, in a sentence. Sharpens the routing recommendation; omitting it costs only specificity.
-          examples:
-          - Mutual NDA ahead of diligence on a possible platform integration with Acme Corporation.
-        playbookId:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Playbookid
-          description: '`pbk_` identifier of an NDA playbook to screen against. Must be a playbook whose `contractType` is `nda`; any other type is refused. Omit to screen against the built-in default NDA positions for `jurisdiction`.'
-          examples:
-          - pbk_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        jurisdiction:
-          type: string
-          pattern: ^([A-Z]{2}|INTL)$
-          title: Jurisdiction
-          description: Two-letter uppercase jurisdiction code, or `INTL`. Selects the built-in default NDA positions when no playbook is named, and is ignored when one is.
-          default: US
-          examples:
-          - US
+          - pdf
       additionalProperties: false
       type: object
-      required:
-      - documentText
-      title: NdaTriageCreateRequest
-      description: Screen one inbound NDA, optionally against one of your own playbooks.
-    OperationError:
+      title: ToolReportExportRequest
+      description: Which format to render the finished analysis in.
+    OperationStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: OperationStatus
+      description: 'The public five. There is no sixth, and there are no synonyms.
+
+
+        Internal vocabularies spell terminal success `completed`, `ready`,
+
+        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+
+        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+
+        `app.workspace_api.adapters.status_map`, which refuses to guess.'
+    OperationProgress:
       properties:
-        code:
-          type: string
-          title: Code
-          description: Stable, machine-readable failure code. Branch on this, never on `message`.
+        done:
+          type: integer
+          minimum: 0.0
+          title: Done
+          description: How many units are finished.
           examples:
-          - EXTRACTION_FAILED
-        message:
-          type: string
-          title: Message
-          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
+          - 24
+        total:
+          type: integer
+          minimum: 0.0
+          title: Total
+          description: How many units there are in total. Can legitimately be zero for an empty run.
           examples:
-          - The upstream extraction did not finish.
+          - 128
+        unit:
+          type: string
+          enum:
+          - cells
+          - steps
+          - documents
+          - files
+          - rows
+          - percent
+          title: Unit
+          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
+          examples:
+          - cells
       additionalProperties: false
       type: object
       required:
-      - code
-      - message
-      title: OperationError
-      description: 'Why a failed operation failed, in terms a customer can act on.
+      - done
+      - total
+      - unit
+      title: OperationProgress
+      description: 'How far along, and in what units.
 
 
-        `code` is stable and machine-readable. `message` is sanitized: the internal
+        The unit is not decoration. A workflow run stores only a percentage while a
 
-        job tables store stack traces and file paths in their `error_message`
+        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
 
-        columns, and forwarding those verbatim leaks our internals into a customer''s
-
-        logs.'
+        as 43 of 100 documents and a client builds a wrong estimate from it.'
     Problem:
       type: object
       title: Problem
@@ -1263,6 +1248,3 @@ components:
 externalDocs:
   description: Getting started guide and error reference
   url: https://vaquill.ai/docs/workspace-api
-x-refined-from:
-- vaquill-ai-workspace-openapi.json
-- vaquill-ai-workspace-openapi.yml

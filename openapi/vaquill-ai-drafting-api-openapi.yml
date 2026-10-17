@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai Drafting API
+  title: Vaquill Legal Workspace Drafting API
+  description: 'Organization-scoped API for driving your legal workspace from your own backend: matters, documents, drafting, review, compare and matrices.'
   version: 1.0.0
-  description: 'Operations tagged Drafting across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai/workspace
   description: Vaquill Legal Workspace API (production)
@@ -173,11 +173,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/drafts:
     get:
       tags:
@@ -546,11 +541,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/drafts/from-document:
     post:
       tags:
@@ -724,11 +714,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/drafts/{draftId}:
     get:
       tags:
@@ -1219,11 +1204,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/drafts/{draftId}/improvements:
     post:
       tags:
@@ -1400,11 +1380,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/drafts/{draftId}/versions:
     get:
       tags:
@@ -1577,11 +1552,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/drafts/{draftId}/exports:
     post:
       tags:
@@ -1735,11 +1705,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/drafts/{draftId}/copies:
     post:
       tags:
@@ -1906,11 +1871,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/drafts/{draftId}/restore:
     post:
       tags:
@@ -2069,11 +2029,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/drafts/{draftId}/documents:
     post:
       tags:
@@ -2252,11 +2207,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/templates:
     get:
       tags:
@@ -2561,11 +2511,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/templates/from-document:
     post:
       tags:
@@ -2719,11 +2664,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/templates/{templateId}:
     get:
       tags:
@@ -3193,11 +3133,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/templates/{templateId}/copies:
     post:
       tags:
@@ -3358,11 +3293,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/templates/{templateId}/runs:
     post:
       tags:
@@ -3539,11 +3469,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/template-runs/{runId}:
     get:
       tags:
@@ -3698,319 +3623,8 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
 components:
   schemas:
-    DraftExportRequest:
-      properties:
-        format:
-          type: string
-          enum:
-          - docx
-          - pdf
-          title: Format
-          description: 'Which format to render: `docx` or `pdf`.'
-          examples:
-          - docx
-      additionalProperties: false
-      type: object
-      required:
-      - format
-      title: DraftExportRequest
-      description: Ask for the draft rendered to a file.
-    DraftImproveRequest:
-      properties:
-        instructions:
-          anyOf:
-          - type: string
-            maxLength: 40000
-          - type: 'null'
-          title: Instructions
-          description: 'What to fix, in your own words. Optional: the pipeline runs its own analysis first and an instruction only steers it.'
-          examples:
-          - House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
-        category:
-          anyOf:
-          - type: string
-            maxLength: 64
-            minLength: 1
-          - type: 'null'
-          title: Category
-          description: Override the category. Defaults to the source draft's own, so supply this only when the source was misclassified. A source whose category we no longer draft falls back to `custom` rather than refusing the revision.
-          examples:
-          - commercial
-        tone:
-          type: string
-          enum:
-          - protective
-          - balanced
-          - permissive
-          title: Tone
-          description: How protective the revised language should be.
-          default: balanced
-          examples:
-          - protective
-      additionalProperties: false
-      type: object
-      title: DraftImproveRequest
-      description: 'Revise an existing draft into a NEW one.
-
-
-        The improvement never overwrites its source. That is the internal pipeline''s
-
-        behaviour and it is the right one to publish: the run takes minutes and
-
-        costs money, and a customer that dislikes the result still has the draft it
-
-        started from.'
-    TemplateRunRequest:
-      properties:
-        prompt:
-          anyOf:
-          - type: string
-            maxLength: 8000
-          - type: 'null'
-          title: Prompt
-          description: 'Free text the extractor reads variable values out of. Optional: a template whose every variable is supplied in `slotOverrides` needs no prose.'
-          examples:
-          - Two-year mutual NDA with Acme Corporation, governed by California law.
-        slotOverrides:
-          additionalProperties:
-            type: string
-            maxLength: 4000
-            minLength: 1
-          type: object
-          title: Slotoverrides
-          description: Values you already know, keyed by the variable's `varId`. Recorded with source `user`, and the extractor never overwrites them.
-      additionalProperties: false
-      type: object
-      title: TemplateRunRequest
-      description: 'What to fill the template with.
-
-
-        Context documents are deliberately absent in v1. The internal flow can take
-
-        document ids as extra evidence for the extractor, and the same route will
-
-        accept them additively; publishing them now would mean publishing an id
-
-        space and an ownership check for a feature nobody has asked this API for.
-
-        Generation from a prompt alone is supported by the pipeline as it stands.'
-    TemplateFromDocumentRequest:
-      properties:
-        documentId:
-          type: string
-          title: Documentid
-          description: '`doc_` identifier of a document in this organization to build the template from.'
-          examples:
-          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        title:
-          anyOf:
-          - type: string
-            maxLength: 300
-            minLength: 1
-          - type: 'null'
-          title: Title
-          description: Display name. Defaults to the document's filename.
-          examples:
-          - Master Services Agreement
-        description:
-          anyOf:
-          - type: string
-            maxLength: 2000
-          - type: 'null'
-          title: Description
-          description: What this template is for, in your own words.
-          examples:
-          - Master services agreement with Acme for the 2026 platform rollout.
-        category:
-          anyOf:
-          - type: string
-            maxLength: 100
-            minLength: 1
-          - type: 'null'
-          title: Category
-          description: How you classify this template. Defaults to `custom`.
-          examples:
-          - commercial
-      additionalProperties: false
-      type: object
-      required:
-      - documentId
-      title: TemplateFromDocumentRequest
-      description: 'Turn a document you already uploaded into a template.
-
-
-        Takes a `documentId` rather than a file. Bytes reach this API exactly one
-
-        way, through `uploads.initiate` and the presigned part PUTs, so there is one
-
-        media allowlist, one size ceiling and one answer to encryption at rest. The
-
-        cost is stated: importing a template is four calls rather than one, and the
-
-        source file stays as a document you own, can list, can download and can
-
-        delete, which is how "which contract did this come from" is answerable
-
-        months later.
-
-
-        **A DOCX-sourced template keeps its Word structure; a later
-
-        `templates.update` does not.** Replacing the body through this API replaces
-
-        it with what markdown can express, so duplicate first if the original
-
-        formatting matters.'
-    Page_Template_:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/Template'
-          type: array
-          title: Data
-          description: The rows in this window, in the collection's default order.
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-          description: Where this window sits in the full result set.
-      additionalProperties: false
-      type: object
-      required:
-      - data
-      - pagination
-      title: Page[Template]
-    DraftReplaceRequest:
-      properties:
-        contentMarkdown:
-          type: string
-          maxLength: 500000
-          minLength: 1
-          title: Contentmarkdown
-          description: 'The COMPLETE new body as markdown. This replaces the whole document: a partial body is not something this format can express, so sending one paragraph loses the rest. Whitespace alone is refused.'
-          examples:
-          - '# Mutual Non-Disclosure Agreement
-
-
-            ## 1. Confidential Information
-
-
-            Each party may disclose information that is confidential and proprietary to the other party.
-
-            '
-        title:
-          anyOf:
-          - type: string
-            maxLength: 200
-            minLength: 1
-          - type: 'null'
-          title: Title
-          description: New title. Omit to leave the title alone.
-          examples:
-          - Master Services Agreement
-        status:
-          anyOf:
-          - type: string
-            enum:
-            - draft
-            - review
-            - final
-            - archived
-          - type: 'null'
-          title: Status
-          description: 'New document lifecycle status: `draft`, `review`, `final` or `archived`. Omit to leave it alone.'
-          examples:
-          - draft
-        changeSummary:
-          anyOf:
-          - type: string
-            maxLength: 500
-          - type: 'null'
-          title: Changesummary
-          description: Why this change was made. Recorded on the version snapshot the replace creates, so it shows up in the version list later.
-          examples:
-          - Tightened the indemnity carve-outs after counsel review.
-        expectedVersion:
-          anyOf:
-          - type: integer
-            minimum: 1.0
-          - type: 'null'
-          title: Expectedversion
-          description: The `version` you read before editing. Supply it so a concurrent write is refused rather than silently overwritten. Omitting it means 'overwrite whatever is there'.
-          examples:
-          - 1
-      additionalProperties: false
-      type: object
-      required:
-      - contentMarkdown
-      title: DraftReplaceRequest
-      description: 'Replace a draft''s body, and optionally its title and lifecycle status.
-
-
-        A PUT rather than a PATCH because `contentMarkdown` is the whole body:
-
-        a partial body is not a thing this format can express, and pretending
-
-        otherwise would invite a caller to send one paragraph and lose the rest.
-
-        Title and status are left alone when omitted, which is what makes a
-
-        body-only edit possible without restating metadata the caller did not read.
-
-
-        `expectedVersion` is how a headless read-modify-write avoids a lost update.
-
-        Omitting it means "overwrite whatever is there", which is a legitimate thing
-
-        to want and a bad default to impose.'
-    Problem:
-      type: object
-      title: Problem
-      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
-      required:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      properties:
-        type:
-          type: string
-          format: uri
-          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
-          examples:
-          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
-        title:
-          type: string
-          description: A short human-readable summary.
-          examples:
-          - Insufficient scope
-        status:
-          type: integer
-          description: The HTTP status code, repeated.
-          examples:
-          - 403
-        detail:
-          type: string
-          description: What went wrong on this specific request. May be reworded at any time.
-          examples:
-          - This credential carries matters:read. This operation needs matters:write.
-        instance:
-          type: string
-          description: The path this problem occurred on.
-          examples:
-          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        requestId:
-          type: string
-          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
-          examples:
-          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-      additionalProperties: true
     Draft:
       properties:
         id:
@@ -4112,447 +3726,6 @@ components:
       - sections
       title: Draft
       description: One draft with its body, section by section.
-    TemplateUpdateRequest:
-      properties:
-        contentMarkdown:
-          type: string
-          maxLength: 500000
-          minLength: 1
-          title: Contentmarkdown
-          description: 'The COMPLETE new body as markdown. This replaces the whole template: a partial body is not something this format can express. Whitespace alone is refused.'
-          examples:
-          - '# Mutual Non-Disclosure Agreement
-
-
-            ## 1. Confidential Information
-
-
-            Each party may disclose information that is confidential and proprietary to the other party.
-
-            '
-        title:
-          anyOf:
-          - type: string
-            maxLength: 300
-            minLength: 1
-          - type: 'null'
-          title: Title
-          description: New display name. Omit to leave it alone.
-          examples:
-          - Mutual NDA
-        description:
-          anyOf:
-          - type: string
-            maxLength: 2000
-          - type: 'null'
-          title: Description
-          description: New description. Omit to leave it alone.
-          examples:
-          - Master services agreement with Acme for the 2026 platform rollout.
-      additionalProperties: false
-      type: object
-      required:
-      - contentMarkdown
-      title: TemplateUpdateRequest
-      description: 'Replace a template''s body, and optionally its title and description.
-
-
-        A PUT rather than a PATCH, matching `drafts.update`: `contentMarkdown` is
-
-        the WHOLE body, so sending one clause replaces the template with that
-
-        clause. Title and description are left alone when omitted.
-
-
-        Variables are re-detected from the new body and the frozen-text hash is
-
-        recomputed in the same write. That hash is the renderer''s integrity baseline
-
-        over the non-variable segments, so leaving it stale would check the next run
-
-        against the body the template used to have.
-
-
-        **This is lossy against a DOCX-imported template.** The rich converter
-
-        preserves Word formatting that markdown cannot express, and replacing the
-
-        body through here discards it. Duplicate the template first if you want to
-
-        keep the original.'
-    OperationProgress:
-      properties:
-        done:
-          type: integer
-          minimum: 0.0
-          title: Done
-          description: How many units are finished.
-          examples:
-          - 24
-        total:
-          type: integer
-          minimum: 0.0
-          title: Total
-          description: How many units there are in total. Can legitimately be zero for an empty run.
-          examples:
-          - 128
-        unit:
-          type: string
-          enum:
-          - cells
-          - steps
-          - documents
-          - files
-          - rows
-          - percent
-          title: Unit
-          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
-          examples:
-          - cells
-      additionalProperties: false
-      type: object
-      required:
-      - done
-      - total
-      - unit
-      title: OperationProgress
-      description: 'How far along, and in what units.
-
-
-        The unit is not decoration. A workflow run stores only a percentage while a
-
-        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
-
-        as 43 of 100 documents and a client builds a wrong estimate from it.'
-    OperationResource:
-      properties:
-        kind:
-          type: string
-          title: Kind
-          description: What sort of thing was produced, for example `matrix` or `document`.
-          examples:
-          - matrix
-        id:
-          type: string
-          title: Id
-          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
-          examples:
-          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        url:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Url
-          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
-          examples:
-          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
-      additionalProperties: false
-      type: object
-      required:
-      - kind
-      - id
-      title: OperationResource
-      description: 'What the operation produced, or is producing.
-
-
-        `url` is a path on this API rather than an absolute URL, because the service
-
-        is mounted today and gets its own hostname later (docs 07.5). A relative
-
-        path survives that move; a baked-in host does not.'
-    TemplateVariable:
-      properties:
-        id:
-          type: string
-          title: Id
-          description: The variable's `varId`, and the key to use in `slotOverrides` when you run this template. Stable across every run.
-          examples:
-          - party_a_name
-        name:
-          type: string
-          title: Name
-          description: The detected or authored name for this variable.
-          examples:
-          - Counterparty name
-        label:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Label
-          description: Display label, when one was set. Falls back to `name`.
-          examples:
-          - Counterparty name
-        kind:
-          type: string
-          title: Kind
-          description: 'What sort of value belongs here: `party`, `date`, `money`, `jurisdiction`, `address`, `number`, `duration`, `text`, `other`. Drives how the extractor is constrained when it fills the slot.'
-          examples:
-          - party
-        hint:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Hint
-          description: Guidance the extractor was given for this variable.
-          examples:
-          - The counterparty's full legal entity name, as it appears on the signature block.
-        defaultValue:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Defaultvalue
-          description: Value used when nothing is supplied or extracted.
-          examples:
-          - Acme Corporation
-        position:
-          type: integer
-          title: Position
-          description: Where this variable sits in the template body, counting from zero.
-          examples:
-          - 0
-      additionalProperties: false
-      type: object
-      required:
-      - id
-      - name
-      - kind
-      - position
-      title: TemplateVariable
-      description: 'One fillable span the template declares.
-
-
-        Published because `slotOverrides` on a run is keyed by `id` and **nothing
-
-        else on this surface publishes one**. Before this model existed, the only
-
-        way to learn a template''s keys was to run it once and read the slots back
-
-        off the finished run, which is a paid LLM call to discover a schema.'
-    DraftCopyRequest:
-      properties:
-        title:
-          anyOf:
-          - type: string
-            maxLength: 200
-            minLength: 1
-          - type: 'null'
-          title: Title
-          description: Title for the copy. Defaults to the source title followed by " (copy)".
-          examples:
-          - Master Services Agreement
-      additionalProperties: false
-      type: object
-      title: DraftCopyRequest
-      description: 'Copy a draft, optionally under a new name.
-
-
-        Send `{}` to accept the defaults. The copy starts at version 1 with no
-
-        history of its own and status `draft`, and it lands in the same matter: it
-
-        is a new document that happens to start from this one, not a branch of it.'
-    DraftCategory:
-      properties:
-        id:
-          type: string
-          title: Id
-          description: The category slug. Send it as `category` on a draft generation.
-          examples:
-          - nda
-        label:
-          type: string
-          title: Label
-          description: The product's own name for this document type, taken from the format the generator uses rather than from a second list, so it cannot drift from what gets written.
-          examples:
-          - Liability cap
-        practiceArea:
-          type: string
-          title: Practicearea
-          description: The practice area a draft in this category is filed under. Every category reads `general` today, because that is the only practice area the product registers.
-          examples:
-          - commercial
-      additionalProperties: false
-      type: object
-      required:
-      - id
-      - label
-      - practiceArea
-      title: DraftCategory
-      description: One document type the drafting pipeline knows how to write.
-    DraftFromDocumentRequest:
-      properties:
-        documentId:
-          type: string
-          title: Documentid
-          description: '`doc_` identifier of a document in this matter to convert into a draft.'
-          examples:
-          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        title:
-          anyOf:
-          - type: string
-            maxLength: 200
-            minLength: 1
-          - type: 'null'
-          title: Title
-          description: Title for the draft. Defaults to the document's filename.
-          examples:
-          - Master Services Agreement
-        category:
-          type: string
-          maxLength: 64
-          minLength: 1
-          title: Category
-          description: What kind of document this is, as a category slug from `draftCategories.list`. Defaults to `custom`, which is always accepted.
-          default: custom
-          examples:
-          - commercial
-      additionalProperties: false
-      type: object
-      required:
-      - documentId
-      title: DraftFromDocumentRequest
-      description: 'Turn a document you already uploaded into an editable draft.
-
-
-        Takes a `documentId` rather than a file, for the reason every other file on
-
-        this surface does: bytes reach this API through `uploads.initiate` and the
-
-        presigned part PUTs, so there is one media allowlist, one size ceiling and
-
-        one answer to encryption at rest.
-
-
-        The ORIGINAL file is what gets converted, not the text the ingest pipeline
-
-        extracted for retrieval. That text is chunk-shaped and has already lost the
-
-        headings a contract is navigated by.
-
-
-        No AI runs. This is a format conversion, so it answers `201` with the draft
-
-        rather than `202` with an operation.'
-    DraftCreateRequest:
-      properties:
-        category:
-          type: string
-          maxLength: 64
-          minLength: 1
-          title: Category
-          description: What kind of document to generate, as a category slug. Validated against the live vocabulary when the generation starts.
-          examples:
-          - commercial
-        title:
-          type: string
-          maxLength: 200
-          minLength: 1
-          title: Title
-          description: Title for the generated draft.
-          examples:
-          - Master Services Agreement
-        governingLawState:
-          type: string
-          maxLength: 80
-          minLength: 1
-          title: Governinglawstate
-          description: 'Governing law to pin. Accepts a code (`ca`), a name (`California`) or the sentinel `federal`. Required: a US draft with no pinned governing law cites nothing.'
-          examples:
-          - ca
-        tone:
-          type: string
-          enum:
-          - protective
-          - balanced
-          - permissive
-          title: Tone
-          description: 'How protective the generated language should be: `protective`, `balanced` or `permissive`.'
-          default: balanced
-          examples:
-          - protective
-        specialInstructions:
-          anyOf:
-          - type: string
-            maxLength: 40000
-          - type: 'null'
-          title: Specialinstructions
-          description: Anything specific this draft needs, in your own words.
-          examples:
-          - Two-year term, mutual, governed by California law.
-        variables:
-          additionalProperties:
-            type: string
-          type: object
-          title: Variables
-          description: 'Template variable values, for example `{"party_a_name": "Acme Corp"}`. Which keys mean anything is a property of the category, so this is deliberately free-form. Unfilled placeholders are counted on export.'
-        practiceArea:
-          anyOf:
-          - type: string
-            maxLength: 64
-            minLength: 1
-          - type: 'null'
-          title: Practicearea
-          description: Practice area for the draft. Inferred from the category when omitted.
-          examples:
-          - commercial
-      additionalProperties: false
-      type: object
-      required:
-      - category
-      - title
-      - governingLawState
-      title: DraftCreateRequest
-      description: 'Start a generation. There is no synchronous create.
-
-
-        `jurisdiction` is deliberately absent and fixed at US: this is a US-only
-
-        product (OPINIONS.md), and a field whose only accepted value is the default
-
-        is a field a customer has to discover before they can ignore it.
-
-        `governingLawState` is required for the same reason it is required
-
-        internally: a US draft with no pinned governing law cites nothing.'
-    DraftVersion:
-      properties:
-        version:
-          type: integer
-          title: Version
-          description: The version number this entry records.
-          examples:
-          - 3
-        changeSummary:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Changesummary
-          description: Why this version was created, when a summary was supplied.
-          examples:
-          - Tightened the indemnity carve-outs after counsel review.
-        createdAt:
-          type: string
-          format: date-time
-          title: Createdat
-          description: When this version was snapshotted (RFC 3339).
-          examples:
-          - '2026-08-19T14:32:10Z'
-      additionalProperties: false
-      type: object
-      required:
-      - version
-      - createdAt
-      title: DraftVersion
-      description: 'One point in a draft''s history. Metadata only.
-
-
-        The stored CONTENT of an old version is not published. A version body would
-
-        be a second representation of the same document with the same TipTap problem
-
-        and no customer has asked to read one; `changeSummary` plus the version
-
-        number is what makes the list useful for an audit trail.'
     TemplateCopyRequest:
       properties:
         title:
@@ -4576,147 +3749,6 @@ components:
         own id and its own variable rows, so editing it cannot touch the original,
 
         which is what makes it the safe move before a lossy body replacement.'
-    Operation:
-      properties:
-        id:
-          type: string
-          title: Id
-          description: Public identifier, `op_` followed by 32 hex characters. Poll `GET /v1/operations/{operationId}` with it.
-          examples:
-          - op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        type:
-          type: string
-          title: Type
-          description: What kind of work this is, for example `matrix.run` or `draft.generate`.
-          examples:
-          - matrix.run
-        status:
-          $ref: '#/components/schemas/OperationStatus'
-          description: 'One of five values: `queued`, `running`, `succeeded`, `failed`, `cancelled`. There is no sixth and there are no synonyms. Stop polling once it is `succeeded`, `failed` or `cancelled`.'
-          examples:
-          - succeeded
-        createdAt:
-          type: string
-          format: date-time
-          title: Createdat
-          description: When the operation was accepted (RFC 3339).
-          examples:
-          - '2026-08-19T14:32:10Z'
-        completedAt:
-          anyOf:
-          - type: string
-            format: date-time
-          - type: 'null'
-          title: Completedat
-          description: When the operation reached a terminal status (RFC 3339). Present if and only if the status is terminal.
-          examples:
-          - '2026-08-19T14:32:10Z'
-        matterId:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Matterid
-          description: '`mat_` identifier of the matter this work belongs to, when it belongs to one.'
-          examples:
-          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        resource:
-          anyOf:
-          - $ref: '#/components/schemas/OperationResource'
-          - type: 'null'
-          description: What the operation produced. Absent until the underlying job row exists, which an idempotent replay can briefly observe, so treat absence as 'not yet' rather than 'never'.
-        error:
-          anyOf:
-          - $ref: '#/components/schemas/OperationError'
-          - type: 'null'
-          description: Why the work failed. Present only when `status` is `failed`. Partial success is `succeeded` with `progress.done < progress.total`, never an error.
-        progress:
-          anyOf:
-          - $ref: '#/components/schemas/OperationProgress'
-          - type: 'null'
-          description: How far along the work is, when the underlying job reports it. Absent does not mean no progress.
-        requestId:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Requestid
-          description: The `X-Request-ID` of the request that created this operation. Quote it in a support ticket.
-          examples:
-          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-      additionalProperties: false
-      type: object
-      required:
-      - id
-      - type
-      - status
-      - createdAt
-      title: Operation
-      description: 'One long-running operation, whatever kind of work it is.
-
-
-        Readable for `OPERATION_RETENTION_DAYS` after creation, per AIP-151.'
-    ValidationProblem:
-      type: object
-      title: ValidationProblem
-      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
-      required:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      - errors
-      properties:
-        type:
-          type: string
-          format: uri
-          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
-          examples:
-          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
-        title:
-          type: string
-          description: A short human-readable summary.
-          examples:
-          - Insufficient scope
-        status:
-          type: integer
-          description: The HTTP status code, repeated.
-          examples:
-          - 403
-        detail:
-          type: string
-          description: What went wrong on this specific request. May be reworded at any time.
-          examples:
-          - This credential carries matters:read. This operation needs matters:write.
-        instance:
-          type: string
-          description: The path this problem occurred on.
-          examples:
-          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        requestId:
-          type: string
-          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
-          examples:
-          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        errors:
-          type: array
-          description: One entry per rejected field.
-          items:
-            type: object
-            required:
-            - location
-            - message
-            - type
-            properties:
-              location:
-                type: string
-                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
-              message:
-                type: string
-                description: Why it was rejected.
-              type:
-                type: string
-                description: The validation rule that failed.
-      additionalProperties: true
     TemplateCreateRequest:
       properties:
         title:
@@ -4795,23 +3827,74 @@ components:
         spans the regex missed; the identifiers `slotOverrides` is keyed by are
 
         deliberately left alone by it either way.'
-    Page_DraftSummary_:
+    TemplateUpdateRequest:
       properties:
-        data:
-          items:
-            $ref: '#/components/schemas/DraftSummary'
-          type: array
-          title: Data
-          description: The rows in this window, in the collection's default order.
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-          description: Where this window sits in the full result set.
+        contentMarkdown:
+          type: string
+          maxLength: 500000
+          minLength: 1
+          title: Contentmarkdown
+          description: 'The COMPLETE new body as markdown. This replaces the whole template: a partial body is not something this format can express. Whitespace alone is refused.'
+          examples:
+          - '# Mutual Non-Disclosure Agreement
+
+
+            ## 1. Confidential Information
+
+
+            Each party may disclose information that is confidential and proprietary to the other party.
+
+            '
+        title:
+          anyOf:
+          - type: string
+            maxLength: 300
+            minLength: 1
+          - type: 'null'
+          title: Title
+          description: New display name. Omit to leave it alone.
+          examples:
+          - Mutual NDA
+        description:
+          anyOf:
+          - type: string
+            maxLength: 2000
+          - type: 'null'
+          title: Description
+          description: New description. Omit to leave it alone.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
       additionalProperties: false
       type: object
       required:
-      - data
-      - pagination
-      title: Page[DraftSummary]
+      - contentMarkdown
+      title: TemplateUpdateRequest
+      description: 'Replace a template''s body, and optionally its title and description.
+
+
+        A PUT rather than a PATCH, matching `drafts.update`: `contentMarkdown` is
+
+        the WHOLE body, so sending one clause replaces the template with that
+
+        clause. Title and description are left alone when omitted.
+
+
+        Variables are re-detected from the new body and the frozen-text hash is
+
+        recomputed in the same write. That hash is the renderer''s integrity baseline
+
+        over the non-variable segments, so leaving it stale would check the next run
+
+        against the body the template used to have.
+
+
+        **This is lossy against a DOCX-imported template.** The rich converter
+
+        preserves Word formatting that markdown cannot express, and replacing the
+
+        body through here discards it. Duplicate the template first if you want to
+
+        keep the original.'
     DraftSummary:
       properties:
         id:
@@ -4906,25 +3989,176 @@ components:
       - updatedAt
       title: DraftSummary
       description: 'A draft as it appears in a list: everything except the body.'
-    OperationStatus:
-      type: string
-      enum:
-      - queued
-      - running
-      - succeeded
-      - failed
-      - cancelled
-      title: OperationStatus
-      description: 'The public five. There is no sixth, and there are no synonyms.
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
+          examples:
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
 
 
-        Internal vocabularies spell terminal success `completed`, `ready`,
+        `total` is the count of rows matching the filter, not the count returned,
 
-        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+        so a caller can size a job before running it.'
+    TemplateFromDocumentRequest:
+      properties:
+        documentId:
+          type: string
+          title: Documentid
+          description: '`doc_` identifier of a document in this organization to build the template from.'
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        title:
+          anyOf:
+          - type: string
+            maxLength: 300
+            minLength: 1
+          - type: 'null'
+          title: Title
+          description: Display name. Defaults to the document's filename.
+          examples:
+          - Master Services Agreement
+        description:
+          anyOf:
+          - type: string
+            maxLength: 2000
+          - type: 'null'
+          title: Description
+          description: What this template is for, in your own words.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        category:
+          anyOf:
+          - type: string
+            maxLength: 100
+            minLength: 1
+          - type: 'null'
+          title: Category
+          description: How you classify this template. Defaults to `custom`.
+          examples:
+          - commercial
+      additionalProperties: false
+      type: object
+      required:
+      - documentId
+      title: TemplateFromDocumentRequest
+      description: 'Turn a document you already uploaded into a template.
 
-        queued `pending`, `queued` and `draft`. All of that is collapsed here by
 
-        `app.workspace_api.adapters.status_map`, which refuses to guess.'
+        Takes a `documentId` rather than a file. Bytes reach this API exactly one
+
+        way, through `uploads.initiate` and the presigned part PUTs, so there is one
+
+        media allowlist, one size ceiling and one answer to encryption at rest. The
+
+        cost is stated: importing a template is four calls rather than one, and the
+
+        source file stays as a document you own, can list, can download and can
+
+        delete, which is how "which contract did this come from" is answerable
+
+        months later.
+
+
+        **A DOCX-sourced template keeps its Word structure; a later
+
+        `templates.update` does not.** Replacing the body through this API replaces
+
+        it with what markdown can express, so duplicate first if the original
+
+        formatting matters.'
     TemplateRun:
       properties:
         id:
@@ -5000,11 +4234,11 @@ components:
       - createdAt
       title: TemplateRun
       description: One invocation, and what it produced.
-    Page_DraftVersion_:
+    Page_DraftSummary_:
       properties:
         data:
           items:
-            $ref: '#/components/schemas/DraftVersion'
+            $ref: '#/components/schemas/DraftSummary'
           type: array
           title: Data
           description: The rows in this window, in the collection's default order.
@@ -5016,7 +4250,171 @@ components:
       required:
       - data
       - pagination
-      title: Page[DraftVersion]
+      title: Page[DraftSummary]
+    DraftExport:
+      properties:
+        format:
+          type: string
+          enum:
+          - docx
+          - pdf
+          title: Format
+          description: The format that was rendered.
+          examples:
+          - docx
+        filename:
+          type: string
+          title: Filename
+          description: Suggested filename for the rendered file.
+          examples:
+          - msa-acme-v3.docx
+        sizeBytes:
+          type: integer
+          title: Sizebytes
+          description: Length of the DECODED file in bytes, so you can size storage without doing base64 arithmetic.
+          examples:
+          - 248193
+        content:
+          type: string
+          title: Content
+          description: 'The rendered file, base64 encoded. Bytes rather than a signed URL because a draft is rendered on demand: a URL would mean writing your work product to storage first.'
+          examples:
+          - UEsDBBQABgAIAAAAIQ...
+        unfilledPlaceholders:
+          type: integer
+          title: Unfilledplaceholders
+          description: 'How many `[Party Name]`-style placeholders are still unfilled. Check it before filing an export unread: a non-zero value means the document is not finished.'
+          examples:
+          - 0
+      additionalProperties: false
+      type: object
+      required:
+      - format
+      - filename
+      - sizeBytes
+      - content
+      - unfilledPlaceholders
+      title: DraftExport
+      description: 'A rendered draft, returned as bytes rather than as a URL.
+
+
+        Every other artifact on this API is a signed URL over an object a worker
+
+        already wrote. A draft export is rendered on demand, so a URL would mean
+
+        writing client work product to storage first, and with encryption on in
+
+        every deployment that is a choice between a URL the customer cannot decrypt
+
+        and plaintext in a bucket. `content` is base64 and bounded by
+
+        `MAX_INLINE_EXPORT_BYTES`; docs 10-DRAFT_BODY.md records the trade.'
+    Operation:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `op_` followed by 32 hex characters. Poll `GET /v1/operations/{operationId}` with it.
+          examples:
+          - op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        type:
+          type: string
+          title: Type
+          description: What kind of work this is, for example `matrix.run` or `draft.generate`.
+          examples:
+          - matrix.run
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: 'One of five values: `queued`, `running`, `succeeded`, `failed`, `cancelled`. There is no sixth and there are no synonyms. Stop polling once it is `succeeded`, `failed` or `cancelled`.'
+          examples:
+          - succeeded
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the operation was accepted (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        completedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Completedat
+          description: When the operation reached a terminal status (RFC 3339). Present if and only if the status is terminal.
+          examples:
+          - '2026-08-19T14:32:10Z'
+        matterId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matterid
+          description: '`mat_` identifier of the matter this work belongs to, when it belongs to one.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        resource:
+          anyOf:
+          - $ref: '#/components/schemas/OperationResource'
+          - type: 'null'
+          description: What the operation produced. Absent until the underlying job row exists, which an idempotent replay can briefly observe, so treat absence as 'not yet' rather than 'never'.
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/OperationError'
+          - type: 'null'
+          description: Why the work failed. Present only when `status` is `failed`. Partial success is `succeeded` with `progress.done < progress.total`, never an error.
+        progress:
+          anyOf:
+          - $ref: '#/components/schemas/OperationProgress'
+          - type: 'null'
+          description: How far along the work is, when the underlying job reports it. Absent does not mean no progress.
+        requestId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Requestid
+          description: The `X-Request-ID` of the request that created this operation. Quote it in a support ticket.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - type
+      - status
+      - createdAt
+      title: Operation
+      description: 'One long-running operation, whatever kind of work it is.
+
+
+        Readable for `OPERATION_RETENTION_DAYS` after creation, per AIP-151.'
+    DraftCategory:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: The category slug. Send it as `category` on a draft generation.
+          examples:
+          - nda
+        label:
+          type: string
+          title: Label
+          description: The product's own name for this document type, taken from the format the generator uses rather than from a second list, so it cannot drift from what gets written.
+          examples:
+          - Liability cap
+        practiceArea:
+          type: string
+          title: Practicearea
+          description: The practice area a draft in this category is filed under. Every category reads `general` today, because that is the only practice area the product registers.
+          examples:
+          - commercial
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - label
+      - practiceArea
+      title: DraftCategory
+      description: One document type the drafting pipeline knows how to write.
     Page_DraftCategory_:
       properties:
         data:
@@ -5034,6 +4432,530 @@ components:
       - data
       - pagination
       title: Page[DraftCategory]
+    OperationStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: OperationStatus
+      description: 'The public five. There is no sixth, and there are no synonyms.
+
+
+        Internal vocabularies spell terminal success `completed`, `ready`,
+
+        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+
+        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+
+        `app.workspace_api.adapters.status_map`, which refuses to guess.'
+    Page_Template_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Template'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[Template]
+    TemplateRunRequest:
+      properties:
+        prompt:
+          anyOf:
+          - type: string
+            maxLength: 8000
+          - type: 'null'
+          title: Prompt
+          description: 'Free text the extractor reads variable values out of. Optional: a template whose every variable is supplied in `slotOverrides` needs no prose.'
+          examples:
+          - Two-year mutual NDA with Acme Corporation, governed by California law.
+        slotOverrides:
+          additionalProperties:
+            type: string
+            maxLength: 4000
+            minLength: 1
+          type: object
+          title: Slotoverrides
+          description: Values you already know, keyed by the variable's `varId`. Recorded with source `user`, and the extractor never overwrites them.
+      additionalProperties: false
+      type: object
+      title: TemplateRunRequest
+      description: 'What to fill the template with.
+
+
+        Context documents are deliberately absent in v1. The internal flow can take
+
+        document ids as extra evidence for the extractor, and the same route will
+
+        accept them additively; publishing them now would mean publishing an id
+
+        space and an ownership check for a feature nobody has asked this API for.
+
+        Generation from a prompt alone is supported by the pipeline as it stands.'
+    OperationResource:
+      properties:
+        kind:
+          type: string
+          title: Kind
+          description: What sort of thing was produced, for example `matrix` or `document`.
+          examples:
+          - matrix
+        id:
+          type: string
+          title: Id
+          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
+          examples:
+          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+      additionalProperties: false
+      type: object
+      required:
+      - kind
+      - id
+      title: OperationResource
+      description: 'What the operation produced, or is producing.
+
+
+        `url` is a path on this API rather than an absolute URL, because the service
+
+        is mounted today and gets its own hostname later (docs 07.5). A relative
+
+        path survives that move; a baked-in host does not.'
+    DraftFromDocumentRequest:
+      properties:
+        documentId:
+          type: string
+          title: Documentid
+          description: '`doc_` identifier of a document in this matter to convert into a draft.'
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        title:
+          anyOf:
+          - type: string
+            maxLength: 200
+            minLength: 1
+          - type: 'null'
+          title: Title
+          description: Title for the draft. Defaults to the document's filename.
+          examples:
+          - Master Services Agreement
+        category:
+          type: string
+          maxLength: 64
+          minLength: 1
+          title: Category
+          description: What kind of document this is, as a category slug from `draftCategories.list`. Defaults to `custom`, which is always accepted.
+          default: custom
+          examples:
+          - commercial
+      additionalProperties: false
+      type: object
+      required:
+      - documentId
+      title: DraftFromDocumentRequest
+      description: 'Turn a document you already uploaded into an editable draft.
+
+
+        Takes a `documentId` rather than a file, for the reason every other file on
+
+        this surface does: bytes reach this API through `uploads.initiate` and the
+
+        presigned part PUTs, so there is one media allowlist, one size ceiling and
+
+        one answer to encryption at rest.
+
+
+        The ORIGINAL file is what gets converted, not the text the ingest pipeline
+
+        extracted for retrieval. That text is chunk-shaped and has already lost the
+
+        headings a contract is navigated by.
+
+
+        No AI runs. This is a format conversion, so it answers `201` with the draft
+
+        rather than `202` with an operation.'
+    DraftExportRequest:
+      properties:
+        format:
+          type: string
+          enum:
+          - docx
+          - pdf
+          title: Format
+          description: 'Which format to render: `docx` or `pdf`.'
+          examples:
+          - docx
+      additionalProperties: false
+      type: object
+      required:
+      - format
+      title: DraftExportRequest
+      description: Ask for the draft rendered to a file.
+    DraftCreateRequest:
+      properties:
+        category:
+          type: string
+          maxLength: 64
+          minLength: 1
+          title: Category
+          description: What kind of document to generate, as a category slug. Validated against the live vocabulary when the generation starts.
+          examples:
+          - commercial
+        title:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Title
+          description: Title for the generated draft.
+          examples:
+          - Master Services Agreement
+        governingLawState:
+          type: string
+          maxLength: 80
+          minLength: 1
+          title: Governinglawstate
+          description: 'Governing law to pin. Accepts a code (`ca`), a name (`California`) or the sentinel `federal`. Required: a US draft with no pinned governing law cites nothing.'
+          examples:
+          - ca
+        tone:
+          type: string
+          enum:
+          - protective
+          - balanced
+          - permissive
+          title: Tone
+          description: 'How protective the generated language should be: `protective`, `balanced` or `permissive`.'
+          default: balanced
+          examples:
+          - protective
+        specialInstructions:
+          anyOf:
+          - type: string
+            maxLength: 40000
+          - type: 'null'
+          title: Specialinstructions
+          description: Anything specific this draft needs, in your own words.
+          examples:
+          - Two-year term, mutual, governed by California law.
+        variables:
+          additionalProperties:
+            type: string
+          type: object
+          title: Variables
+          description: 'Template variable values, for example `{"party_a_name": "Acme Corp"}`. Which keys mean anything is a property of the category, so this is deliberately free-form. Unfilled placeholders are counted on export.'
+        practiceArea:
+          anyOf:
+          - type: string
+            maxLength: 64
+            minLength: 1
+          - type: 'null'
+          title: Practicearea
+          description: Practice area for the draft. Inferred from the category when omitted.
+          examples:
+          - commercial
+      additionalProperties: false
+      type: object
+      required:
+      - category
+      - title
+      - governingLawState
+      title: DraftCreateRequest
+      description: 'Start a generation. There is no synchronous create.
+
+
+        `jurisdiction` is deliberately absent and fixed at US: this is a US-only
+
+        product (OPINIONS.md), and a field whose only accepted value is the default
+
+        is a field a customer has to discover before they can ignore it.
+
+        `governingLawState` is required for the same reason it is required
+
+        internally: a US draft with no pinned governing law cites nothing.'
+    DraftSection:
+      properties:
+        heading:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Heading
+          description: The section's heading. Null for body text preceding the first heading, which is where a parties block or preamble lives.
+          examples:
+          - 8. Limitation of Liability
+        level:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Level
+          description: Heading depth, 1 to 6. Null when there is no heading.
+          examples:
+          - 1
+        text:
+          type: string
+          title: Text
+          description: The text beneath this heading, as plain text.
+          examples:
+          - Neither party shall be liable for indirect or consequential damages.
+      additionalProperties: false
+      type: object
+      required:
+      - text
+      title: DraftSection
+      description: 'One heading and the text beneath it.
+
+
+        `heading` is null for body text that precedes the first heading, which is
+
+        where a parties block or a preamble lives. Dropping it because it has no
+
+        heading would lose the first paragraph of most contracts.'
+    OperationError:
+      properties:
+        code:
+          type: string
+          title: Code
+          description: Stable, machine-readable failure code. Branch on this, never on `message`.
+          examples:
+          - EXTRACTION_FAILED
+        message:
+          type: string
+          title: Message
+          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
+          examples:
+          - The upstream extraction did not finish.
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - message
+      title: OperationError
+      description: 'Why a failed operation failed, in terms a customer can act on.
+
+
+        `code` is stable and machine-readable. `message` is sanitized: the internal
+
+        job tables store stack traces and file paths in their `error_message`
+
+        columns, and forwarding those verbatim leaks our internals into a customer''s
+
+        logs.'
+    Page_DraftVersion_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/DraftVersion'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[DraftVersion]
+    TemplateSlot:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: The variable's `varId` on the template, stable across every run of that template.
+          examples:
+          - party_a_name
+        value:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Value
+          description: What the run put in this slot. Null when nothing was supplied or extracted for it.
+          examples:
+          - Acme Corporation
+        source:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Source
+          description: 'Where the value came from: `prompt`, `context`, `computed`, `user` or `default`. Read it before relying on a value: `user` was handed over, the rest were inferred by a model.'
+          examples:
+          - prompt
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      title: TemplateSlot
+      description: One variable and the value the run put in it.
+    Template:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `tpl_` followed by 32 hex characters. Name it when starting a run.
+          examples:
+          - tpl_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        title:
+          type: string
+          title: Title
+          description: The template's display name.
+          examples:
+          - Mutual NDA
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: Free-text description of what the template is for.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        category:
+          type: string
+          title: Category
+          description: The template's category, as the customer classified it on upload.
+          examples:
+          - commercial
+        sourceFilename:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourcefilename
+          description: Filename of the document this template was created from. Published because it is how a person recognizes which template a run used, months later.
+          examples:
+          - msa-acme-v3.docx
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the template was created (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        updatedAt:
+          type: string
+          format: date-time
+          title: Updatedat
+          description: When the template was last modified (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - title
+      - category
+      - createdAt
+      - updatedAt
+      title: Template
+      description: 'One uploaded template, as listed.
+
+
+        The TipTap body and the variable definitions are not published. The body is
+
+        the same editor document a draft carries, and the variable list is only
+
+        meaningful against it; what a headless caller needs is which template to
+
+        name and what came back after it ran.'
+    DraftReplaceRequest:
+      properties:
+        contentMarkdown:
+          type: string
+          maxLength: 500000
+          minLength: 1
+          title: Contentmarkdown
+          description: 'The COMPLETE new body as markdown. This replaces the whole document: a partial body is not something this format can express, so sending one paragraph loses the rest. Whitespace alone is refused.'
+          examples:
+          - '# Mutual Non-Disclosure Agreement
+
+
+            ## 1. Confidential Information
+
+
+            Each party may disclose information that is confidential and proprietary to the other party.
+
+            '
+        title:
+          anyOf:
+          - type: string
+            maxLength: 200
+            minLength: 1
+          - type: 'null'
+          title: Title
+          description: New title. Omit to leave the title alone.
+          examples:
+          - Master Services Agreement
+        status:
+          anyOf:
+          - type: string
+            enum:
+            - draft
+            - review
+            - final
+            - archived
+          - type: 'null'
+          title: Status
+          description: 'New document lifecycle status: `draft`, `review`, `final` or `archived`. Omit to leave it alone.'
+          examples:
+          - draft
+        changeSummary:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+          title: Changesummary
+          description: Why this change was made. Recorded on the version snapshot the replace creates, so it shows up in the version list later.
+          examples:
+          - Tightened the indemnity carve-outs after counsel review.
+        expectedVersion:
+          anyOf:
+          - type: integer
+            minimum: 1.0
+          - type: 'null'
+          title: Expectedversion
+          description: The `version` you read before editing. Supply it so a concurrent write is refused rather than silently overwritten. Omitting it means 'overwrite whatever is there'.
+          examples:
+          - 1
+      additionalProperties: false
+      type: object
+      required:
+      - contentMarkdown
+      title: DraftReplaceRequest
+      description: 'Replace a draft''s body, and optionally its title and lifecycle status.
+
+
+        A PUT rather than a PATCH because `contentMarkdown` is the whole body:
+
+        a partial body is not a thing this format can express, and pretending
+
+        otherwise would invite a caller to send one paragraph and lose the rest.
+
+        Title and status are left alone when omitted, which is what makes a
+
+        body-only edit possible without restating metadata the caller did not read.
+
+
+        `expectedVersion` is how a headless read-modify-write avoids a lost update.
+
+        Omitting it means "overwrite whatever is there", which is a legitimate thing
+
+        to want and a bad default to impose.'
     TemplateDetail:
       properties:
         id:
@@ -5117,270 +5039,268 @@ components:
         to run needs to read what it says, and the editor''s own document model does
 
         not cross this boundary in either direction.'
-    Pagination:
+    DraftImproveRequest:
       properties:
-        limit:
-          type: integer
-          title: Limit
-          description: The `limit` that was applied to this request.
+        instructions:
+          anyOf:
+          - type: string
+            maxLength: 40000
+          - type: 'null'
+          title: Instructions
+          description: 'What to fix, in your own words. Optional: the pipeline runs its own analysis first and an instruction only steers it.'
           examples:
-          - 50
-        offset:
-          type: integer
-          title: Offset
-          description: The `offset` that was applied to this request.
+          - House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+        category:
+          anyOf:
+          - type: string
+            maxLength: 64
+            minLength: 1
+          - type: 'null'
+          title: Category
+          description: Override the category. Defaults to the source draft's own, so supply this only when the source was misclassified. A source whose category we no longer draft falls back to `custom` rather than refusing the revision.
           examples:
-          - 0
-        total:
-          type: integer
-          title: Total
-          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          - commercial
+        tone:
+          type: string
+          enum:
+          - protective
+          - balanced
+          - permissive
+          title: Tone
+          description: How protective the revised language should be.
+          default: balanced
           examples:
-          - 128
-        hasMore:
-          type: boolean
-          title: Hasmore
-          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
-          examples:
-          - false
+          - protective
       additionalProperties: false
       type: object
-      required:
-      - limit
-      - offset
-      - total
-      - hasMore
-      title: Pagination
-      description: 'Where the caller is, and whether there is more.
+      title: DraftImproveRequest
+      description: 'Revise an existing draft into a NEW one.
 
 
-        `total` is the count of rows matching the filter, not the count returned,
+        The improvement never overwrites its source. That is the internal pipeline''s
 
-        so a caller can size a job before running it.'
-    Template:
+        behaviour and it is the right one to publish: the run takes minutes and
+
+        costs money, and a customer that dislikes the result still has the draft it
+
+        started from.'
+    TemplateVariable:
       properties:
         id:
           type: string
           title: Id
-          description: Public identifier, `tpl_` followed by 32 hex characters. Name it when starting a run.
+          description: The variable's `varId`, and the key to use in `slotOverrides` when you run this template. Stable across every run.
           examples:
-          - tpl_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        title:
+          - party_a_name
+        name:
           type: string
-          title: Title
-          description: The template's display name.
+          title: Name
+          description: The detected or authored name for this variable.
           examples:
-          - Mutual NDA
-        description:
+          - Counterparty name
+        label:
           anyOf:
           - type: string
           - type: 'null'
-          title: Description
-          description: Free-text description of what the template is for.
+          title: Label
+          description: Display label, when one was set. Falls back to `name`.
           examples:
-          - Master services agreement with Acme for the 2026 platform rollout.
-        category:
+          - Counterparty name
+        kind:
           type: string
-          title: Category
-          description: The template's category, as the customer classified it on upload.
+          title: Kind
+          description: 'What sort of value belongs here: `party`, `date`, `money`, `jurisdiction`, `address`, `number`, `duration`, `text`, `other`. Drives how the extractor is constrained when it fills the slot.'
           examples:
-          - commercial
-        sourceFilename:
+          - party
+        hint:
           anyOf:
           - type: string
           - type: 'null'
-          title: Sourcefilename
-          description: Filename of the document this template was created from. Published because it is how a person recognizes which template a run used, months later.
+          title: Hint
+          description: Guidance the extractor was given for this variable.
           examples:
-          - msa-acme-v3.docx
+          - The counterparty's full legal entity name, as it appears on the signature block.
+        defaultValue:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Defaultvalue
+          description: Value used when nothing is supplied or extracted.
+          examples:
+          - Acme Corporation
+        position:
+          type: integer
+          title: Position
+          description: Where this variable sits in the template body, counting from zero.
+          examples:
+          - 0
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - name
+      - kind
+      - position
+      title: TemplateVariable
+      description: 'One fillable span the template declares.
+
+
+        Published because `slotOverrides` on a run is keyed by `id` and **nothing
+
+        else on this surface publishes one**. Before this model existed, the only
+
+        way to learn a template''s keys was to run it once and read the slots back
+
+        off the finished run, which is a paid LLM call to discover a schema.'
+    DraftVersion:
+      properties:
+        version:
+          type: integer
+          title: Version
+          description: The version number this entry records.
+          examples:
+          - 3
+        changeSummary:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Changesummary
+          description: Why this version was created, when a summary was supplied.
+          examples:
+          - Tightened the indemnity carve-outs after counsel review.
         createdAt:
           type: string
           format: date-time
           title: Createdat
-          description: When the template was created (RFC 3339).
-          examples:
-          - '2026-08-19T14:32:10Z'
-        updatedAt:
-          type: string
-          format: date-time
-          title: Updatedat
-          description: When the template was last modified (RFC 3339).
+          description: When this version was snapshotted (RFC 3339).
           examples:
           - '2026-08-19T14:32:10Z'
       additionalProperties: false
       type: object
       required:
-      - id
-      - title
-      - category
+      - version
       - createdAt
-      - updatedAt
-      title: Template
-      description: 'One uploaded template, as listed.
+      title: DraftVersion
+      description: 'One point in a draft''s history. Metadata only.
 
 
-        The TipTap body and the variable definitions are not published. The body is
+        The stored CONTENT of an old version is not published. A version body would
 
-        the same editor document a draft carries, and the variable list is only
+        be a second representation of the same document with the same TipTap problem
 
-        meaningful against it; what a headless caller needs is which template to
+        and no customer has asked to read one; `changeSummary` plus the version
 
-        name and what came back after it ran.'
-    OperationError:
+        number is what makes the list useful for an audit trail.'
+    OperationProgress:
       properties:
-        code:
-          type: string
-          title: Code
-          description: Stable, machine-readable failure code. Branch on this, never on `message`.
+        done:
+          type: integer
+          minimum: 0.0
+          title: Done
+          description: How many units are finished.
           examples:
-          - EXTRACTION_FAILED
-        message:
-          type: string
-          title: Message
-          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
+          - 24
+        total:
+          type: integer
+          minimum: 0.0
+          title: Total
+          description: How many units there are in total. Can legitimately be zero for an empty run.
           examples:
-          - The upstream extraction did not finish.
-      additionalProperties: false
-      type: object
-      required:
-      - code
-      - message
-      title: OperationError
-      description: 'Why a failed operation failed, in terms a customer can act on.
-
-
-        `code` is stable and machine-readable. `message` is sanitized: the internal
-
-        job tables store stack traces and file paths in their `error_message`
-
-        columns, and forwarding those verbatim leaks our internals into a customer''s
-
-        logs.'
-    DraftSection:
-      properties:
-        heading:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Heading
-          description: The section's heading. Null for body text preceding the first heading, which is where a parties block or preamble lives.
-          examples:
-          - 8. Limitation of Liability
-        level:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Level
-          description: Heading depth, 1 to 6. Null when there is no heading.
-          examples:
-          - 1
-        text:
-          type: string
-          title: Text
-          description: The text beneath this heading, as plain text.
-          examples:
-          - Neither party shall be liable for indirect or consequential damages.
-      additionalProperties: false
-      type: object
-      required:
-      - text
-      title: DraftSection
-      description: 'One heading and the text beneath it.
-
-
-        `heading` is null for body text that precedes the first heading, which is
-
-        where a parties block or a preamble lives. Dropping it because it has no
-
-        heading would lose the first paragraph of most contracts.'
-    TemplateSlot:
-      properties:
-        id:
-          type: string
-          title: Id
-          description: The variable's `varId` on the template, stable across every run of that template.
-          examples:
-          - party_a_name
-        value:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Value
-          description: What the run put in this slot. Null when nothing was supplied or extracted for it.
-          examples:
-          - Acme Corporation
-        source:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Source
-          description: 'Where the value came from: `prompt`, `context`, `computed`, `user` or `default`. Read it before relying on a value: `user` was handed over, the rest were inferred by a model.'
-          examples:
-          - prompt
-      additionalProperties: false
-      type: object
-      required:
-      - id
-      title: TemplateSlot
-      description: One variable and the value the run put in it.
-    DraftExport:
-      properties:
-        format:
+          - 128
+        unit:
           type: string
           enum:
-          - docx
-          - pdf
-          title: Format
-          description: The format that was rendered.
+          - cells
+          - steps
+          - documents
+          - files
+          - rows
+          - percent
+          title: Unit
+          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
           examples:
-          - docx
-        filename:
-          type: string
-          title: Filename
-          description: Suggested filename for the rendered file.
-          examples:
-          - msa-acme-v3.docx
-        sizeBytes:
-          type: integer
-          title: Sizebytes
-          description: Length of the DECODED file in bytes, so you can size storage without doing base64 arithmetic.
-          examples:
-          - 248193
-        content:
-          type: string
-          title: Content
-          description: 'The rendered file, base64 encoded. Bytes rather than a signed URL because a draft is rendered on demand: a URL would mean writing your work product to storage first.'
-          examples:
-          - UEsDBBQABgAIAAAAIQ...
-        unfilledPlaceholders:
-          type: integer
-          title: Unfilledplaceholders
-          description: 'How many `[Party Name]`-style placeholders are still unfilled. Check it before filing an export unread: a non-zero value means the document is not finished.'
-          examples:
-          - 0
+          - cells
       additionalProperties: false
       type: object
       required:
-      - format
-      - filename
-      - sizeBytes
-      - content
-      - unfilledPlaceholders
-      title: DraftExport
-      description: 'A rendered draft, returned as bytes rather than as a URL.
+      - done
+      - total
+      - unit
+      title: OperationProgress
+      description: 'How far along, and in what units.
 
 
-        Every other artifact on this API is a signed URL over an object a worker
+        The unit is not decoration. A workflow run stores only a percentage while a
 
-        already wrote. A draft export is rendered on demand, so a URL would mean
+        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
 
-        writing client work product to storage first, and with encryption on in
+        as 43 of 100 documents and a client builds a wrong estimate from it.'
+    DraftCopyRequest:
+      properties:
+        title:
+          anyOf:
+          - type: string
+            maxLength: 200
+            minLength: 1
+          - type: 'null'
+          title: Title
+          description: Title for the copy. Defaults to the source title followed by " (copy)".
+          examples:
+          - Master Services Agreement
+      additionalProperties: false
+      type: object
+      title: DraftCopyRequest
+      description: 'Copy a draft, optionally under a new name.
 
-        every deployment that is a choice between a URL the customer cannot decrypt
 
-        and plaintext in a bucket. `content` is base64 and bounded by
+        Send `{}` to accept the defaults. The copy starts at version 1 with no
 
-        `MAX_INLINE_EXPORT_BYTES`; docs 10-DRAFT_BODY.md records the trade.'
+        history of its own and status `draft`, and it lands in the same matter: it
+
+        is a new document that happens to start from this one, not a branch of it.'
+    Problem:
+      type: object
+      title: Problem
+      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: true
   securitySchemes:
     WorkspaceAuth:
       type: http
@@ -5390,6 +5310,3 @@ components:
 externalDocs:
   description: Getting started guide and error reference
   url: https://vaquill.ai/docs/workspace-api
-x-refined-from:
-- vaquill-ai-workspace-openapi.json
-- vaquill-ai-workspace-openapi.yml

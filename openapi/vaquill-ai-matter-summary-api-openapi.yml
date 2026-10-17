@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai Matter summary API
+  title: Vaquill Legal Workspace Matter summary API
+  description: 'Organization-scoped API for driving your legal workspace from your own backend: matters, documents, drafting, review, compare and matrices.'
   version: 1.0.0
-  description: 'Operations tagged Matter summary across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai/workspace
   description: Vaquill Legal Workspace API (production)
@@ -398,11 +398,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/summaries/{summaryId}:
     get:
       tags:
@@ -590,11 +585,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/summaries/{summaryId}/exports:
     post:
       tags:
@@ -752,13 +742,292 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
 components:
   schemas:
+    SummaryClaim:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Stable within this summary.
+          examples:
+          - 3d7a1c05-8e64-4b2f-9a1d-7c5e8f0b2a41
+        text:
+          type: string
+          title: Text
+          description: The claim, as one sentence.
+          examples:
+          - Neither party shall be liable for indirect or consequential damages.
+        position:
+          type: integer
+          title: Position
+          description: Reading order within the section.
+          examples:
+          - 0
+        claimType:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Claimtype
+          description: 'What kind of assertion this is, for example `general` or `event`. Publisher-controlled and open: read it, do not switch on a closed list.'
+          examples:
+          - obligation
+        eventDate:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Eventdate
+          description: The date the claim is about, when it names one.
+          examples:
+          - '2026-08-19'
+        confidence:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Confidence
+          description: 0 to 1.
+          examples:
+          - 0.92
+        citations:
+          items:
+            $ref: '#/components/schemas/SummaryCitation'
+          type: array
+          title: Citations
+          description: Every passage behind this claim.
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - text
+      - position
+      title: SummaryClaim
+      description: One assertion inside a section, with the passages that support it.
+    OperationError:
+      properties:
+        code:
+          type: string
+          title: Code
+          description: Stable, machine-readable failure code. Branch on this, never on `message`.
+          examples:
+          - EXTRACTION_FAILED
+        message:
+          type: string
+          title: Message
+          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
+          examples:
+          - The upstream extraction did not finish.
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - message
+      title: OperationError
+      description: 'Why a failed operation failed, in terms a customer can act on.
+
+
+        `code` is stable and machine-readable. `message` is sanitized: the internal
+
+        job tables store stack traces and file paths in their `error_message`
+
+        columns, and forwarding those verbatim leaks our internals into a customer''s
+
+        logs.'
+    MatterSummaryExport:
+      properties:
+        format:
+          type: string
+          title: Format
+          description: The format that was rendered.
+          examples:
+          - docx
+        filename:
+          type: string
+          title: Filename
+          description: A filename derived from the matter's own name.
+          examples:
+          - msa-acme-v3.docx
+        sizeBytes:
+          type: integer
+          title: Sizebytes
+          description: Decoded size, so you can check `content` round-tripped.
+          examples:
+          - 248193
+        content:
+          type: string
+          title: Content
+          description: The file, base64-encoded.
+          examples:
+          - UEsDBBQABgAIAAAAIQ...
+      additionalProperties: false
+      type: object
+      required:
+      - format
+      - filename
+      - sizeBytes
+      - content
+      title: MatterSummaryExport
+      description: 'A rendered summary, returned as bytes rather than as a signed URL.
+
+
+        Same reasoning as the facts and draft exports: the renderer runs on demand and
+
+        writes no object, so a URL would mean storing client work product first.'
+    OperationResource:
+      properties:
+        kind:
+          type: string
+          title: Kind
+          description: What sort of thing was produced, for example `matrix` or `document`.
+          examples:
+          - matrix
+        id:
+          type: string
+          title: Id
+          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
+          examples:
+          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+      additionalProperties: false
+      type: object
+      required:
+      - kind
+      - id
+      title: OperationResource
+      description: 'What the operation produced, or is producing.
+
+
+        `url` is a path on this API rather than an absolute URL, because the service
+
+        is mounted today and gets its own hostname later (docs 07.5). A relative
+
+        path survives that move; a baked-in host does not.'
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
+          examples:
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
+
+
+        `total` is the count of rows matching the filter, not the count returned,
+
+        so a caller can size a job before running it.'
+    MatterSummaryExportRequest:
+      properties:
+        format:
+          type: string
+          enum:
+          - pdf
+          - docx
+          title: Format
+          description: 'There is no CSV: a summary is a narrative with citations, and flattening it into rows would lose the thing being exported.'
+          examples:
+          - pdf
+      additionalProperties: false
+      type: object
+      required:
+      - format
+      title: MatterSummaryExportRequest
     MatterSummary:
       properties:
         id:
@@ -873,305 +1142,6 @@ components:
       - createdAt
       title: MatterSummary
       description: One generation of a matter summary, and its content once it has one.
-    MatterSummarySection:
-      properties:
-        id:
-          type: string
-          title: Id
-          description: Stable within this summary.
-          examples:
-          - 9f2c8b1e-4a7d-43c9-b6e0-f1a2c3d4e5f6
-        title:
-          type: string
-          title: Title
-          description: The section heading.
-          examples:
-          - Master Services Agreement
-        position:
-          type: integer
-          title: Position
-          description: Reading order within the summary.
-          examples:
-          - 0
-        claims:
-          items:
-            $ref: '#/components/schemas/SummaryClaim'
-          type: array
-          title: Claims
-          description: The section's claims.
-      additionalProperties: false
-      type: object
-      required:
-      - id
-      - title
-      - position
-      title: MatterSummarySection
-      description: One heading of the narrative.
-    MatterSummaryExport:
-      properties:
-        format:
-          type: string
-          title: Format
-          description: The format that was rendered.
-          examples:
-          - docx
-        filename:
-          type: string
-          title: Filename
-          description: A filename derived from the matter's own name.
-          examples:
-          - msa-acme-v3.docx
-        sizeBytes:
-          type: integer
-          title: Sizebytes
-          description: Decoded size, so you can check `content` round-tripped.
-          examples:
-          - 248193
-        content:
-          type: string
-          title: Content
-          description: The file, base64-encoded.
-          examples:
-          - UEsDBBQABgAIAAAAIQ...
-      additionalProperties: false
-      type: object
-      required:
-      - format
-      - filename
-      - sizeBytes
-      - content
-      title: MatterSummaryExport
-      description: 'A rendered summary, returned as bytes rather than as a signed URL.
-
-
-        Same reasoning as the facts and draft exports: the renderer runs on demand and
-
-        writes no object, so a URL would mean storing client work product first.'
-    OperationStatus:
-      type: string
-      enum:
-      - queued
-      - running
-      - succeeded
-      - failed
-      - cancelled
-      title: OperationStatus
-      description: 'The public five. There is no sixth, and there are no synonyms.
-
-
-        Internal vocabularies spell terminal success `completed`, `ready`,
-
-        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
-
-        queued `pending`, `queued` and `draft`. All of that is collapsed here by
-
-        `app.workspace_api.adapters.status_map`, which refuses to guess.'
-    Pagination:
-      properties:
-        limit:
-          type: integer
-          title: Limit
-          description: The `limit` that was applied to this request.
-          examples:
-          - 50
-        offset:
-          type: integer
-          title: Offset
-          description: The `offset` that was applied to this request.
-          examples:
-          - 0
-        total:
-          type: integer
-          title: Total
-          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
-          examples:
-          - 128
-        hasMore:
-          type: boolean
-          title: Hasmore
-          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
-          examples:
-          - false
-      additionalProperties: false
-      type: object
-      required:
-      - limit
-      - offset
-      - total
-      - hasMore
-      title: Pagination
-      description: 'Where the caller is, and whether there is more.
-
-
-        `total` is the count of rows matching the filter, not the count returned,
-
-        so a caller can size a job before running it.'
-    OperationProgress:
-      properties:
-        done:
-          type: integer
-          minimum: 0.0
-          title: Done
-          description: How many units are finished.
-          examples:
-          - 24
-        total:
-          type: integer
-          minimum: 0.0
-          title: Total
-          description: How many units there are in total. Can legitimately be zero for an empty run.
-          examples:
-          - 128
-        unit:
-          type: string
-          enum:
-          - cells
-          - steps
-          - documents
-          - files
-          - rows
-          - percent
-          title: Unit
-          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
-          examples:
-          - cells
-      additionalProperties: false
-      type: object
-      required:
-      - done
-      - total
-      - unit
-      title: OperationProgress
-      description: 'How far along, and in what units.
-
-
-        The unit is not decoration. A workflow run stores only a percentage while a
-
-        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
-
-        as 43 of 100 documents and a client builds a wrong estimate from it.'
-    SummaryClaim:
-      properties:
-        id:
-          type: string
-          title: Id
-          description: Stable within this summary.
-          examples:
-          - 3d7a1c05-8e64-4b2f-9a1d-7c5e8f0b2a41
-        text:
-          type: string
-          title: Text
-          description: The claim, as one sentence.
-          examples:
-          - Neither party shall be liable for indirect or consequential damages.
-        position:
-          type: integer
-          title: Position
-          description: Reading order within the section.
-          examples:
-          - 0
-        claimType:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Claimtype
-          description: 'What kind of assertion this is, for example `general` or `event`. Publisher-controlled and open: read it, do not switch on a closed list.'
-          examples:
-          - obligation
-        eventDate:
-          anyOf:
-          - type: string
-            format: date
-          - type: 'null'
-          title: Eventdate
-          description: The date the claim is about, when it names one.
-          examples:
-          - '2026-08-19'
-        confidence:
-          anyOf:
-          - type: number
-          - type: 'null'
-          title: Confidence
-          description: 0 to 1.
-          examples:
-          - 0.92
-        citations:
-          items:
-            $ref: '#/components/schemas/SummaryCitation'
-          type: array
-          title: Citations
-          description: Every passage behind this claim.
-      additionalProperties: false
-      type: object
-      required:
-      - id
-      - text
-      - position
-      title: SummaryClaim
-      description: One assertion inside a section, with the passages that support it.
-    ValidationProblem:
-      type: object
-      title: ValidationProblem
-      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
-      required:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      - errors
-      properties:
-        type:
-          type: string
-          format: uri
-          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
-          examples:
-          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
-        title:
-          type: string
-          description: A short human-readable summary.
-          examples:
-          - Insufficient scope
-        status:
-          type: integer
-          description: The HTTP status code, repeated.
-          examples:
-          - 403
-        detail:
-          type: string
-          description: What went wrong on this specific request. May be reworded at any time.
-          examples:
-          - This credential carries matters:read. This operation needs matters:write.
-        instance:
-          type: string
-          description: The path this problem occurred on.
-          examples:
-          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        requestId:
-          type: string
-          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
-          examples:
-          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        errors:
-          type: array
-          description: One entry per rejected field.
-          items:
-            type: object
-            required:
-            - location
-            - message
-            - type
-            properties:
-              location:
-                type: string
-                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
-              message:
-                type: string
-                description: Why it was rejected.
-              type:
-                type: string
-                description: The validation rule that failed.
-      additionalProperties: true
     Operation:
       properties:
         id:
@@ -1288,105 +1258,25 @@ components:
         and then move it, which the operation contract does not allow, and would sell
 
         a customer a control over spend that does not stop the spend.'
-    Page_MatterSummary_:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/MatterSummary'
-          type: array
-          title: Data
-          description: The rows in this window, in the collection's default order.
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-          description: Where this window sits in the full result set.
-      additionalProperties: false
-      type: object
-      required:
-      - data
-      - pagination
-      title: Page[MatterSummary]
-    OperationResource:
-      properties:
-        kind:
-          type: string
-          title: Kind
-          description: What sort of thing was produced, for example `matrix` or `document`.
-          examples:
-          - matrix
-        id:
-          type: string
-          title: Id
-          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
-          examples:
-          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        url:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Url
-          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
-          examples:
-          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
-      additionalProperties: false
-      type: object
-      required:
-      - kind
-      - id
-      title: OperationResource
-      description: 'What the operation produced, or is producing.
+    OperationStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: OperationStatus
+      description: 'The public five. There is no sixth, and there are no synonyms.
 
 
-        `url` is a path on this API rather than an absolute URL, because the service
+        Internal vocabularies spell terminal success `completed`, `ready`,
 
-        is mounted today and gets its own hostname later (docs 07.5). A relative
+        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
 
-        path survives that move; a baked-in host does not.'
-    MatterSummaryExportRequest:
-      properties:
-        format:
-          type: string
-          enum:
-          - pdf
-          - docx
-          title: Format
-          description: 'There is no CSV: a summary is a narrative with citations, and flattening it into rows would lose the thing being exported.'
-          examples:
-          - pdf
-      additionalProperties: false
-      type: object
-      required:
-      - format
-      title: MatterSummaryExportRequest
-    OperationError:
-      properties:
-        code:
-          type: string
-          title: Code
-          description: Stable, machine-readable failure code. Branch on this, never on `message`.
-          examples:
-          - EXTRACTION_FAILED
-        message:
-          type: string
-          title: Message
-          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
-          examples:
-          - The upstream extraction did not finish.
-      additionalProperties: false
-      type: object
-      required:
-      - code
-      - message
-      title: OperationError
-      description: 'Why a failed operation failed, in terms a customer can act on.
+        queued `pending`, `queued` and `draft`. All of that is collapsed here by
 
-
-        `code` is stable and machine-readable. `message` is sanitized: the internal
-
-        job tables store stack traces and file paths in their `error_message`
-
-        columns, and forwarding those verbatim leaks our internals into a customer''s
-
-        logs.'
+        `app.workspace_api.adapters.status_map`, which refuses to guess.'
     SummaryCitation:
       properties:
         label:
@@ -1448,6 +1338,101 @@ components:
       - sourceAvailable
       title: SummaryCitation
       description: One passage behind a claim, snapshotted when the summary was generated.
+    OperationProgress:
+      properties:
+        done:
+          type: integer
+          minimum: 0.0
+          title: Done
+          description: How many units are finished.
+          examples:
+          - 24
+        total:
+          type: integer
+          minimum: 0.0
+          title: Total
+          description: How many units there are in total. Can legitimately be zero for an empty run.
+          examples:
+          - 128
+        unit:
+          type: string
+          enum:
+          - cells
+          - steps
+          - documents
+          - files
+          - rows
+          - percent
+          title: Unit
+          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
+          examples:
+          - cells
+      additionalProperties: false
+      type: object
+      required:
+      - done
+      - total
+      - unit
+      title: OperationProgress
+      description: 'How far along, and in what units.
+
+
+        The unit is not decoration. A workflow run stores only a percentage while a
+
+        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
+
+        as 43 of 100 documents and a client builds a wrong estimate from it.'
+    MatterSummarySection:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Stable within this summary.
+          examples:
+          - 9f2c8b1e-4a7d-43c9-b6e0-f1a2c3d4e5f6
+        title:
+          type: string
+          title: Title
+          description: The section heading.
+          examples:
+          - Master Services Agreement
+        position:
+          type: integer
+          title: Position
+          description: Reading order within the summary.
+          examples:
+          - 0
+        claims:
+          items:
+            $ref: '#/components/schemas/SummaryClaim'
+          type: array
+          title: Claims
+          description: The section's claims.
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - title
+      - position
+      title: MatterSummarySection
+      description: One heading of the narrative.
+    Page_MatterSummary_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/MatterSummary'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[MatterSummary]
     Problem:
       type: object
       title: Problem
@@ -1500,6 +1485,3 @@ components:
 externalDocs:
   description: Getting started guide and error reference
   url: https://vaquill.ai/docs/workspace-api
-x-refined-from:
-- vaquill-ai-workspace-openapi.json
-- vaquill-ai-workspace-openapi.yml

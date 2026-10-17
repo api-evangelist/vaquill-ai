@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai Chronology API
+  title: Vaquill Legal Workspace Chronology API
+  description: 'Organization-scoped API for driving your legal workspace from your own backend: matters, documents, drafting, review, compare and matrices.'
   version: 1.0.0
-  description: 'Operations tagged Chronology across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai/workspace
   description: Vaquill Legal Workspace API (production)
@@ -597,11 +597,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/chronology/events/{eventId}:
     patch:
       tags:
@@ -926,11 +921,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/chronology/extraction-status:
     get:
       tags:
@@ -1083,11 +1073,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/chronology/exports:
     post:
       tags:
@@ -1258,13 +1243,361 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
 components:
   schemas:
+    ChronologyEventCreateRequest:
+      properties:
+        eventDate:
+          type: string
+          format: date
+          title: Eventdate
+          description: When it happened. Required; there is no undated event.
+          examples:
+          - '2026-08-19'
+        eventDateEnd:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Eventdateend
+          description: The end of a date range.
+          examples:
+          - '2026-08-19'
+        eventDateApproximate:
+          type: boolean
+          title: Eventdateapproximate
+          description: True when the date is your best estimate.
+          default: false
+          examples:
+          - false
+        eventType:
+          type: string
+          enum:
+          - signed
+          - executed
+          - filed
+          - served
+          - effective
+          - expired
+          - terminated
+          - notice_sent
+          - notice_received
+          - payment
+          - hearing
+          - meeting
+          - judgment
+          - order
+          - correspondence
+          - amended
+          - enacted
+          - published
+          - decided
+          - incident
+          - referenced
+          - founded
+          - incorporated
+          - appointed
+          - resigned
+          - acquired
+          - launched
+          - awarded
+          - approved
+          - registered
+          - commenced
+          - completed
+          - transferred
+          - invested
+          - dissolved
+          - announced
+          - renewed
+          - other
+          title: Eventtype
+          description: What happened.
+          default: other
+          examples:
+          - signed
+        category:
+          type: string
+          enum:
+          - contract_event
+          - court_filing
+          - correspondence
+          - payment_financial
+          - deadline_notice
+          - meeting_hearing
+          - legislative
+          - case_law
+          - historical
+          - corporate
+          - regulatory
+          - employment
+          - milestone
+          - other
+          title: Category
+          description: Which swim lane it joins.
+          default: other
+          examples:
+          - contract_event
+        title:
+          type: string
+          maxLength: 500
+          minLength: 1
+          title: Title
+          description: A one-line description.
+          examples:
+          - Master Services Agreement
+        description:
+          anyOf:
+          - type: string
+            maxLength: 5000
+          - type: 'null'
+          title: Description
+          description: The longer account, when there is one.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        parties:
+          items:
+            type: string
+          type: array
+          maxItems: 50
+          title: Parties
+          description: Who was involved, by name.
+          examples:
+          - - value
+        tags:
+          items:
+            type: string
+          type: array
+          maxItems: 30
+          title: Tags
+          description: Free-form labels of your own.
+          examples:
+          - - saas
+            - buyer-side
+        significance:
+          type: string
+          enum:
+          - high
+          - medium
+          - low
+          title: Significance
+          description: '`high`, `medium` or `low`.'
+          default: medium
+          examples:
+          - high
+        documentId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Documentid
+          description: Link the event to a `doc_` document in this matter. The reference is checked against your organization AND this matter before it is written.
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        sourcePageNumber:
+          anyOf:
+          - type: integer
+            minimum: 1.0
+          - type: 'null'
+          title: Sourcepagenumber
+          description: The page in that document this event comes from.
+          examples:
+          - 1
+      additionalProperties: false
+      type: object
+      required:
+      - eventDate
+      - title
+      title: ChronologyEventCreateRequest
+      description: 'A hand-entered event.
+
+
+        Created events are recorded as NOT ai-extracted and carry no confidence,
+
+        which is what keeps them distinguishable from the pipeline''s output forever.'
+    ChronologyExportRequest:
+      properties:
+        format:
+          type: string
+          enum:
+          - csv
+          - pdf
+          - docx
+          title: Format
+          description: '`csv` for a spreadsheet, `pdf` or `docx` for a filed document.'
+          examples:
+          - csv
+        filters:
+          $ref: '#/components/schemas/ChronologyFilters'
+          description: Same fields as the list. Omit for the whole timeline.
+      additionalProperties: false
+      type: object
+      required:
+      - format
+      title: ChronologyExportRequest
+      description: 'A POST, because the filters live in the body.
+
+
+        The export honours exactly the filters the list accepts, and it refuses
+
+        rather than truncating: over the ceiling you get a 413 carrying `limit` and
+
+        `requested` so you can narrow the date range. The web app''s export silently
+
+        stops at 50,000 events with no flag on the response, which hands a customer a
+
+        file they believe is complete.'
+    ChronologyExtractionStatus:
+      properties:
+        documents:
+          items:
+            $ref: '#/components/schemas/DocumentExtractionState'
+          type: array
+          title: Documents
+          description: Per-document state, for every document extraction has touched.
+        totalDocuments:
+          type: integer
+          title: Totaldocuments
+          description: Finished documents in the matter.
+          examples:
+          - 1
+        completedDocuments:
+          type: integer
+          title: Completeddocuments
+          description: Documents whose extraction succeeded.
+          examples:
+          - 1
+        pendingDocuments:
+          type: integer
+          title: Pendingdocuments
+          description: Documents still waiting, including ones extraction has not reached yet and therefore has no per-document row for.
+          examples:
+          - 1
+        failedDocuments:
+          type: integer
+          title: Faileddocuments
+          description: Documents whose extraction failed.
+          examples:
+          - 1
+        isExtractionComplete:
+          type: boolean
+          title: Isextractioncomplete
+          description: True when nothing is outstanding and the matter had something to extract.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - documents
+      - totalDocuments
+      - completedDocuments
+      - pendingDocuments
+      - failedDocuments
+      - isExtractionComplete
+      title: ChronologyExtractionStatus
+      description: How far the automatic extraction has got across the whole matter.
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
+          examples:
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
+
+
+        `total` is the count of rows matching the filter, not the count returned,
+
+        so a caller can size a job before running it.'
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
     ChronologyFilters:
       properties:
         dateFrom:
@@ -1441,582 +1774,6 @@ components:
         quietly stops being honoured on the export, which nobody notices until a
 
         customer files a chronology that includes events they excluded.'
-    DocumentExtractionState:
-      properties:
-        documentId:
-          type: string
-          title: Documentid
-          description: The `doc_` document.
-          examples:
-          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        documentName:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Documentname
-          description: Its filename.
-          examples:
-          - msa-acme-v3.docx
-        status:
-          type: string
-          title: Status
-          description: '`pending`, `in_progress`, `completed`, `failed` or `skipped`. Deliberately NOT one of the five operation statuses: this is per-document bookkeeping under a capability that publishes no operation, and mapping it would put a sixth spelling of ''running'' into the contract.'
-          examples:
-          - completed
-        eventsExtracted:
-          type: integer
-          title: Eventsextracted
-          description: How many events came out of this document.
-          examples:
-          - 1
-      additionalProperties: false
-      type: object
-      required:
-      - documentId
-      - status
-      - eventsExtracted
-      title: DocumentExtractionState
-      description: Where one document's chronology extraction got to.
-    Page_ChronologyEvent_:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/ChronologyEvent'
-          type: array
-          title: Data
-          description: The rows in this window, in the collection's default order.
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-          description: Where this window sits in the full result set.
-      additionalProperties: false
-      type: object
-      required:
-      - data
-      - pagination
-      title: Page[ChronologyEvent]
-    ChronologyExtractionStatus:
-      properties:
-        documents:
-          items:
-            $ref: '#/components/schemas/DocumentExtractionState'
-          type: array
-          title: Documents
-          description: Per-document state, for every document extraction has touched.
-        totalDocuments:
-          type: integer
-          title: Totaldocuments
-          description: Finished documents in the matter.
-          examples:
-          - 1
-        completedDocuments:
-          type: integer
-          title: Completeddocuments
-          description: Documents whose extraction succeeded.
-          examples:
-          - 1
-        pendingDocuments:
-          type: integer
-          title: Pendingdocuments
-          description: Documents still waiting, including ones extraction has not reached yet and therefore has no per-document row for.
-          examples:
-          - 1
-        failedDocuments:
-          type: integer
-          title: Faileddocuments
-          description: Documents whose extraction failed.
-          examples:
-          - 1
-        isExtractionComplete:
-          type: boolean
-          title: Isextractioncomplete
-          description: True when nothing is outstanding and the matter had something to extract.
-          examples:
-          - false
-      additionalProperties: false
-      type: object
-      required:
-      - documents
-      - totalDocuments
-      - completedDocuments
-      - pendingDocuments
-      - failedDocuments
-      - isExtractionComplete
-      title: ChronologyExtractionStatus
-      description: How far the automatic extraction has got across the whole matter.
-    Pagination:
-      properties:
-        limit:
-          type: integer
-          title: Limit
-          description: The `limit` that was applied to this request.
-          examples:
-          - 50
-        offset:
-          type: integer
-          title: Offset
-          description: The `offset` that was applied to this request.
-          examples:
-          - 0
-        total:
-          type: integer
-          title: Total
-          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
-          examples:
-          - 128
-        hasMore:
-          type: boolean
-          title: Hasmore
-          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
-          examples:
-          - false
-      additionalProperties: false
-      type: object
-      required:
-      - limit
-      - offset
-      - total
-      - hasMore
-      title: Pagination
-      description: 'Where the caller is, and whether there is more.
-
-
-        `total` is the count of rows matching the filter, not the count returned,
-
-        so a caller can size a job before running it.'
-    ChronologyExportRequest:
-      properties:
-        format:
-          type: string
-          enum:
-          - csv
-          - pdf
-          - docx
-          title: Format
-          description: '`csv` for a spreadsheet, `pdf` or `docx` for a filed document.'
-          examples:
-          - csv
-        filters:
-          $ref: '#/components/schemas/ChronologyFilters'
-          description: Same fields as the list. Omit for the whole timeline.
-      additionalProperties: false
-      type: object
-      required:
-      - format
-      title: ChronologyExportRequest
-      description: 'A POST, because the filters live in the body.
-
-
-        The export honours exactly the filters the list accepts, and it refuses
-
-        rather than truncating: over the ceiling you get a 413 carrying `limit` and
-
-        `requested` so you can narrow the date range. The web app''s export silently
-
-        stops at 50,000 events with no flag on the response, which hands a customer a
-
-        file they believe is complete.'
-    ValidationProblem:
-      type: object
-      title: ValidationProblem
-      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
-      required:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      - errors
-      properties:
-        type:
-          type: string
-          format: uri
-          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
-          examples:
-          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
-        title:
-          type: string
-          description: A short human-readable summary.
-          examples:
-          - Insufficient scope
-        status:
-          type: integer
-          description: The HTTP status code, repeated.
-          examples:
-          - 403
-        detail:
-          type: string
-          description: What went wrong on this specific request. May be reworded at any time.
-          examples:
-          - This credential carries matters:read. This operation needs matters:write.
-        instance:
-          type: string
-          description: The path this problem occurred on.
-          examples:
-          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        requestId:
-          type: string
-          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
-          examples:
-          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        errors:
-          type: array
-          description: One entry per rejected field.
-          items:
-            type: object
-            required:
-            - location
-            - message
-            - type
-            properties:
-              location:
-                type: string
-                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
-              message:
-                type: string
-                description: Why it was rejected.
-              type:
-                type: string
-                description: The validation rule that failed.
-      additionalProperties: true
-    ChronologyEventUpdateRequest:
-      properties:
-        eventDate:
-          anyOf:
-          - type: string
-            format: date
-          - type: 'null'
-          title: Eventdate
-          description: When it happened.
-          examples:
-          - '2026-08-19'
-        eventDateEnd:
-          anyOf:
-          - type: string
-            format: date
-          - type: 'null'
-          title: Eventdateend
-          description: The end of a date range. Send null to clear it.
-          examples:
-          - '2026-08-19'
-        eventDateApproximate:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Eventdateapproximate
-          description: True when the date is an estimate rather than a record.
-          examples:
-          - false
-        eventType:
-          anyOf:
-          - type: string
-            enum:
-            - signed
-            - executed
-            - filed
-            - served
-            - effective
-            - expired
-            - terminated
-            - notice_sent
-            - notice_received
-            - payment
-            - hearing
-            - meeting
-            - judgment
-            - order
-            - correspondence
-            - amended
-            - enacted
-            - published
-            - decided
-            - incident
-            - referenced
-            - founded
-            - incorporated
-            - appointed
-            - resigned
-            - acquired
-            - launched
-            - awarded
-            - approved
-            - registered
-            - commenced
-            - completed
-            - transferred
-            - invested
-            - dissolved
-            - announced
-            - renewed
-            - other
-          - type: 'null'
-          title: Eventtype
-          description: What happened.
-          examples:
-          - signed
-        category:
-          anyOf:
-          - type: string
-            enum:
-            - contract_event
-            - court_filing
-            - correspondence
-            - payment_financial
-            - deadline_notice
-            - meeting_hearing
-            - legislative
-            - case_law
-            - historical
-            - corporate
-            - regulatory
-            - employment
-            - milestone
-            - other
-          - type: 'null'
-          title: Category
-          description: Which swim lane it joins.
-          examples:
-          - contract_event
-        title:
-          anyOf:
-          - type: string
-            maxLength: 500
-            minLength: 1
-          - type: 'null'
-          title: Title
-          description: A one-line description.
-          examples:
-          - Master Services Agreement
-        description:
-          anyOf:
-          - type: string
-            maxLength: 5000
-          - type: 'null'
-          title: Description
-          description: The longer account. Send null to clear it.
-          examples:
-          - Master services agreement with Acme for the 2026 platform rollout.
-        parties:
-          anyOf:
-          - items:
-              type: string
-            type: array
-            maxItems: 50
-          - type: 'null'
-          title: Parties
-          description: Who was involved. Replaces the whole list.
-          examples:
-          - - value
-        tags:
-          anyOf:
-          - items:
-              type: string
-            type: array
-            maxItems: 30
-          - type: 'null'
-          title: Tags
-          description: Free-form labels. Replaces the whole list.
-          examples:
-          - - saas
-            - buyer-side
-        significance:
-          anyOf:
-          - type: string
-            enum:
-            - high
-            - medium
-            - low
-          - type: 'null'
-          title: Significance
-          description: '`high`, `medium` or `low`.'
-          examples:
-          - high
-      additionalProperties: false
-      type: object
-      title: ChronologyEventUpdateRequest
-      description: 'Fields to change. Omitted fields are left alone.
-
-
-        An explicit null clears `description` or `eventDateEnd`. Every other field
-
-        here is backed by a NOT NULL column, so a null for one is refused by name
-
-        rather than passed to the database.
-
-
-        `documentId` is deliberately not patchable: which document an event came from
-
-        is provenance, and re-pointing it would make an extracted event claim a source
-
-        it was never read from.'
-    ChronologyEventCreateRequest:
-      properties:
-        eventDate:
-          type: string
-          format: date
-          title: Eventdate
-          description: When it happened. Required; there is no undated event.
-          examples:
-          - '2026-08-19'
-        eventDateEnd:
-          anyOf:
-          - type: string
-            format: date
-          - type: 'null'
-          title: Eventdateend
-          description: The end of a date range.
-          examples:
-          - '2026-08-19'
-        eventDateApproximate:
-          type: boolean
-          title: Eventdateapproximate
-          description: True when the date is your best estimate.
-          default: false
-          examples:
-          - false
-        eventType:
-          type: string
-          enum:
-          - signed
-          - executed
-          - filed
-          - served
-          - effective
-          - expired
-          - terminated
-          - notice_sent
-          - notice_received
-          - payment
-          - hearing
-          - meeting
-          - judgment
-          - order
-          - correspondence
-          - amended
-          - enacted
-          - published
-          - decided
-          - incident
-          - referenced
-          - founded
-          - incorporated
-          - appointed
-          - resigned
-          - acquired
-          - launched
-          - awarded
-          - approved
-          - registered
-          - commenced
-          - completed
-          - transferred
-          - invested
-          - dissolved
-          - announced
-          - renewed
-          - other
-          title: Eventtype
-          description: What happened.
-          default: other
-          examples:
-          - signed
-        category:
-          type: string
-          enum:
-          - contract_event
-          - court_filing
-          - correspondence
-          - payment_financial
-          - deadline_notice
-          - meeting_hearing
-          - legislative
-          - case_law
-          - historical
-          - corporate
-          - regulatory
-          - employment
-          - milestone
-          - other
-          title: Category
-          description: Which swim lane it joins.
-          default: other
-          examples:
-          - contract_event
-        title:
-          type: string
-          maxLength: 500
-          minLength: 1
-          title: Title
-          description: A one-line description.
-          examples:
-          - Master Services Agreement
-        description:
-          anyOf:
-          - type: string
-            maxLength: 5000
-          - type: 'null'
-          title: Description
-          description: The longer account, when there is one.
-          examples:
-          - Master services agreement with Acme for the 2026 platform rollout.
-        parties:
-          items:
-            type: string
-          type: array
-          maxItems: 50
-          title: Parties
-          description: Who was involved, by name.
-          examples:
-          - - value
-        tags:
-          items:
-            type: string
-          type: array
-          maxItems: 30
-          title: Tags
-          description: Free-form labels of your own.
-          examples:
-          - - saas
-            - buyer-side
-        significance:
-          type: string
-          enum:
-          - high
-          - medium
-          - low
-          title: Significance
-          description: '`high`, `medium` or `low`.'
-          default: medium
-          examples:
-          - high
-        documentId:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Documentid
-          description: Link the event to a `doc_` document in this matter. The reference is checked against your organization AND this matter before it is written.
-          examples:
-          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        sourcePageNumber:
-          anyOf:
-          - type: integer
-            minimum: 1.0
-          - type: 'null'
-          title: Sourcepagenumber
-          description: The page in that document this event comes from.
-          examples:
-          - 1
-      additionalProperties: false
-      type: object
-      required:
-      - eventDate
-      - title
-      title: ChronologyEventCreateRequest
-      description: 'A hand-entered event.
-
-
-        Created events are recorded as NOT ai-extracted and carry no confidence,
-
-        which is what keeps them distinguishable from the pipeline''s output forever.'
     Problem:
       type: object
       title: Problem
@@ -2228,6 +1985,229 @@ components:
       - updatedAt
       title: ChronologyEvent
       description: One dated event on the matter's timeline.
+    Page_ChronologyEvent_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/ChronologyEvent'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[ChronologyEvent]
+    DocumentExtractionState:
+      properties:
+        documentId:
+          type: string
+          title: Documentid
+          description: The `doc_` document.
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        documentName:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Documentname
+          description: Its filename.
+          examples:
+          - msa-acme-v3.docx
+        status:
+          type: string
+          title: Status
+          description: '`pending`, `in_progress`, `completed`, `failed` or `skipped`. Deliberately NOT one of the five operation statuses: this is per-document bookkeeping under a capability that publishes no operation, and mapping it would put a sixth spelling of ''running'' into the contract.'
+          examples:
+          - completed
+        eventsExtracted:
+          type: integer
+          title: Eventsextracted
+          description: How many events came out of this document.
+          examples:
+          - 1
+      additionalProperties: false
+      type: object
+      required:
+      - documentId
+      - status
+      - eventsExtracted
+      title: DocumentExtractionState
+      description: Where one document's chronology extraction got to.
+    ChronologyEventUpdateRequest:
+      properties:
+        eventDate:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Eventdate
+          description: When it happened.
+          examples:
+          - '2026-08-19'
+        eventDateEnd:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Eventdateend
+          description: The end of a date range. Send null to clear it.
+          examples:
+          - '2026-08-19'
+        eventDateApproximate:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Eventdateapproximate
+          description: True when the date is an estimate rather than a record.
+          examples:
+          - false
+        eventType:
+          anyOf:
+          - type: string
+            enum:
+            - signed
+            - executed
+            - filed
+            - served
+            - effective
+            - expired
+            - terminated
+            - notice_sent
+            - notice_received
+            - payment
+            - hearing
+            - meeting
+            - judgment
+            - order
+            - correspondence
+            - amended
+            - enacted
+            - published
+            - decided
+            - incident
+            - referenced
+            - founded
+            - incorporated
+            - appointed
+            - resigned
+            - acquired
+            - launched
+            - awarded
+            - approved
+            - registered
+            - commenced
+            - completed
+            - transferred
+            - invested
+            - dissolved
+            - announced
+            - renewed
+            - other
+          - type: 'null'
+          title: Eventtype
+          description: What happened.
+          examples:
+          - signed
+        category:
+          anyOf:
+          - type: string
+            enum:
+            - contract_event
+            - court_filing
+            - correspondence
+            - payment_financial
+            - deadline_notice
+            - meeting_hearing
+            - legislative
+            - case_law
+            - historical
+            - corporate
+            - regulatory
+            - employment
+            - milestone
+            - other
+          - type: 'null'
+          title: Category
+          description: Which swim lane it joins.
+          examples:
+          - contract_event
+        title:
+          anyOf:
+          - type: string
+            maxLength: 500
+            minLength: 1
+          - type: 'null'
+          title: Title
+          description: A one-line description.
+          examples:
+          - Master Services Agreement
+        description:
+          anyOf:
+          - type: string
+            maxLength: 5000
+          - type: 'null'
+          title: Description
+          description: The longer account. Send null to clear it.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        parties:
+          anyOf:
+          - items:
+              type: string
+            type: array
+            maxItems: 50
+          - type: 'null'
+          title: Parties
+          description: Who was involved. Replaces the whole list.
+          examples:
+          - - value
+        tags:
+          anyOf:
+          - items:
+              type: string
+            type: array
+            maxItems: 30
+          - type: 'null'
+          title: Tags
+          description: Free-form labels. Replaces the whole list.
+          examples:
+          - - saas
+            - buyer-side
+        significance:
+          anyOf:
+          - type: string
+            enum:
+            - high
+            - medium
+            - low
+          - type: 'null'
+          title: Significance
+          description: '`high`, `medium` or `low`.'
+          examples:
+          - high
+      additionalProperties: false
+      type: object
+      title: ChronologyEventUpdateRequest
+      description: 'Fields to change. Omitted fields are left alone.
+
+
+        An explicit null clears `description` or `eventDateEnd`. Every other field
+
+        here is backed by a NOT NULL column, so a null for one is refused by name
+
+        rather than passed to the database.
+
+
+        `documentId` is deliberately not patchable: which document an event came from
+
+        is provenance, and re-pointing it would make an extracted event claim a source
+
+        it was never read from.'
     ChronologyExport:
       properties:
         format:
@@ -2279,6 +2259,3 @@ components:
 externalDocs:
   description: Getting started guide and error reference
   url: https://vaquill.ai/docs/workspace-api
-x-refined-from:
-- vaquill-ai-workspace-openapi.json
-- vaquill-ai-workspace-openapi.yml

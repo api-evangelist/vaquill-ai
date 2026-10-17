@@ -1,6 +1,7 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai Board Watches API
+  title: Vaquill Developer Board Watches API
+  description: Public API for legal statutes and legislation.
   version: 1.0.0
   contact:
     name: Vaquill API Support
@@ -10,7 +11,6 @@ info:
     name: Proprietary
     url: https://www.vaquill.ai/terms
   termsOfService: https://www.vaquill.ai/terms
-  description: 'Operations tagged Board Watches across 2 of this provider''s published API definitions: vaquill-ai-openapi.json, vaquill-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai
   description: Production
@@ -199,9 +199,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/watches:
     get:
       tags:
@@ -379,9 +376,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/watches/{watch_id}/test:
     post:
       tags:
@@ -438,9 +432,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/watches/{watch_id}:
     patch:
       tags:
@@ -577,9 +568,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/watches/{watch_id}/changes:
     get:
       tags:
@@ -748,9 +736,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/watches/{watch_id}/changes/{change_id}/diff:
     get:
       tags:
@@ -843,9 +828,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/watches/{watch_id}/deliveries:
     get:
       tags:
@@ -935,11 +917,75 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
 components:
   schemas:
+    ApiDetailError:
+      properties:
+        detail:
+          type: string
+          title: Detail
+          description: 'Human-readable reason, safe to surface to an end user. Branch on the HTTP status rather than on this string: the wording is not part of the contract and may be reworded, but 401 (bad key), 402 (out of credits), 403 (missing scope), 404 (no such resource) and 429 (rate limited) are stable.'
+          examples:
+          - Insufficient API credits.
+        errors:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/ApiFieldError'
+            type: array
+          - type: 'null'
+          title: Errors
+          description: 'Present on 422 only: every field that failed validation.'
+      type: object
+      required:
+      - detail
+      title: ApiDetailError
+      description: 'Error envelope the API actually returns.
+
+
+        Every error (400/401/402/403/404/405/422/429/5xx) carries a `detail`
+
+        string, e.g. `{"detail": "Insufficient API credits."}`, on every mount of
+
+        the API. A 422 adds `errors`, one entry per rejected field. Some 404s add
+
+        endpoint-specific diagnosis beside `detail` (the statutes section routes
+
+        add `actId`, `reason` and `didYouMean`); treat unknown keys as optional.'
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
     ApiFieldError:
       properties:
         loc:
@@ -972,32 +1018,6 @@ components:
       - type
       title: ApiFieldError
       description: One rejected field in a 422 response.
-    ValidationError:
-      properties:
-        loc:
-          items:
-            anyOf:
-            - type: string
-            - type: integer
-          type: array
-          title: Location
-        msg:
-          type: string
-          title: Message
-        type:
-          type: string
-          title: Error Type
-        input:
-          title: Input
-        ctx:
-          type: object
-          title: Context
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationError
     CreateWatchRequest:
       properties:
         corpusType:
@@ -1131,6 +1151,46 @@ components:
       required:
       - corpusType
       title: CreateWatchRequest
+    WebhookAuthRequest:
+      properties:
+        scheme:
+          type: string
+          enum:
+          - none
+          - bearer
+          - basic
+          - header
+          title: Scheme
+          description: '`bearer` sends `Authorization: Bearer <secret>`. `basic` sends `Authorization: Basic <secret>` with the secret already base64-encoded by you. `header` sends `<headerName>: <secret>`, for gateways that read something like `X-Api-Key`. `none` removes any credential currently stored.'
+          default: none
+        secret:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Secret
+          description: The credential value. Stored encrypted and never returned. Required when setting a scheme for the first time or changing scheme; on PATCH you may omit it to keep the stored one while changing only `headerName`.
+        headerName:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Headername
+          description: Header to send the credential on. Required for `header`, and rejected for every other scheme. Cannot be `Authorization` (use `bearer`/`basic`), a transport header, or one of ours.
+          examples:
+          - X-Api-Key
+      type: object
+      title: WebhookAuthRequest
+      description: 'How a delivery should authenticate itself to your endpoint.
+
+
+        SEPARATE FROM `webhookSecret`, and the distinction is the point.
+
+        `webhookSecret` signs the body so you can prove it is intact and ours.
+
+        This sends a credential so your gateway can reject anything else before
+
+        it reaches your handler. Most integrations want the second, many want
+
+        both, and the two are set independently.'
     UpdateWatchRequest:
       properties:
         isActive:
@@ -1190,87 +1250,6 @@ components:
           description: 'Replace the outbound credential config. Sent as a whole object, not field by field: a scheme without a credential is not a partial edit, it is a broken config. Send `{"scheme": "none"}` to remove auth entirely. Keeping the same scheme and omitting `secret` retains the stored credential, so you can rename a header without re-entering the token.'
       type: object
       title: UpdateWatchRequest
-    ApiDetailError:
-      properties:
-        detail:
-          type: string
-          title: Detail
-          description: 'Human-readable reason, safe to surface to an end user. Branch on the HTTP status rather than on this string: the wording is not part of the contract and may be reworded, but 401 (bad key), 402 (out of credits), 403 (missing scope), 404 (no such resource) and 429 (rate limited) are stable.'
-          examples:
-          - Insufficient API credits.
-        errors:
-          anyOf:
-          - items:
-              $ref: '#/components/schemas/ApiFieldError'
-            type: array
-          - type: 'null'
-          title: Errors
-          description: 'Present on 422 only: every field that failed validation.'
-      type: object
-      required:
-      - detail
-      title: ApiDetailError
-      description: 'Error envelope the API actually returns.
-
-
-        Every error (400/401/402/403/404/405/422/429/5xx) carries a `detail`
-
-        string, e.g. `{"detail": "Insufficient API credits."}`, on every mount of
-
-        the API. A 422 adds `errors`, one entry per rejected field. Some 404s add
-
-        endpoint-specific diagnosis beside `detail` (the statutes section routes
-
-        add `actId`, `reason` and `didYouMean`); treat unknown keys as optional.'
-    WebhookAuthRequest:
-      properties:
-        scheme:
-          type: string
-          enum:
-          - none
-          - bearer
-          - basic
-          - header
-          title: Scheme
-          description: '`bearer` sends `Authorization: Bearer <secret>`. `basic` sends `Authorization: Basic <secret>` with the secret already base64-encoded by you. `header` sends `<headerName>: <secret>`, for gateways that read something like `X-Api-Key`. `none` removes any credential currently stored.'
-          default: none
-        secret:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Secret
-          description: The credential value. Stored encrypted and never returned. Required when setting a scheme for the first time or changing scheme; on PATCH you may omit it to keep the stored one while changing only `headerName`.
-        headerName:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Headername
-          description: Header to send the credential on. Required for `header`, and rejected for every other scheme. Cannot be `Authorization` (use `bearer`/`basic`), a transport header, or one of ours.
-          examples:
-          - X-Api-Key
-      type: object
-      title: WebhookAuthRequest
-      description: 'How a delivery should authenticate itself to your endpoint.
-
-
-        SEPARATE FROM `webhookSecret`, and the distinction is the point.
-
-        `webhookSecret` signs the body so you can prove it is intact and ours.
-
-        This sends a credential so your gateway can reject anything else before
-
-        it reaches your handler. Most integrations want the second, many want
-
-        both, and the two are set independently.'
-    HTTPValidationError:
-      properties:
-        detail:
-          items:
-            $ref: '#/components/schemas/ValidationError'
-          type: array
-          title: Detail
-      type: object
-      title: HTTPValidationError
   securitySchemes:
     ApiKeyAuth:
       type: http
@@ -1290,6 +1269,3 @@ components:
 externalDocs:
   description: Full API Reference
   url: https://www.vaquill.ai/docs/api-reference/
-x-refined-from:
-- vaquill-ai-openapi.json
-- vaquill-ai-openapi.yml

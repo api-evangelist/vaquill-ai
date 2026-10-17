@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai Uploads API
+  title: Vaquill Legal Workspace Uploads API
+  description: 'Organization-scoped API for driving your legal workspace from your own backend: matters, documents, drafting, review, compare and matrices.'
   version: 1.0.0
-  description: 'Operations tagged Uploads across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai/workspace
   description: Vaquill Legal Workspace API (production)
@@ -321,11 +321,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/uploads/{uploadId}/parts/{partNumber}:
     get:
       tags:
@@ -470,11 +465,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/uploads/{uploadId}/complete:
     post:
       tags:
@@ -639,11 +629,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/uploads/formats:
     get:
       tags:
@@ -770,11 +755,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/uploads/{uploadId}:
     delete:
       tags:
@@ -924,47 +904,244 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
 components:
   schemas:
-    UploadCompleteRequest:
+    OperationError:
       properties:
-        parts:
-          items:
-            $ref: '#/components/schemas/CompletedPart'
-          type: array
-          minItems: 1
-          title: Parts
-          description: Every part that was uploaded, each with the ETag storage returned for it. All parts must be listed; a missing one is not detected until assembly fails.
+        code:
+          type: string
+          title: Code
+          description: Stable, machine-readable failure code. Branch on this, never on `message`.
+          examples:
+          - EXTRACTION_FAILED
+        message:
+          type: string
+          title: Message
+          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
+          examples:
+          - The upstream extraction did not finish.
       additionalProperties: false
       type: object
       required:
+      - code
+      - message
+      title: OperationError
+      description: 'Why a failed operation failed, in terms a customer can act on.
+
+
+        `code` is stable and machine-readable. `message` is sanitized: the internal
+
+        job tables store stack traces and file paths in their `error_message`
+
+        columns, and forwarding those verbatim leaks our internals into a customer''s
+
+        logs.'
+    OperationResource:
+      properties:
+        kind:
+          type: string
+          title: Kind
+          description: What sort of thing was produced, for example `matrix` or `document`.
+          examples:
+          - matrix
+        id:
+          type: string
+          title: Id
+          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
+          examples:
+          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+      additionalProperties: false
+      type: object
+      required:
+      - kind
+      - id
+      title: OperationResource
+      description: 'What the operation produced, or is producing.
+
+
+        `url` is a path on this API rather than an absolute URL, because the service
+
+        is mounted today and gets its own hostname later (docs 07.5). A relative
+
+        path survives that move; a baked-in host does not.'
+    UploadSession:
+      properties:
+        uploadId:
+          type: string
+          title: Uploadid
+          description: Public identifier for this upload session, `upl_` followed by 32 hex characters. Use it to presign a part and to complete the upload.
+          examples:
+          - upl_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        partSize:
+          type: integer
+          title: Partsize
+          description: Size in bytes of every part except the last. Split the file on exactly this boundary or the assembled object will not match.
+          examples:
+          - 5242880
+        totalParts:
+          type: integer
+          title: Totalparts
+          description: 'How many parts to upload. Always at least 1: a small file is a one-part upload rather than a separate code path.'
+          examples:
+          - 3
+        parts:
+          items:
+            $ref: '#/components/schemas/UploadPartLink'
+          type: array
+          title: Parts
+          description: One presigned URL per part, in order.
+        expiresAt:
+          type: string
+          format: date-time
+          title: Expiresat
+          description: When the whole SESSION expires (RFC 3339), which is much later than any individual part URL. Past this, storage discards the parts and the upload has to start again.
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - uploadId
+      - partSize
+      - totalParts
       - parts
-      title: UploadCompleteRequest
-      description: Assemble the parts into the final object and start ingesting it.
-    OperationStatus:
-      type: string
-      enum:
-      - queued
-      - running
-      - succeeded
-      - failed
-      - cancelled
-      title: OperationStatus
-      description: 'The public five. There is no sixth, and there are no synonyms.
+      - expiresAt
+      title: UploadSession
+      description: 'An open upload, and every URL needed to fill it.
 
 
-        Internal vocabularies spell terminal success `completed`, `ready`,
+        Two things are deliberately not here.
 
-        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
 
-        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+        The R2 object KEY. It is inside each presigned URL and cannot not be, since
 
-        `app.workspace_api.adapters.status_map`, which refuses to guess.'
+        an S3 presigned URL is a signed PATH. What is refused is publishing it as a
+
+        FIELD: a field is a stable, structured handle a client would build on and we
+
+        could never withdraw, whereas the URL is a fifteen-minute capability for one
+
+        object the caller was already granted. Nothing cross-tenant is disclosed
+
+        either way; the uuids in that path are the caller''s own.
+
+
+        The DOCUMENT ID. There is no document until the bytes land, only an
+
+        intention to create one, and publishing an id for a row that may never be
+
+        filled invites a customer to store it and then poll something that never
+
+        starts. It arrives on the operation''s `resource` at complete time, which is
+
+        the first moment it means anything.'
+    UploadPartLink:
+      properties:
+        partNumber:
+          type: integer
+          minimum: 1.0
+          title: Partnumber
+          description: Which part this URL is for. Parts are numbered from 1 and must be uploaded under the number given here.
+          examples:
+          - 1
+        url:
+          type: string
+          title: Url
+          description: Presigned URL to `PUT` this part's bytes to, directly to storage. No bytes pass through the Vaquill API. Keep the `ETag` the response returns.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+        expiresAt:
+          type: string
+          format: date-time
+          title: Expiresat
+          description: When this part URL stops working (RFC 3339). Re-sign an expired part with `uploads.presignPart`; parts already uploaded stay valid.
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - partNumber
+      - url
+      - expiresAt
+      title: UploadPartLink
+      description: 'Where to PUT one part, and how long that stays true.
+
+
+        `expiresAt` is on every part rather than on the session, because a large
+
+        upload outlives a single signature: a client re-signs the parts it has not
+
+        finished through `uploads.presignPart` and keeps the ones it has.'
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
     UploadInitiateRequest:
       properties:
         matterId:
@@ -1049,6 +1226,21 @@ components:
       - data
       - pagination
       title: Page[UploadSummary]
+    UploadCompleteRequest:
+      properties:
+        parts:
+          items:
+            $ref: '#/components/schemas/CompletedPart'
+          type: array
+          minItems: 1
+          title: Parts
+          description: Every part that was uploaded, each with the ETag storage returned for it. All parts must be listed; a missing one is not detected until assembly fails.
+      additionalProperties: false
+      type: object
+      required:
+      - parts
+      title: UploadCompleteRequest
+      description: Assemble the parts into the final object and start ingesting it.
     CompletedPart:
       properties:
         partNumber:
@@ -1074,259 +1266,6 @@ components:
       - etag
       title: CompletedPart
       description: One uploaded part, as R2 acknowledged it.
-    UploadFormats:
-      properties:
-        mediaTypes:
-          items:
-            type: string
-          type: array
-          title: Mediatypes
-          description: 'Every IANA media type this API will accept for an upload, sorted. Compare case-insensitively: media types are case-insensitive per RFC 2045, and this API folds both sides.'
-          examples:
-          - - value
-        extensions:
-          items:
-            type: string
-          type: array
-          title: Extensions
-          description: Every filename extension this API will accept, sorted and lowercase, each including its leading dot.
-          examples:
-          - - value
-        maxBytes:
-          type: integer
-          title: Maxbytes
-          description: Largest single file this API will open a session for. A larger `sizeBytes` is refused at initiate, before any URL is signed.
-          examples:
-          - 1
-        minPartSizeBytes:
-          type: integer
-          title: Minpartsizebytes
-          description: The floor storage applies to every part EXCEPT the last. A one-part upload of any size is legal, which is why a small file is not a separate code path.
-          examples:
-          - 1
-        maxParts:
-          type: integer
-          title: Maxparts
-          description: Most parts a single upload may be cut into. The part size is chosen server-side from the file size and returned on the session.
-          examples:
-          - 1
-      additionalProperties: false
-      type: object
-      required:
-      - mediaTypes
-      - extensions
-      - maxBytes
-      - minPartSizeBytes
-      - maxParts
-      title: UploadFormats
-      description: 'What this API will accept, and how it will cut it into parts.
-
-
-        Derived from `adapters/upload_media`, which is itself derived from
-
-        `app.core.file_validation`, rather than from the web app''s
-
-        `get_supported_formats()`. That catalogue carries categories and security
-
-        risk levels and INCLUDES macro-enabled formats the upload path refuses, so
-
-        publishing it would tell a caller a `.docm` is supported and then answer 415
-
-        when they sent one.
-
-
-        `supportedMediaTypes` here is the same list `unsupported-media-type` carries
-
-        in its problem document, from the same constant. A test asserts the two are
-
-        equal, because the day they drift the error becomes the more accurate one
-
-        and this endpoint becomes the lie.'
-    OperationProgress:
-      properties:
-        done:
-          type: integer
-          minimum: 0.0
-          title: Done
-          description: How many units are finished.
-          examples:
-          - 24
-        total:
-          type: integer
-          minimum: 0.0
-          title: Total
-          description: How many units there are in total. Can legitimately be zero for an empty run.
-          examples:
-          - 128
-        unit:
-          type: string
-          enum:
-          - cells
-          - steps
-          - documents
-          - files
-          - rows
-          - percent
-          title: Unit
-          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
-          examples:
-          - cells
-      additionalProperties: false
-      type: object
-      required:
-      - done
-      - total
-      - unit
-      title: OperationProgress
-      description: 'How far along, and in what units.
-
-
-        The unit is not decoration. A workflow run stores only a percentage while a
-
-        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
-
-        as 43 of 100 documents and a client builds a wrong estimate from it.'
-    Operation:
-      properties:
-        id:
-          type: string
-          title: Id
-          description: Public identifier, `op_` followed by 32 hex characters. Poll `GET /v1/operations/{operationId}` with it.
-          examples:
-          - op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        type:
-          type: string
-          title: Type
-          description: What kind of work this is, for example `matrix.run` or `draft.generate`.
-          examples:
-          - matrix.run
-        status:
-          $ref: '#/components/schemas/OperationStatus'
-          description: 'One of five values: `queued`, `running`, `succeeded`, `failed`, `cancelled`. There is no sixth and there are no synonyms. Stop polling once it is `succeeded`, `failed` or `cancelled`.'
-          examples:
-          - succeeded
-        createdAt:
-          type: string
-          format: date-time
-          title: Createdat
-          description: When the operation was accepted (RFC 3339).
-          examples:
-          - '2026-08-19T14:32:10Z'
-        completedAt:
-          anyOf:
-          - type: string
-            format: date-time
-          - type: 'null'
-          title: Completedat
-          description: When the operation reached a terminal status (RFC 3339). Present if and only if the status is terminal.
-          examples:
-          - '2026-08-19T14:32:10Z'
-        matterId:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Matterid
-          description: '`mat_` identifier of the matter this work belongs to, when it belongs to one.'
-          examples:
-          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        resource:
-          anyOf:
-          - $ref: '#/components/schemas/OperationResource'
-          - type: 'null'
-          description: What the operation produced. Absent until the underlying job row exists, which an idempotent replay can briefly observe, so treat absence as 'not yet' rather than 'never'.
-        error:
-          anyOf:
-          - $ref: '#/components/schemas/OperationError'
-          - type: 'null'
-          description: Why the work failed. Present only when `status` is `failed`. Partial success is `succeeded` with `progress.done < progress.total`, never an error.
-        progress:
-          anyOf:
-          - $ref: '#/components/schemas/OperationProgress'
-          - type: 'null'
-          description: How far along the work is, when the underlying job reports it. Absent does not mean no progress.
-        requestId:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Requestid
-          description: The `X-Request-ID` of the request that created this operation. Quote it in a support ticket.
-          examples:
-          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-      additionalProperties: false
-      type: object
-      required:
-      - id
-      - type
-      - status
-      - createdAt
-      title: Operation
-      description: 'One long-running operation, whatever kind of work it is.
-
-
-        Readable for `OPERATION_RETENTION_DAYS` after creation, per AIP-151.'
-    ValidationProblem:
-      type: object
-      title: ValidationProblem
-      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
-      required:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      - errors
-      properties:
-        type:
-          type: string
-          format: uri
-          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
-          examples:
-          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
-        title:
-          type: string
-          description: A short human-readable summary.
-          examples:
-          - Insufficient scope
-        status:
-          type: integer
-          description: The HTTP status code, repeated.
-          examples:
-          - 403
-        detail:
-          type: string
-          description: What went wrong on this specific request. May be reworded at any time.
-          examples:
-          - This credential carries matters:read. This operation needs matters:write.
-        instance:
-          type: string
-          description: The path this problem occurred on.
-          examples:
-          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        requestId:
-          type: string
-          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
-          examples:
-          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        errors:
-          type: array
-          description: One entry per rejected field.
-          items:
-            type: object
-            required:
-            - location
-            - message
-            - type
-            properties:
-              location:
-                type: string
-                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
-              message:
-                type: string
-                description: Why it was rejected.
-              type:
-                type: string
-                description: The validation rule that failed.
-      additionalProperties: true
     Pagination:
       properties:
         limit:
@@ -1367,142 +1306,6 @@ components:
         `total` is the count of rows matching the filter, not the count returned,
 
         so a caller can size a job before running it.'
-    OperationResource:
-      properties:
-        kind:
-          type: string
-          title: Kind
-          description: What sort of thing was produced, for example `matrix` or `document`.
-          examples:
-          - matrix
-        id:
-          type: string
-          title: Id
-          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
-          examples:
-          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        url:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Url
-          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
-          examples:
-          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
-      additionalProperties: false
-      type: object
-      required:
-      - kind
-      - id
-      title: OperationResource
-      description: 'What the operation produced, or is producing.
-
-
-        `url` is a path on this API rather than an absolute URL, because the service
-
-        is mounted today and gets its own hostname later (docs 07.5). A relative
-
-        path survives that move; a baked-in host does not.'
-    OperationError:
-      properties:
-        code:
-          type: string
-          title: Code
-          description: Stable, machine-readable failure code. Branch on this, never on `message`.
-          examples:
-          - EXTRACTION_FAILED
-        message:
-          type: string
-          title: Message
-          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
-          examples:
-          - The upstream extraction did not finish.
-      additionalProperties: false
-      type: object
-      required:
-      - code
-      - message
-      title: OperationError
-      description: 'Why a failed operation failed, in terms a customer can act on.
-
-
-        `code` is stable and machine-readable. `message` is sanitized: the internal
-
-        job tables store stack traces and file paths in their `error_message`
-
-        columns, and forwarding those verbatim leaks our internals into a customer''s
-
-        logs.'
-    UploadSession:
-      properties:
-        uploadId:
-          type: string
-          title: Uploadid
-          description: Public identifier for this upload session, `upl_` followed by 32 hex characters. Use it to presign a part and to complete the upload.
-          examples:
-          - upl_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        partSize:
-          type: integer
-          title: Partsize
-          description: Size in bytes of every part except the last. Split the file on exactly this boundary or the assembled object will not match.
-          examples:
-          - 5242880
-        totalParts:
-          type: integer
-          title: Totalparts
-          description: 'How many parts to upload. Always at least 1: a small file is a one-part upload rather than a separate code path.'
-          examples:
-          - 3
-        parts:
-          items:
-            $ref: '#/components/schemas/UploadPartLink'
-          type: array
-          title: Parts
-          description: One presigned URL per part, in order.
-        expiresAt:
-          type: string
-          format: date-time
-          title: Expiresat
-          description: When the whole SESSION expires (RFC 3339), which is much later than any individual part URL. Past this, storage discards the parts and the upload has to start again.
-          examples:
-          - '2026-08-19T14:32:10Z'
-      additionalProperties: false
-      type: object
-      required:
-      - uploadId
-      - partSize
-      - totalParts
-      - parts
-      - expiresAt
-      title: UploadSession
-      description: 'An open upload, and every URL needed to fill it.
-
-
-        Two things are deliberately not here.
-
-
-        The R2 object KEY. It is inside each presigned URL and cannot not be, since
-
-        an S3 presigned URL is a signed PATH. What is refused is publishing it as a
-
-        FIELD: a field is a stable, structured handle a client would build on and we
-
-        could never withdraw, whereas the URL is a fifteen-minute capability for one
-
-        object the caller was already granted. Nothing cross-tenant is disclosed
-
-        either way; the uuids in that path are the caller''s own.
-
-
-        The DOCUMENT ID. There is no document until the bytes land, only an
-
-        intention to create one, and publishing an id for a row that may never be
-
-        filled invites a customer to store it and then poll something that never
-
-        starts. It arrives on the operation''s `resource` at complete time, which is
-
-        the first moment it means anything.'
     UploadSummary:
       properties:
         uploadId:
@@ -1601,6 +1404,215 @@ components:
         success or failure. The ingest that follows a completion is the job, and it
 
         has an operation of its own.'
+    Operation:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `op_` followed by 32 hex characters. Poll `GET /v1/operations/{operationId}` with it.
+          examples:
+          - op_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        type:
+          type: string
+          title: Type
+          description: What kind of work this is, for example `matrix.run` or `draft.generate`.
+          examples:
+          - matrix.run
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: 'One of five values: `queued`, `running`, `succeeded`, `failed`, `cancelled`. There is no sixth and there are no synonyms. Stop polling once it is `succeeded`, `failed` or `cancelled`.'
+          examples:
+          - succeeded
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the operation was accepted (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        completedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Completedat
+          description: When the operation reached a terminal status (RFC 3339). Present if and only if the status is terminal.
+          examples:
+          - '2026-08-19T14:32:10Z'
+        matterId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matterid
+          description: '`mat_` identifier of the matter this work belongs to, when it belongs to one.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        resource:
+          anyOf:
+          - $ref: '#/components/schemas/OperationResource'
+          - type: 'null'
+          description: What the operation produced. Absent until the underlying job row exists, which an idempotent replay can briefly observe, so treat absence as 'not yet' rather than 'never'.
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/OperationError'
+          - type: 'null'
+          description: Why the work failed. Present only when `status` is `failed`. Partial success is `succeeded` with `progress.done < progress.total`, never an error.
+        progress:
+          anyOf:
+          - $ref: '#/components/schemas/OperationProgress'
+          - type: 'null'
+          description: How far along the work is, when the underlying job reports it. Absent does not mean no progress.
+        requestId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Requestid
+          description: The `X-Request-ID` of the request that created this operation. Quote it in a support ticket.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - type
+      - status
+      - createdAt
+      title: Operation
+      description: 'One long-running operation, whatever kind of work it is.
+
+
+        Readable for `OPERATION_RETENTION_DAYS` after creation, per AIP-151.'
+    OperationStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: OperationStatus
+      description: 'The public five. There is no sixth, and there are no synonyms.
+
+
+        Internal vocabularies spell terminal success `completed`, `ready`,
+
+        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+
+        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+
+        `app.workspace_api.adapters.status_map`, which refuses to guess.'
+    OperationProgress:
+      properties:
+        done:
+          type: integer
+          minimum: 0.0
+          title: Done
+          description: How many units are finished.
+          examples:
+          - 24
+        total:
+          type: integer
+          minimum: 0.0
+          title: Total
+          description: How many units there are in total. Can legitimately be zero for an empty run.
+          examples:
+          - 128
+        unit:
+          type: string
+          enum:
+          - cells
+          - steps
+          - documents
+          - files
+          - rows
+          - percent
+          title: Unit
+          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
+          examples:
+          - cells
+      additionalProperties: false
+      type: object
+      required:
+      - done
+      - total
+      - unit
+      title: OperationProgress
+      description: 'How far along, and in what units.
+
+
+        The unit is not decoration. A workflow run stores only a percentage while a
+
+        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
+
+        as 43 of 100 documents and a client builds a wrong estimate from it.'
+    UploadFormats:
+      properties:
+        mediaTypes:
+          items:
+            type: string
+          type: array
+          title: Mediatypes
+          description: 'Every IANA media type this API will accept for an upload, sorted. Compare case-insensitively: media types are case-insensitive per RFC 2045, and this API folds both sides.'
+          examples:
+          - - value
+        extensions:
+          items:
+            type: string
+          type: array
+          title: Extensions
+          description: Every filename extension this API will accept, sorted and lowercase, each including its leading dot.
+          examples:
+          - - value
+        maxBytes:
+          type: integer
+          title: Maxbytes
+          description: Largest single file this API will open a session for. A larger `sizeBytes` is refused at initiate, before any URL is signed.
+          examples:
+          - 1
+        minPartSizeBytes:
+          type: integer
+          title: Minpartsizebytes
+          description: The floor storage applies to every part EXCEPT the last. A one-part upload of any size is legal, which is why a small file is not a separate code path.
+          examples:
+          - 1
+        maxParts:
+          type: integer
+          title: Maxparts
+          description: Most parts a single upload may be cut into. The part size is chosen server-side from the file size and returned on the session.
+          examples:
+          - 1
+      additionalProperties: false
+      type: object
+      required:
+      - mediaTypes
+      - extensions
+      - maxBytes
+      - minPartSizeBytes
+      - maxParts
+      title: UploadFormats
+      description: 'What this API will accept, and how it will cut it into parts.
+
+
+        Derived from `adapters/upload_media`, which is itself derived from
+
+        `app.core.file_validation`, rather than from the web app''s
+
+        `get_supported_formats()`. That catalogue carries categories and security
+
+        risk levels and INCLUDES macro-enabled formats the upload path refuses, so
+
+        publishing it would tell a caller a `.docm` is supported and then answer 415
+
+        when they sent one.
+
+
+        `supportedMediaTypes` here is the same list `unsupported-media-type` carries
+
+        in its problem document, from the same constant. A test asserts the two are
+
+        equal, because the day they drift the error becomes the more accurate one
+
+        and this endpoint becomes the lie.'
     Problem:
       type: object
       title: Problem
@@ -1644,43 +1656,6 @@ components:
           examples:
           - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
       additionalProperties: true
-    UploadPartLink:
-      properties:
-        partNumber:
-          type: integer
-          minimum: 1.0
-          title: Partnumber
-          description: Which part this URL is for. Parts are numbered from 1 and must be uploaded under the number given here.
-          examples:
-          - 1
-        url:
-          type: string
-          title: Url
-          description: Presigned URL to `PUT` this part's bytes to, directly to storage. No bytes pass through the Vaquill API. Keep the `ETag` the response returns.
-          examples:
-          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
-        expiresAt:
-          type: string
-          format: date-time
-          title: Expiresat
-          description: When this part URL stops working (RFC 3339). Re-sign an expired part with `uploads.presignPart`; parts already uploaded stay valid.
-          examples:
-          - '2026-08-19T14:32:10Z'
-      additionalProperties: false
-      type: object
-      required:
-      - partNumber
-      - url
-      - expiresAt
-      title: UploadPartLink
-      description: 'Where to PUT one part, and how long that stays true.
-
-
-        `expiresAt` is on every part rather than on the session, because a large
-
-        upload outlives a single signature: a client re-signs the parts it has not
-
-        finished through `uploads.presignPart` and keeps the ones it has.'
   securitySchemes:
     WorkspaceAuth:
       type: http
@@ -1690,6 +1665,3 @@ components:
 externalDocs:
   description: Getting started guide and error reference
   url: https://vaquill.ai/docs/workspace-api
-x-refined-from:
-- vaquill-ai-workspace-openapi.json
-- vaquill-ai-workspace-openapi.yml

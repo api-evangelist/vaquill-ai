@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai Reviews API
+  title: Vaquill Legal Workspace Reviews API
+  description: 'Organization-scoped API for driving your legal workspace from your own backend: matters, documents, drafting, review, compare and matrices.'
   version: 1.0.0
-  description: 'Operations tagged Reviews across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai/workspace
   description: Vaquill Legal Workspace API (production)
@@ -456,11 +456,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/reviews/{reviewId}:
     get:
       tags:
@@ -830,11 +825,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/reviews/{reviewId}/exports:
     post:
       tags:
@@ -1006,793 +996,8 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
 components:
   schemas:
-    ReviewCreateRequest:
-      properties:
-        documentText:
-          type: string
-          maxLength: 200000
-          minLength: 100
-          title: Documenttext
-          description: 'The full contract text to review, 100 to 200,000 characters. Text rather than a document id: a review reads one contract end to end and the caller usually has it in hand.'
-          examples:
-          - 'MASTER SERVICES AGREEMENT
-
-
-            This Master Services Agreement is entered into as of 1 September 2026 between Acme Corporation, a Delaware corporation, and the Supplier identified on the signature page.
-
-
-            8. LIMITATION OF LIABILITY. Supplier''s total liability shall be unlimited for any claim arising out of this Agreement.
-
-
-            12. GOVERNING LAW. This Agreement is governed by the laws of the State of Delaware.'
-        contractType:
-          $ref: '#/components/schemas/ContractType'
-          description: What kind of contract this is. Determines which playbook and which default positions resolve.
-          examples:
-          - saas
-        userSide:
-          $ref: '#/components/schemas/UserSide'
-          description: Which side of the deal you are on. The review argues for this side.
-          examples:
-          - vendor
-        playbookId:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Playbookid
-          description: '`pbk_` identifier of the playbook to review against. Omit to run against the built-in default positions for `jurisdiction`, which is a real answer rather than a degraded one.'
-          examples:
-          - pbk_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        jurisdiction:
-          type: string
-          pattern: ^([A-Z]{2}|INTL)$
-          title: Jurisdiction
-          description: Two-letter uppercase jurisdiction code, or `INTL`. Selects the default positions when no playbook is named.
-          default: US
-          examples:
-          - US
-        focusAreas:
-          anyOf:
-          - items:
-              type: string
-              maxLength: 80
-              minLength: 1
-            type: array
-            maxItems: 50
-          - type: 'null'
-          title: Focusareas
-          description: Narrow the review to these areas of concern. Omit to review the whole contract.
-          examples:
-          - - value
-        reviewInstructions:
-          anyOf:
-          - type: string
-            maxLength: 2000
-          - type: 'null'
-          title: Reviewinstructions
-          description: Extra instructions for this review only, layered on top of the playbook.
-          examples:
-          - Pay particular attention to the indemnity carve-outs.
-        markupLevel:
-          type: string
-          enum:
-          - light
-          - standard
-          - firm
-          title: Markuplevel
-          description: How aggressively to mark up. `light` flags only escalation triggers, `standard` marks up gaps to the preferred position, `firm` hard-lines every deviation.
-          default: standard
-          examples:
-          - light
-        paperSide:
-          anyOf:
-          - type: string
-            enum:
-            - own
-            - counterparty
-          - type: 'null'
-          title: Paperside
-          description: Whose paper this is. `own` defends your drafted positions; `counterparty` marks up their form assertively. Orthogonal to `userSide`. Omit if unknown, which costs only prompt specificity.
-          examples:
-          - own
-        round:
-          type: integer
-          maximum: 10.0
-          minimum: 1.0
-          title: Round
-          description: Negotiation round. 2 and above tells the reviewer the counterparty has already responded, so it proposes minimal edits toward the fallback rather than restating the preferred position.
-          default: 1
-          examples:
-          - 1
-        priorRoundText:
-          anyOf:
-          - type: string
-            maxLength: 200000
-          - type: 'null'
-          title: Priorroundtext
-          description: Your last sent version, at round 2 and above, so the reviewer can compute a real diff instead of guessing what changed and undoing settled language.
-          examples:
-          - 8. LIMITATION OF LIABILITY. Supplier's total liability shall not exceed the fees paid in the preceding twelve months.
-        counterpartyResponseText:
-          anyOf:
-          - type: string
-            maxLength: 200000
-          - type: 'null'
-          title: Counterpartyresponsetext
-          description: The counterparty's response, when it differs from `documentText`. Most callers paste the response straight into `documentText`, in which case leave this out.
-          examples:
-          - 8. LIMITATION OF LIABILITY. Supplier's total liability shall not exceed three times the fees paid in the preceding twelve months.
-        dealContext:
-          anyOf:
-          - $ref: '#/components/schemas/ReviewDealContext'
-          - type: 'null'
-          description: Deal attributes the playbook's conditional escalation rules evaluate.
-        depth:
-          type: string
-          enum:
-          - standard
-          - deep
-          title: Depth
-          description: '`standard` runs the first-pass review. `deep` additionally re-drafts every flagged clause with the deep model, grounds each quote against the contract, drops first-pass false positives and stamps a sign-off level, so each redline''s `grounding` is a fact rather than a default. It takes several times as long and verifies at most 40 flagged clauses. `focusAreas`, `reviewInstructions`, `markupLevel`, `round`, `priorRoundText` and `counterpartyResponseText` are not supported at this depth and are refused rather than ignored.'
-          default: standard
-          examples:
-          - standard
-      additionalProperties: false
-      type: object
-      required:
-      - documentText
-      - contractType
-      - userSide
-      title: ReviewCreateRequest
-      description: 'Start a review of one contract against one playbook.
-
-
-        `contractType` and `userSide` are the internal enums by REFERENCE rather than
-
-        by copy. They are the taxonomy the whole product is built on, guarded in both
-
-        directions by `app/tests/unit/test_contract_type_taxonomy.py`, and a second
-
-        hand-maintained copy here would be a fourth layer for that guard to police.
-
-        Widening the taxonomy widens this API additively, which is correct.'
-    ContractType:
-      type: string
-      enum:
-      - saas
-      - professional_services
-      - msa
-      - sow
-      - consulting
-      - license
-      - sale
-      - partnership
-      - procurement
-      - vendor_agreement
-      - reseller_distribution
-      - supply
-      - lease
-      - loan
-      - eula
-      - terms_of_service
-      - baa
-      - order_form
-      - nda
-      - dpa
-      - ip_assignment
-      - employment
-      - executive_employment
-      - independent_contractor
-      - offer_letter
-      - severance_agreement
-      - non_compete
-      - asset_purchase
-      - stock_purchase
-      - merger_agreement
-      - shareholders_agreement
-      - operating_agreement
-      - safe
-      - term_sheet
-      - settlement_agreement
-      - engagement_letter
-      - protective_order
-      - joint_defense
-      - other
-      title: ContractType
-      description: 'Contract types a playbook can encode negotiation positions for.
-
-
-        A playbook is a set of clause-level negotiation positions, so this list
-
-        covers contracts you negotiate clause-by-clause. Documents you only
-
-        *generate* (litigation pleadings, notices) live in `DraftCategory`
-
-        (`app/models/drafting_schemas.py`), NOT here.
-
-
-        Each value backs a `legal_playbooks.contract_type` row, so adding one
-
-        requires a DB migration to extend the CHECK constraint (see
-
-        `20260502160000_expand_playbook_contract_type_dpa_vendor_ip.sql`,
-
-        `20260612130000_expand_playbook_contract_type_msa_sale_sow_consulting.sql`,
-
-        and `20260702120000_expand_playbook_contract_type_gc_litigation.sql`).
-
-        Kept in sync with the FE `ContractType` union + `CONTRACT_TYPE_LABELS`
-
-        (`frontend/src/types/legal-tools.ts`); the drift-guard in
-
-        `app/tests/unit/test_contract_type_taxonomy.py` asserts all three layers
-
-        both ways and fails fast if they diverge.'
-    Problem:
-      type: object
-      title: Problem
-      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
-      required:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      properties:
-        type:
-          type: string
-          format: uri
-          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
-          examples:
-          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
-        title:
-          type: string
-          description: A short human-readable summary.
-          examples:
-          - Insufficient scope
-        status:
-          type: integer
-          description: The HTTP status code, repeated.
-          examples:
-          - 403
-        detail:
-          type: string
-          description: What went wrong on this specific request. May be reworded at any time.
-          examples:
-          - This credential carries matters:read. This operation needs matters:write.
-        instance:
-          type: string
-          description: The path this problem occurred on.
-          examples:
-          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        requestId:
-          type: string
-          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
-          examples:
-          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-      additionalProperties: true
-    Review:
-      properties:
-        id:
-          type: string
-          title: Id
-          description: Public identifier, `rev_` followed by 32 hex characters.
-          examples:
-          - rev_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        matterId:
-          type: string
-          title: Matterid
-          description: '`mat_` identifier of the matter this review belongs to.'
-          examples:
-          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        status:
-          $ref: '#/components/schemas/OperationStatus'
-          description: Review status, using the same five public values as an operation. While `queued` or `running`, every findings list is empty and the scalar fields are absent. That is the truthful shape of a review that has not happened yet, not an error.
-          examples:
-          - succeeded
-        contractType:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Contracttype
-          description: Contract type the review ran as, echoed from the request.
-          examples:
-          - msa
-        userSide:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Userside
-          description: Which side the review argued for, echoed from the request.
-          examples:
-          - buyer
-        playbookId:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Playbookid
-          description: The playbook the review actually ran against. Absent when it ran against the built-in defaults, so the two cases can be told apart after the fact.
-          examples:
-          - pbk_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        jurisdiction:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Jurisdiction
-          description: Jurisdiction the review ran under.
-          examples:
-          - US
-        round:
-          type: integer
-          title: Round
-          description: Negotiation round this review was run for.
-          default: 1
-          examples:
-          - 1
-        summary:
-          type: string
-          title: Summary
-          description: Prose summary of the review's conclusions.
-          default: ''
-          examples:
-          - Twelve substantive changes, seven of them in the liability and indemnity sections.
-        overallRisk:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Overallrisk
-          description: 'Overall risk rating for the contract: `green`, `yellow` or `red`.'
-          examples:
-          - yellow
-        businessImpactSummary:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Businessimpactsummary
-          description: What the findings mean commercially, in plain language.
-          examples:
-          - Two changes shift risk toward us; the rest are housekeeping.
-        approvalGate:
-          anyOf:
-          - $ref: '#/components/schemas/ReviewApprovalGate'
-          - type: 'null'
-          description: Whether a human should sign this off before it goes out. Reported, never enforced.
-        liabilityExposure:
-          anyOf:
-          - $ref: '#/components/schemas/ReviewLiabilityExposure'
-          - type: 'null'
-          description: 'How much you are on the hook for: caps, carve-outs, indemnities and insurance.'
-        counterpartyMatch:
-          anyOf:
-          - $ref: '#/components/schemas/ReviewCounterpartyMatch'
-          - type: 'null'
-          description: Set when a known counterparty paper was recognized, which means the findings include counterparty-specific redlines layered on the general analysis.
-        clauses:
-          items:
-            $ref: '#/components/schemas/ReviewClause'
-          type: array
-          title: Clauses
-          description: Every clause analyzed, with its severity against the playbook position.
-        redlines:
-          items:
-            $ref: '#/components/schemas/ReviewRedline'
-          type: array
-          title: Redlines
-          description: Proposed edits, ready to send to counterparty counsel. Check each one's `grounding` before applying it automatically.
-        negotiationPriorities:
-          items:
-            $ref: '#/components/schemas/ReviewNegotiationPriority'
-          type: array
-          title: Negotiationpriorities
-          description: What to raise first and what to trade, in tiers.
-        missingClauses:
-          items:
-            type: string
-          type: array
-          title: Missingclauses
-          description: Standard clauses ABSENT from the contract. The one finding that cannot be expressed as a clause analysis, because there is no clause to analyze.
-          examples:
-          - - Force Majeure
-        flags:
-          items:
-            $ref: '#/components/schemas/ReviewFlag'
-          type: array
-          title: Flags
-          description: 'Things the reviewer noticed and deliberately did not redline: a wrong entity name, an odd schedule entry, a real ambiguity. Confirm these with a human before signing.'
-        parseWarning:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Parsewarning
-          description: Set when the model's output only partly parsed, which means the findings may be incomplete. Present is the difference between acting on the findings and asking a human first.
-          examples:
-          - Two clauses could not be parsed and are omitted from the findings.
-        deep:
-          anyOf:
-          - $ref: '#/components/schemas/ReviewDeepMeta'
-          - type: 'null'
-          description: What the deep verification pass did. Absent on a standard review, which is the signal that no verification ran rather than that it found nothing.
-        createdAt:
-          type: string
-          format: date-time
-          title: Createdat
-          description: When the review was created (RFC 3339).
-          examples:
-          - '2026-08-19T14:32:10Z'
-        completedAt:
-          anyOf:
-          - type: string
-            format: date-time
-          - type: 'null'
-          title: Completedat
-          description: When the review reached a terminal status (RFC 3339).
-          examples:
-          - '2026-08-19T14:32:10Z'
-      additionalProperties: false
-      type: object
-      required:
-      - id
-      - matterId
-      - status
-      - createdAt
-      title: Review
-      description: 'One contract review: its findings, or its progress toward them.'
-    ReviewDeepMeta:
-      properties:
-        clausesReviewed:
-          type: integer
-          title: Clausesreviewed
-          description: How many first-pass flagged clauses the deep pass verified.
-          examples:
-          - 1
-        redlinesKept:
-          type: integer
-          title: Redlineskept
-          description: How many survived verification and are in `redlines`.
-          examples:
-          - 1
-        clearedAsCompliant:
-          type: integer
-          title: Clearedascompliant
-          description: How many first-pass flags the deep pass cleared as already compliant, and therefore dropped. Fewer false positives is the point of running deep.
-          examples:
-          - 1
-        clauseLimit:
-          type: integer
-          title: Clauselimit
-          description: The ceiling on how many flagged clauses a deep review verifies, currently 40.
-          default: 40
-          examples:
-          - 40
-        clausesTruncated:
-          type: boolean
-          title: Clausestruncated
-          description: True when the deep pass hit its 40-clause ceiling, which means first-pass flags beyond it were NOT verified and are NOT in `redlines`. Treat the review as covering the first 40 findings only. A boolean rather than a count because the number dropped is not recorded anywhere upstream.
-          default: false
-          examples:
-          - false
-      additionalProperties: false
-      type: object
-      required:
-      - clausesReviewed
-      - redlinesKept
-      - clearedAsCompliant
-      title: ReviewDeepMeta
-      description: 'What the deep verification pass did, present only when one ran.
-
-
-        Absent on a standard review, which is the honest signal that no verification
-
-        happened rather than a zeroed object implying one found nothing.
-
-
-        `estimatedCostUsd` is dropped on the way through. It is our spend and our
-
-        model choice, and it is on the list of things a published DTO always drops.'
-    OperationProgress:
-      properties:
-        done:
-          type: integer
-          minimum: 0.0
-          title: Done
-          description: How many units are finished.
-          examples:
-          - 24
-        total:
-          type: integer
-          minimum: 0.0
-          title: Total
-          description: How many units there are in total. Can legitimately be zero for an empty run.
-          examples:
-          - 128
-        unit:
-          type: string
-          enum:
-          - cells
-          - steps
-          - documents
-          - files
-          - rows
-          - percent
-          title: Unit
-          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
-          examples:
-          - cells
-      additionalProperties: false
-      type: object
-      required:
-      - done
-      - total
-      - unit
-      title: OperationProgress
-      description: 'How far along, and in what units.
-
-
-        The unit is not decoration. A workflow run stores only a percentage while a
-
-        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
-
-        as 43 of 100 documents and a client builds a wrong estimate from it.'
-    ReviewExportRequest:
-      properties:
-        redlines:
-          anyOf:
-          - items:
-              $ref: '#/components/schemas/AcceptedRedline'
-            type: array
-            maxItems: 500
-          - type: 'null'
-          title: Redlines
-          description: Which edits to apply. Omit to apply EVERY redline the review produced, which is the common case for an integration that triaged them elsewhere. Supply them to apply a subset, or edits you wrote yourself.
-        trackedChanges:
-          type: boolean
-          title: Trackedchanges
-          description: True renders native Word tracked changes, so the counterparty accepts or rejects each edit in the Review pane. False renders colored strikethrough and underline, which is viewable anywhere but is not real revisions.
-          default: true
-          examples:
-          - true
-      additionalProperties: false
-      type: object
-      title: ReviewExportRequest
-      description: 'Which of a review''s redlines to apply, and how to mark them up.
-
-
-        Omitting `redlines` applies EVERY redline the review produced, which is the
-
-        common case for an integration that has already triaged them elsewhere.
-
-        Supplying them is how a caller applies a subset, or applies edits it wrote
-
-        itself after reading the review.'
-    OperationResource:
-      properties:
-        kind:
-          type: string
-          title: Kind
-          description: What sort of thing was produced, for example `matrix` or `document`.
-          examples:
-          - matrix
-        id:
-          type: string
-          title: Id
-          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
-          examples:
-          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        url:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Url
-          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
-          examples:
-          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
-      additionalProperties: false
-      type: object
-      required:
-      - kind
-      - id
-      title: OperationResource
-      description: 'What the operation produced, or is producing.
-
-
-        `url` is a path on this API rather than an absolute URL, because the service
-
-        is mounted today and gets its own hostname later (docs 07.5). A relative
-
-        path survives that move; a baked-in host does not.'
-    Page_Review_:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/Review'
-          type: array
-          title: Data
-          description: The rows in this window, in the collection's default order.
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-          description: Where this window sits in the full result set.
-      additionalProperties: false
-      type: object
-      required:
-      - data
-      - pagination
-      title: Page[Review]
-    ReviewClause:
-      properties:
-        clauseName:
-          type: string
-          title: Clausename
-          description: Human-readable name of the clause, for example 'Limitation of Liability'.
-          examples:
-          - Limitation of Liability
-        clauseType:
-          type: string
-          title: Clausetype
-          description: Clause-type slug the analysis matched, the same key a playbook's `positions` map uses.
-          examples:
-          - limitation_of_liability
-        sectionReference:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sectionreference
-          description: Where the clause sits in the contract, for example `8.2`.
-          examples:
-          - '8.2'
-        currentLanguage:
-          type: string
-          title: Currentlanguage
-          description: The exact quote from the contract this analysis is about. Empty when the finding is that the clause is ABSENT, which is the one case with nothing to quote.
-          default: ''
-          examples:
-          - Supplier's total liability shall be unlimited.
-        severity:
-          type: string
-          title: Severity
-          description: 'How far the clause deviates from the playbook position: `green`, `yellow` or `red`. Published as a plain string so a new level cannot break your client.'
-          examples:
-          - yellow
-        analysis:
-          type: string
-          title: Analysis
-          description: What the reviewer concluded about this clause.
-          examples:
-          - The clause is uncapped and departs from the playbook's standard position.
-        riskDescription:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Riskdescription
-          description: What could go wrong if the clause stands as written.
-          examples:
-          - Unlimited liability for a breach we cannot fully control.
-        playbookPosition:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Playbookposition
-          description: The playbook position this clause was measured against.
-          examples:
-          - Cap liability at fees paid in the preceding twelve months.
-        approvalLevel:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Approvallevel
-          description: 'Sign-off a deviation on this clause needs: `none`, `manager`, `partner` or `gc`. Computed server-side by matching the clause to its playbook position, never asserted by the model. Only meaningful when `severity` is not green.'
-          examples:
-          - partner
-        isDealBreaker:
-          type: boolean
-          title: Isdealbreaker
-          description: True when the clause is at or below the playbook's walk-away floor.
-          default: false
-          examples:
-          - false
-      additionalProperties: false
-      type: object
-      required:
-      - clauseName
-      - clauseType
-      - severity
-      - analysis
-      title: ReviewClause
-      description: One clause, as analyzed against the playbook position for its type.
-    ReviewRedline:
-      properties:
-        clauseName:
-          type: string
-          title: Clausename
-          description: Which clause this edit applies to.
-          examples:
-          - Limitation of Liability
-        sectionReference:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sectionreference
-          description: Where the clause sits in the contract, for example `8.2`.
-          examples:
-          - '8.2'
-        currentLanguage:
-          type: string
-          title: Currentlanguage
-          description: The text to be replaced, as it stands in the contract. Empty for an insertion.
-          default: ''
-          examples:
-          - Supplier's total liability shall be unlimited.
-        proposedLanguage:
-          type: string
-          title: Proposedlanguage
-          description: The replacement text to send to the counterparty.
-          examples:
-          - Supplier's total liability shall not exceed the fees paid in the preceding twelve months.
-        rationale:
-          type: string
-          title: Rationale
-          description: Why this edit is being proposed. Suitable to put in a margin comment.
-          examples:
-          - Our standard position caps liability at fees paid in the preceding 12 months.
-        priority:
-          type: string
-          title: Priority
-          description: 'How hard to push for this edit: `must_have`, `should_have` or `nice_to_have`.'
-          examples:
-          - must_have
-        fallbackPosition:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Fallbackposition
-          description: What to retreat to if this edit is rejected, taken from the playbook's fallback ladder.
-          examples:
-          - Two times fees paid in the preceding twelve months.
-        grounding:
-          type: string
-          title: Grounding
-          description: Whether `currentLanguage` was found verbatim in the contract. `verified` means it was. `unverified` means it was NOT, so the edit may be misanchored. `insertion` means there is nothing to anchor because the clause is missing. An integration applying redlines automatically must stop and ask a human on `unverified`.
-          default: verified
-          examples:
-          - verified
-        approvalLevel:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Approvallevel
-          description: 'Sign-off this edit needs before it goes out: `none`, `manager`, `partner` or `gc`.'
-          examples:
-          - partner
-        isDealBreaker:
-          type: boolean
-          title: Isdealbreaker
-          description: True when the clause this edit addresses is at or below the walk-away floor.
-          default: false
-          examples:
-          - false
-        nature:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Nature
-          description: '`substantive` or `housekeeping`. Absent means unclassified, on a review produced before the pipeline classified this. Absent is NOT the same as `housekeeping`.'
-          examples:
-          - substantive
-      additionalProperties: false
-      type: object
-      required:
-      - clauseName
-      - proposedLanguage
-      - rationale
-      - priority
-      title: ReviewRedline
-      description: One proposed edit, ready to send to counterparty counsel.
     ReviewCounterpartyMatch:
       properties:
         name:
@@ -1844,6 +1049,73 @@ components:
         should be read. The catalogue slug and the phrases that matched are NOT
 
         published: they are our detection internals, and neither is actionable.'
+    ReviewApprovalGate:
+      properties:
+        required:
+          type: boolean
+          title: Required
+          description: 'Whether a human should sign this off before it goes to the counterparty. REPORTED, never enforced: it does not block the review or the export. Implement the gate on your side using this field.'
+          default: false
+          examples:
+          - false
+        level:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Level
+          description: 'The highest sign-off any gating clause needs: `manager`, `partner` or `gc`. Absent when `required` is false.'
+          examples:
+          - partner
+        dealBreakerCount:
+          type: integer
+          title: Dealbreakercount
+          description: How many clauses sit at or below the walk-away floor.
+          default: 0
+          examples:
+          - 1
+        reasons:
+          items:
+            $ref: '#/components/schemas/ReviewApprovalReason'
+          type: array
+          title: Reasons
+          description: Which clauses drive the gate, and why each one does.
+        summary:
+          type: string
+          title: Summary
+          description: One-line explanation of the gate, suitable to show a reviewer.
+          default: ''
+          examples:
+          - Twelve substantive changes, seven of them in the liability and indemnity sections.
+      additionalProperties: false
+      type: object
+      title: ReviewApprovalGate
+      description: 'Whether a human has to sign this off before it goes to the counterparty.
+
+
+        **Reported, never enforced.** The gate is computed deterministically from the
+
+        playbook''s own `approvalLevel` and `dealBreaker` on clauses that actually
+
+        deviated, and it is published as a fact about the result. It does not block
+
+        the review, it does not block the export, and the operation reaches a
+
+        terminal status either way.
+
+
+        That is the same decision the acting-user header already carries (docs 07.3):
+
+        we record what we know and build no enforcement machinery we cannot honour.
+
+        Enforcing would mean an approval workflow, an enrolled approver directory and
+
+        a state a review can sit in indefinitely, which is precisely the "do not let
+
+        it hang" failure the handoff for this track warned about. A caller that wants
+
+        a gate has everything it needs to implement one: `required` says whether,
+
+        `level` says who, and `reasons` says why.'
     ReviewLiabilityExposure:
       properties:
         exposureLevel:
@@ -2042,6 +1314,129 @@ components:
                 type: string
                 description: The validation rule that failed.
       additionalProperties: true
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
+          examples:
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
+
+
+        `total` is the count of rows matching the filter, not the count returned,
+
+        so a caller can size a job before running it.'
+    ReviewDeepMeta:
+      properties:
+        clausesReviewed:
+          type: integer
+          title: Clausesreviewed
+          description: How many first-pass flagged clauses the deep pass verified.
+          examples:
+          - 1
+        redlinesKept:
+          type: integer
+          title: Redlineskept
+          description: How many survived verification and are in `redlines`.
+          examples:
+          - 1
+        clearedAsCompliant:
+          type: integer
+          title: Clearedascompliant
+          description: How many first-pass flags the deep pass cleared as already compliant, and therefore dropped. Fewer false positives is the point of running deep.
+          examples:
+          - 1
+        clauseLimit:
+          type: integer
+          title: Clauselimit
+          description: The ceiling on how many flagged clauses a deep review verifies, currently 40.
+          default: 40
+          examples:
+          - 40
+        clausesTruncated:
+          type: boolean
+          title: Clausestruncated
+          description: True when the deep pass hit its 40-clause ceiling, which means first-pass flags beyond it were NOT verified and are NOT in `redlines`. Treat the review as covering the first 40 findings only. A boolean rather than a count because the number dropped is not recorded anywhere upstream.
+          default: false
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - clausesReviewed
+      - redlinesKept
+      - clearedAsCompliant
+      title: ReviewDeepMeta
+      description: 'What the deep verification pass did, present only when one ran.
+
+
+        Absent on a standard review, which is the honest signal that no verification
+
+        happened rather than a zeroed object implying one found nothing.
+
+
+        `estimatedCostUsd` is dropped on the way through. It is our spend and our
+
+        model choice, and it is on the list of things a published DTO always drops.'
+    ReviewNegotiationPriority:
+      properties:
+        tier:
+          type: integer
+          title: Tier
+          description: 'Priority tier: 1 is must-have and covers deal breakers, 2 is should-have, 3 is nice-to-have.'
+          examples:
+          - 1
+        tierLabel:
+          type: string
+          title: Tierlabel
+          description: Human-readable name for the tier.
+          examples:
+          - Must have
+        items:
+          items:
+            type: string
+          type: array
+          title: Items
+          description: What to raise at this tier, in order.
+          examples:
+          - - Cap liability
+            - Remove uncapped indemnity
+      additionalProperties: false
+      type: object
+      required:
+      - tier
+      - tierLabel
+      - items
+      title: ReviewNegotiationPriority
+      description: 'One tier of the negotiation plan: what to raise first, and what to trade.'
     Operation:
       properties:
         id:
@@ -2120,6 +1515,268 @@ components:
 
 
         Readable for `OPERATION_RETENTION_DAYS` after creation, per AIP-151.'
+    ReviewRedline:
+      properties:
+        clauseName:
+          type: string
+          title: Clausename
+          description: Which clause this edit applies to.
+          examples:
+          - Limitation of Liability
+        sectionReference:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectionreference
+          description: Where the clause sits in the contract, for example `8.2`.
+          examples:
+          - '8.2'
+        currentLanguage:
+          type: string
+          title: Currentlanguage
+          description: The text to be replaced, as it stands in the contract. Empty for an insertion.
+          default: ''
+          examples:
+          - Supplier's total liability shall be unlimited.
+        proposedLanguage:
+          type: string
+          title: Proposedlanguage
+          description: The replacement text to send to the counterparty.
+          examples:
+          - Supplier's total liability shall not exceed the fees paid in the preceding twelve months.
+        rationale:
+          type: string
+          title: Rationale
+          description: Why this edit is being proposed. Suitable to put in a margin comment.
+          examples:
+          - Our standard position caps liability at fees paid in the preceding 12 months.
+        priority:
+          type: string
+          title: Priority
+          description: 'How hard to push for this edit: `must_have`, `should_have` or `nice_to_have`.'
+          examples:
+          - must_have
+        fallbackPosition:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Fallbackposition
+          description: What to retreat to if this edit is rejected, taken from the playbook's fallback ladder.
+          examples:
+          - Two times fees paid in the preceding twelve months.
+        grounding:
+          type: string
+          title: Grounding
+          description: Whether `currentLanguage` was found verbatim in the contract. `verified` means it was. `unverified` means it was NOT, so the edit may be misanchored. `insertion` means there is nothing to anchor because the clause is missing. An integration applying redlines automatically must stop and ask a human on `unverified`.
+          default: verified
+          examples:
+          - verified
+        approvalLevel:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Approvallevel
+          description: 'Sign-off this edit needs before it goes out: `none`, `manager`, `partner` or `gc`.'
+          examples:
+          - partner
+        isDealBreaker:
+          type: boolean
+          title: Isdealbreaker
+          description: True when the clause this edit addresses is at or below the walk-away floor.
+          default: false
+          examples:
+          - false
+        nature:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Nature
+          description: '`substantive` or `housekeeping`. Absent means unclassified, on a review produced before the pipeline classified this. Absent is NOT the same as `housekeeping`.'
+          examples:
+          - substantive
+      additionalProperties: false
+      type: object
+      required:
+      - clauseName
+      - proposedLanguage
+      - rationale
+      - priority
+      title: ReviewRedline
+      description: One proposed edit, ready to send to counterparty counsel.
+    OperationStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: OperationStatus
+      description: 'The public five. There is no sixth, and there are no synonyms.
+
+
+        Internal vocabularies spell terminal success `completed`, `ready`,
+
+        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+
+        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+
+        `app.workspace_api.adapters.status_map`, which refuses to guess.'
+    ReviewFlag:
+      properties:
+        clauseName:
+          type: string
+          title: Clausename
+          description: Which clause or part of the contract the observation is about.
+          examples:
+          - Limitation of Liability
+        sectionReference:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectionreference
+          description: Where it sits in the contract.
+          examples:
+          - '8.2'
+        observation:
+          type: string
+          title: Observation
+          description: What the reviewer noticed. These are things a human should confirm before signing, not edits, which makes them the most important field here for a caller automating the review away.
+          examples:
+          - The counterparty entity name differs from the one on the signature block.
+      additionalProperties: false
+      type: object
+      required:
+      - clauseName
+      - observation
+      title: ReviewFlag
+      description: 'Something the reviewer noticed and deliberately did NOT redline.
+
+
+        A wrong entity name, an odd schedule entry, a real ambiguity. These are not
+
+        edits; they are things a human should confirm before signing, which makes
+
+        them the most important thing on this surface for a caller that is otherwise
+
+        automating the review away.'
+    ReviewClause:
+      properties:
+        clauseName:
+          type: string
+          title: Clausename
+          description: Human-readable name of the clause, for example 'Limitation of Liability'.
+          examples:
+          - Limitation of Liability
+        clauseType:
+          type: string
+          title: Clausetype
+          description: Clause-type slug the analysis matched, the same key a playbook's `positions` map uses.
+          examples:
+          - limitation_of_liability
+        sectionReference:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectionreference
+          description: Where the clause sits in the contract, for example `8.2`.
+          examples:
+          - '8.2'
+        currentLanguage:
+          type: string
+          title: Currentlanguage
+          description: The exact quote from the contract this analysis is about. Empty when the finding is that the clause is ABSENT, which is the one case with nothing to quote.
+          default: ''
+          examples:
+          - Supplier's total liability shall be unlimited.
+        severity:
+          type: string
+          title: Severity
+          description: 'How far the clause deviates from the playbook position: `green`, `yellow` or `red`. Published as a plain string so a new level cannot break your client.'
+          examples:
+          - yellow
+        analysis:
+          type: string
+          title: Analysis
+          description: What the reviewer concluded about this clause.
+          examples:
+          - The clause is uncapped and departs from the playbook's standard position.
+        riskDescription:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Riskdescription
+          description: What could go wrong if the clause stands as written.
+          examples:
+          - Unlimited liability for a breach we cannot fully control.
+        playbookPosition:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Playbookposition
+          description: The playbook position this clause was measured against.
+          examples:
+          - Cap liability at fees paid in the preceding twelve months.
+        approvalLevel:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Approvallevel
+          description: 'Sign-off a deviation on this clause needs: `none`, `manager`, `partner` or `gc`. Computed server-side by matching the clause to its playbook position, never asserted by the model. Only meaningful when `severity` is not green.'
+          examples:
+          - partner
+        isDealBreaker:
+          type: boolean
+          title: Isdealbreaker
+          description: True when the clause is at or below the playbook's walk-away floor.
+          default: false
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - clauseName
+      - clauseType
+      - severity
+      - analysis
+      title: ReviewClause
+      description: One clause, as analyzed against the playbook position for its type.
+    OperationResource:
+      properties:
+        kind:
+          type: string
+          title: Kind
+          description: What sort of thing was produced, for example `matrix` or `document`.
+          examples:
+          - matrix
+        id:
+          type: string
+          title: Id
+          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
+          examples:
+          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+      additionalProperties: false
+      type: object
+      required:
+      - kind
+      - id
+      title: OperationResource
+      description: 'What the operation produced, or is producing.
+
+
+        `url` is a path on this API rather than an absolute URL, because the service
+
+        is mounted today and gets its own hostname later (docs 07.5). A relative
+
+        path survives that move; a baked-in host does not.'
     ReviewExport:
       properties:
         format:
@@ -2199,43 +1856,355 @@ components:
         that would send an unapproved redline to a counterparty, and the gate is
 
         cheap to carry at the point where content actually leaves the workspace.'
-    ReviewApprovalReason:
+    Review:
       properties:
-        clauseName:
+        id:
           type: string
-          title: Clausename
-          description: The clause driving this part of the gate.
+          title: Id
+          description: Public identifier, `rev_` followed by 32 hex characters.
           examples:
-          - Limitation of Liability
-        approvalLevel:
+          - rev_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        matterId:
+          type: string
+          title: Matterid
+          description: '`mat_` identifier of the matter this review belongs to.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: Review status, using the same five public values as an operation. While `queued` or `running`, every findings list is empty and the scalar fields are absent. That is the truthful shape of a review that has not happened yet, not an error.
+          examples:
+          - succeeded
+        contractType:
           anyOf:
           - type: string
           - type: 'null'
-          title: Approvallevel
-          description: Sign-off this clause requires.
+          title: Contracttype
+          description: Contract type the review ran as, echoed from the request.
           examples:
-          - partner
-        isDealBreaker:
-          type: boolean
-          title: Isdealbreaker
-          description: True when this clause is at or below the walk-away floor.
-          default: false
-          examples:
-          - false
-        note:
+          - msa
+        userSide:
           anyOf:
           - type: string
           - type: 'null'
-          title: Note
-          description: 'Set when a conditional rule RAISED this clause''s sign-off, for example ''Escalated to GC: deal value over $1M''. Absent when the level came straight from the playbook position.'
+          title: Userside
+          description: Which side the review argued for, echoed from the request.
           examples:
-          - 'Escalated to GC: deal value over $1M.'
+          - buyer
+        playbookId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Playbookid
+          description: The playbook the review actually ran against. Absent when it ran against the built-in defaults, so the two cases can be told apart after the fact.
+          examples:
+          - pbk_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        jurisdiction:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Jurisdiction
+          description: Jurisdiction the review ran under.
+          examples:
+          - US
+        round:
+          type: integer
+          title: Round
+          description: Negotiation round this review was run for.
+          default: 1
+          examples:
+          - 1
+        summary:
+          type: string
+          title: Summary
+          description: Prose summary of the review's conclusions.
+          default: ''
+          examples:
+          - Twelve substantive changes, seven of them in the liability and indemnity sections.
+        overallRisk:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Overallrisk
+          description: 'Overall risk rating for the contract: `green`, `yellow` or `red`.'
+          examples:
+          - yellow
+        businessImpactSummary:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Businessimpactsummary
+          description: What the findings mean commercially, in plain language.
+          examples:
+          - Two changes shift risk toward us; the rest are housekeeping.
+        approvalGate:
+          anyOf:
+          - $ref: '#/components/schemas/ReviewApprovalGate'
+          - type: 'null'
+          description: Whether a human should sign this off before it goes out. Reported, never enforced.
+        liabilityExposure:
+          anyOf:
+          - $ref: '#/components/schemas/ReviewLiabilityExposure'
+          - type: 'null'
+          description: 'How much you are on the hook for: caps, carve-outs, indemnities and insurance.'
+        counterpartyMatch:
+          anyOf:
+          - $ref: '#/components/schemas/ReviewCounterpartyMatch'
+          - type: 'null'
+          description: Set when a known counterparty paper was recognized, which means the findings include counterparty-specific redlines layered on the general analysis.
+        clauses:
+          items:
+            $ref: '#/components/schemas/ReviewClause'
+          type: array
+          title: Clauses
+          description: Every clause analyzed, with its severity against the playbook position.
+        redlines:
+          items:
+            $ref: '#/components/schemas/ReviewRedline'
+          type: array
+          title: Redlines
+          description: Proposed edits, ready to send to counterparty counsel. Check each one's `grounding` before applying it automatically.
+        negotiationPriorities:
+          items:
+            $ref: '#/components/schemas/ReviewNegotiationPriority'
+          type: array
+          title: Negotiationpriorities
+          description: What to raise first and what to trade, in tiers.
+        missingClauses:
+          items:
+            type: string
+          type: array
+          title: Missingclauses
+          description: Standard clauses ABSENT from the contract. The one finding that cannot be expressed as a clause analysis, because there is no clause to analyze.
+          examples:
+          - - Force Majeure
+        flags:
+          items:
+            $ref: '#/components/schemas/ReviewFlag'
+          type: array
+          title: Flags
+          description: 'Things the reviewer noticed and deliberately did not redline: a wrong entity name, an odd schedule entry, a real ambiguity. Confirm these with a human before signing.'
+        parseWarning:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Parsewarning
+          description: Set when the model's output only partly parsed, which means the findings may be incomplete. Present is the difference between acting on the findings and asking a human first.
+          examples:
+          - Two clauses could not be parsed and are omitted from the findings.
+        deep:
+          anyOf:
+          - $ref: '#/components/schemas/ReviewDeepMeta'
+          - type: 'null'
+          description: What the deep verification pass did. Absent on a standard review, which is the signal that no verification ran rather than that it found nothing.
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the review was created (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        completedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Completedat
+          description: When the review reached a terminal status (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
       additionalProperties: false
       type: object
       required:
-      - clauseName
-      title: ReviewApprovalReason
-      description: One clause driving the review-level sign-off gate.
+      - id
+      - matterId
+      - status
+      - createdAt
+      title: Review
+      description: 'One contract review: its findings, or its progress toward them.'
+    ReviewDealContext:
+      properties:
+        contractValue:
+          anyOf:
+          - type: number
+            minimum: 0.0
+          - type: 'null'
+          title: Contractvalue
+          description: 'Total deal value, used by playbook escalation rules that key on it. Omit if unknown: a rule referencing a value you did not supply simply does not fire, which is the fail-safe direction.'
+          examples:
+          - 1500000
+        governingLaw:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Governinglaw
+          description: Governing law of the deal, used by playbook escalation rules that key on it.
+          examples:
+          - Delaware
+      additionalProperties: false
+      type: object
+      title: ReviewDealContext
+      description: 'Deal attributes the playbook''s conditional escalation rules evaluate.
+
+
+        Everything is optional and stays optional. A rule referencing an attribute
+
+        the caller did not supply simply does not fire, which is the fail-safe
+
+        direction: a missing contract value must not escalate a clause to GC on the
+
+        strength of a number nobody provided.'
+    ReviewCreateRequest:
+      properties:
+        documentText:
+          type: string
+          maxLength: 200000
+          minLength: 100
+          title: Documenttext
+          description: 'The full contract text to review, 100 to 200,000 characters. Text rather than a document id: a review reads one contract end to end and the caller usually has it in hand.'
+          examples:
+          - 'MASTER SERVICES AGREEMENT
+
+
+            This Master Services Agreement is entered into as of 1 September 2026 between Acme Corporation, a Delaware corporation, and the Supplier identified on the signature page.
+
+
+            8. LIMITATION OF LIABILITY. Supplier''s total liability shall be unlimited for any claim arising out of this Agreement.
+
+
+            12. GOVERNING LAW. This Agreement is governed by the laws of the State of Delaware.'
+        contractType:
+          $ref: '#/components/schemas/ContractType'
+          description: What kind of contract this is. Determines which playbook and which default positions resolve.
+          examples:
+          - saas
+        userSide:
+          $ref: '#/components/schemas/UserSide'
+          description: Which side of the deal you are on. The review argues for this side.
+          examples:
+          - vendor
+        playbookId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Playbookid
+          description: '`pbk_` identifier of the playbook to review against. Omit to run against the built-in default positions for `jurisdiction`, which is a real answer rather than a degraded one.'
+          examples:
+          - pbk_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        jurisdiction:
+          type: string
+          pattern: ^([A-Z]{2}|INTL)$
+          title: Jurisdiction
+          description: Two-letter uppercase jurisdiction code, or `INTL`. Selects the default positions when no playbook is named.
+          default: US
+          examples:
+          - US
+        focusAreas:
+          anyOf:
+          - items:
+              type: string
+              maxLength: 80
+              minLength: 1
+            type: array
+            maxItems: 50
+          - type: 'null'
+          title: Focusareas
+          description: Narrow the review to these areas of concern. Omit to review the whole contract.
+          examples:
+          - - value
+        reviewInstructions:
+          anyOf:
+          - type: string
+            maxLength: 2000
+          - type: 'null'
+          title: Reviewinstructions
+          description: Extra instructions for this review only, layered on top of the playbook.
+          examples:
+          - Pay particular attention to the indemnity carve-outs.
+        markupLevel:
+          type: string
+          enum:
+          - light
+          - standard
+          - firm
+          title: Markuplevel
+          description: How aggressively to mark up. `light` flags only escalation triggers, `standard` marks up gaps to the preferred position, `firm` hard-lines every deviation.
+          default: standard
+          examples:
+          - light
+        paperSide:
+          anyOf:
+          - type: string
+            enum:
+            - own
+            - counterparty
+          - type: 'null'
+          title: Paperside
+          description: Whose paper this is. `own` defends your drafted positions; `counterparty` marks up their form assertively. Orthogonal to `userSide`. Omit if unknown, which costs only prompt specificity.
+          examples:
+          - own
+        round:
+          type: integer
+          maximum: 10.0
+          minimum: 1.0
+          title: Round
+          description: Negotiation round. 2 and above tells the reviewer the counterparty has already responded, so it proposes minimal edits toward the fallback rather than restating the preferred position.
+          default: 1
+          examples:
+          - 1
+        priorRoundText:
+          anyOf:
+          - type: string
+            maxLength: 200000
+          - type: 'null'
+          title: Priorroundtext
+          description: Your last sent version, at round 2 and above, so the reviewer can compute a real diff instead of guessing what changed and undoing settled language.
+          examples:
+          - 8. LIMITATION OF LIABILITY. Supplier's total liability shall not exceed the fees paid in the preceding twelve months.
+        counterpartyResponseText:
+          anyOf:
+          - type: string
+            maxLength: 200000
+          - type: 'null'
+          title: Counterpartyresponsetext
+          description: The counterparty's response, when it differs from `documentText`. Most callers paste the response straight into `documentText`, in which case leave this out.
+          examples:
+          - 8. LIMITATION OF LIABILITY. Supplier's total liability shall not exceed three times the fees paid in the preceding twelve months.
+        dealContext:
+          anyOf:
+          - $ref: '#/components/schemas/ReviewDealContext'
+          - type: 'null'
+          description: Deal attributes the playbook's conditional escalation rules evaluate.
+        depth:
+          type: string
+          enum:
+          - standard
+          - deep
+          title: Depth
+          description: '`standard` runs the first-pass review. `deep` additionally re-drafts every flagged clause with the deep model, grounds each quote against the contract, drops first-pass false positives and stamps a sign-off level, so each redline''s `grounding` is a fact rather than a default. It takes several times as long and verifies at most 40 flagged clauses. `focusAreas`, `reviewInstructions`, `markupLevel`, `round`, `priorRoundText` and `counterpartyResponseText` are not supported at this depth and are refused rather than ignored.'
+          default: standard
+          examples:
+          - standard
+      additionalProperties: false
+      type: object
+      required:
+      - documentText
+      - contractType
+      - userSide
+      title: ReviewCreateRequest
+      description: 'Start a review of one contract against one playbook.
+
+
+        `contractType` and `userSide` are the internal enums by REFERENCE rather than
+
+        by copy. They are the taxonomy the whole product is built on, guarded in both
+
+        directions by `app/tests/unit/test_contract_type_taxonomy.py`, and a second
+
+        hand-maintained copy here would be a fourth layer for that guard to police.
+
+        Widening the taxonomy widens this API additively, which is correct.'
     UserSide:
       type: string
       enum:
@@ -2272,196 +2241,54 @@ components:
         CHECK), so widening it needs no migration; that guard also fails if a
 
         `user_side` CHECK ever appears, because this sentence would then be wrong.'
-    ReviewApprovalGate:
+    Page_Review_:
       properties:
-        required:
-          type: boolean
-          title: Required
-          description: 'Whether a human should sign this off before it goes to the counterparty. REPORTED, never enforced: it does not block the review or the export. Implement the gate on your side using this field.'
-          default: false
-          examples:
-          - false
-        level:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Level
-          description: 'The highest sign-off any gating clause needs: `manager`, `partner` or `gc`. Absent when `required` is false.'
-          examples:
-          - partner
-        dealBreakerCount:
-          type: integer
-          title: Dealbreakercount
-          description: How many clauses sit at or below the walk-away floor.
-          default: 0
-          examples:
-          - 1
-        reasons:
+        data:
           items:
-            $ref: '#/components/schemas/ReviewApprovalReason'
+            $ref: '#/components/schemas/Review'
           type: array
-          title: Reasons
-          description: Which clauses drive the gate, and why each one does.
-        summary:
-          type: string
-          title: Summary
-          description: One-line explanation of the gate, suitable to show a reviewer.
-          default: ''
-          examples:
-          - Twelve substantive changes, seven of them in the liability and indemnity sections.
-      additionalProperties: false
-      type: object
-      title: ReviewApprovalGate
-      description: 'Whether a human has to sign this off before it goes to the counterparty.
-
-
-        **Reported, never enforced.** The gate is computed deterministically from the
-
-        playbook''s own `approvalLevel` and `dealBreaker` on clauses that actually
-
-        deviated, and it is published as a fact about the result. It does not block
-
-        the review, it does not block the export, and the operation reaches a
-
-        terminal status either way.
-
-
-        That is the same decision the acting-user header already carries (docs 07.3):
-
-        we record what we know and build no enforcement machinery we cannot honour.
-
-        Enforcing would mean an approval workflow, an enrolled approver directory and
-
-        a state a review can sit in indefinitely, which is precisely the "do not let
-
-        it hang" failure the handoff for this track warned about. A caller that wants
-
-        a gate has everything it needs to implement one: `required` says whether,
-
-        `level` says who, and `reasons` says why.'
-    ReviewNegotiationPriority:
-      properties:
-        tier:
-          type: integer
-          title: Tier
-          description: 'Priority tier: 1 is must-have and covers deal breakers, 2 is should-have, 3 is nice-to-have.'
-          examples:
-          - 1
-        tierLabel:
-          type: string
-          title: Tierlabel
-          description: Human-readable name for the tier.
-          examples:
-          - Must have
-        items:
-          items:
-            type: string
-          type: array
-          title: Items
-          description: What to raise at this tier, in order.
-          examples:
-          - - Cap liability
-            - Remove uncapped indemnity
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
       additionalProperties: false
       type: object
       required:
-      - tier
-      - tierLabel
-      - items
-      title: ReviewNegotiationPriority
-      description: 'One tier of the negotiation plan: what to raise first, and what to trade.'
-    OperationStatus:
-      type: string
-      enum:
-      - queued
-      - running
-      - succeeded
-      - failed
-      - cancelled
-      title: OperationStatus
-      description: 'The public five. There is no sixth, and there are no synonyms.
-
-
-        Internal vocabularies spell terminal success `completed`, `ready`,
-
-        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
-
-        queued `pending`, `queued` and `draft`. All of that is collapsed here by
-
-        `app.workspace_api.adapters.status_map`, which refuses to guess.'
-    Pagination:
+      - data
+      - pagination
+      title: Page[Review]
+    ReviewExportRequest:
       properties:
-        limit:
-          type: integer
-          title: Limit
-          description: The `limit` that was applied to this request.
-          examples:
-          - 50
-        offset:
-          type: integer
-          title: Offset
-          description: The `offset` that was applied to this request.
-          examples:
-          - 0
-        total:
-          type: integer
-          title: Total
-          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
-          examples:
-          - 128
-        hasMore:
+        redlines:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/AcceptedRedline'
+            type: array
+            maxItems: 500
+          - type: 'null'
+          title: Redlines
+          description: Which edits to apply. Omit to apply EVERY redline the review produced, which is the common case for an integration that triaged them elsewhere. Supply them to apply a subset, or edits you wrote yourself.
+        trackedChanges:
           type: boolean
-          title: Hasmore
-          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          title: Trackedchanges
+          description: True renders native Word tracked changes, so the counterparty accepts or rejects each edit in the Review pane. False renders colored strikethrough and underline, which is viewable anywhere but is not real revisions.
+          default: true
           examples:
-          - false
+          - true
       additionalProperties: false
       type: object
-      required:
-      - limit
-      - offset
-      - total
-      - hasMore
-      title: Pagination
-      description: 'Where the caller is, and whether there is more.
+      title: ReviewExportRequest
+      description: 'Which of a review''s redlines to apply, and how to mark them up.
 
 
-        `total` is the count of rows matching the filter, not the count returned,
+        Omitting `redlines` applies EVERY redline the review produced, which is the
 
-        so a caller can size a job before running it.'
-    ReviewDealContext:
-      properties:
-        contractValue:
-          anyOf:
-          - type: number
-            minimum: 0.0
-          - type: 'null'
-          title: Contractvalue
-          description: 'Total deal value, used by playbook escalation rules that key on it. Omit if unknown: a rule referencing a value you did not supply simply does not fire, which is the fail-safe direction.'
-          examples:
-          - 1500000
-        governingLaw:
-          anyOf:
-          - type: string
-            maxLength: 64
-          - type: 'null'
-          title: Governinglaw
-          description: Governing law of the deal, used by playbook escalation rules that key on it.
-          examples:
-          - Delaware
-      additionalProperties: false
-      type: object
-      title: ReviewDealContext
-      description: 'Deal attributes the playbook''s conditional escalation rules evaluate.
+        common case for an integration that has already triaged them elsewhere.
 
+        Supplying them is how a caller applies a subset, or applies edits it wrote
 
-        Everything is optional and stays optional. A rule referencing an attribute
-
-        the caller did not supply simply does not fire, which is the fail-safe
-
-        direction: a missing contract value must not escalate a clause to GC on the
-
-        strength of a number nobody provided.'
+        itself after reading the review.'
     AcceptedRedline:
       properties:
         clauseName:
@@ -2541,44 +2368,202 @@ components:
         columns, and forwarding those verbatim leaks our internals into a customer''s
 
         logs.'
-    ReviewFlag:
+    ContractType:
+      type: string
+      enum:
+      - saas
+      - professional_services
+      - msa
+      - sow
+      - consulting
+      - license
+      - sale
+      - partnership
+      - procurement
+      - vendor_agreement
+      - reseller_distribution
+      - supply
+      - lease
+      - loan
+      - eula
+      - terms_of_service
+      - baa
+      - order_form
+      - nda
+      - dpa
+      - ip_assignment
+      - employment
+      - executive_employment
+      - independent_contractor
+      - offer_letter
+      - severance_agreement
+      - non_compete
+      - asset_purchase
+      - stock_purchase
+      - merger_agreement
+      - shareholders_agreement
+      - operating_agreement
+      - safe
+      - term_sheet
+      - settlement_agreement
+      - engagement_letter
+      - protective_order
+      - joint_defense
+      - other
+      title: ContractType
+      description: 'Contract types a playbook can encode negotiation positions for.
+
+
+        A playbook is a set of clause-level negotiation positions, so this list
+
+        covers contracts you negotiate clause-by-clause. Documents you only
+
+        *generate* (litigation pleadings, notices) live in `DraftCategory`
+
+        (`app/models/drafting_schemas.py`), NOT here.
+
+
+        Each value backs a `legal_playbooks.contract_type` row, so adding one
+
+        requires a DB migration to extend the CHECK constraint (see
+
+        `20260502160000_expand_playbook_contract_type_dpa_vendor_ip.sql`,
+
+        `20260612130000_expand_playbook_contract_type_msa_sale_sow_consulting.sql`,
+
+        and `20260702120000_expand_playbook_contract_type_gc_litigation.sql`).
+
+        Kept in sync with the FE `ContractType` union + `CONTRACT_TYPE_LABELS`
+
+        (`frontend/src/types/legal-tools.ts`); the drift-guard in
+
+        `app/tests/unit/test_contract_type_taxonomy.py` asserts all three layers
+
+        both ways and fails fast if they diverge.'
+    ReviewApprovalReason:
       properties:
         clauseName:
           type: string
           title: Clausename
-          description: Which clause or part of the contract the observation is about.
+          description: The clause driving this part of the gate.
           examples:
           - Limitation of Liability
-        sectionReference:
+        approvalLevel:
           anyOf:
           - type: string
           - type: 'null'
-          title: Sectionreference
-          description: Where it sits in the contract.
+          title: Approvallevel
+          description: Sign-off this clause requires.
           examples:
-          - '8.2'
-        observation:
-          type: string
-          title: Observation
-          description: What the reviewer noticed. These are things a human should confirm before signing, not edits, which makes them the most important field here for a caller automating the review away.
+          - partner
+        isDealBreaker:
+          type: boolean
+          title: Isdealbreaker
+          description: True when this clause is at or below the walk-away floor.
+          default: false
           examples:
-          - The counterparty entity name differs from the one on the signature block.
+          - false
+        note:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Note
+          description: 'Set when a conditional rule RAISED this clause''s sign-off, for example ''Escalated to GC: deal value over $1M''. Absent when the level came straight from the playbook position.'
+          examples:
+          - 'Escalated to GC: deal value over $1M.'
       additionalProperties: false
       type: object
       required:
       - clauseName
-      - observation
-      title: ReviewFlag
-      description: 'Something the reviewer noticed and deliberately did NOT redline.
+      title: ReviewApprovalReason
+      description: One clause driving the review-level sign-off gate.
+    OperationProgress:
+      properties:
+        done:
+          type: integer
+          minimum: 0.0
+          title: Done
+          description: How many units are finished.
+          examples:
+          - 24
+        total:
+          type: integer
+          minimum: 0.0
+          title: Total
+          description: How many units there are in total. Can legitimately be zero for an empty run.
+          examples:
+          - 128
+        unit:
+          type: string
+          enum:
+          - cells
+          - steps
+          - documents
+          - files
+          - rows
+          - percent
+          title: Unit
+          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
+          examples:
+          - cells
+      additionalProperties: false
+      type: object
+      required:
+      - done
+      - total
+      - unit
+      title: OperationProgress
+      description: 'How far along, and in what units.
 
 
-        A wrong entity name, an odd schedule entry, a real ambiguity. These are not
+        The unit is not decoration. A workflow run stores only a percentage while a
 
-        edits; they are things a human should confirm before signing, which makes
+        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
 
-        them the most important thing on this surface for a caller that is otherwise
-
-        automating the review away.'
+        as 43 of 100 documents and a client builds a wrong estimate from it.'
+    Problem:
+      type: object
+      title: Problem
+      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: true
   securitySchemes:
     WorkspaceAuth:
       type: http
@@ -2588,6 +2573,3 @@ components:
 externalDocs:
   description: Getting started guide and error reference
   url: https://vaquill.ai/docs/workspace-api
-x-refined-from:
-- vaquill-ai-workspace-openapi.json
-- vaquill-ai-workspace-openapi.yml

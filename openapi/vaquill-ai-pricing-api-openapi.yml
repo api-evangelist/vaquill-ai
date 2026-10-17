@@ -1,6 +1,7 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai Pricing API
+  title: Vaquill Developer Pricing API
+  description: Public API for legal statutes and legislation.
   version: 1.0.0
   contact:
     name: Vaquill API Support
@@ -10,7 +11,6 @@ info:
     name: Proprietary
     url: https://www.vaquill.ai/terms
   termsOfService: https://www.vaquill.ai/terms
-  description: 'Operations tagged Pricing across 2 of this provider''s published API definitions: vaquill-ai-openapi.json, vaquill-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai
   description: Production
@@ -101,11 +101,43 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
       security: []
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
 components:
   schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
     ApiCreditCostResponse:
       properties:
         endpoint:
@@ -168,41 +200,6 @@ components:
       - category
       title: ApiCreditCostResponse
       description: Single endpoint credit cost for the pricing matrix.
-    HTTPValidationError:
-      properties:
-        detail:
-          items:
-            $ref: '#/components/schemas/ValidationError'
-          type: array
-          title: Detail
-      type: object
-      title: HTTPValidationError
-    ValidationError:
-      properties:
-        loc:
-          items:
-            anyOf:
-            - type: string
-            - type: integer
-          type: array
-          title: Location
-        msg:
-          type: string
-          title: Message
-        type:
-          type: string
-          title: Error Type
-        input:
-          title: Input
-        ctx:
-          type: object
-          title: Context
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationError
     ApiCreditPricingResponse:
       properties:
         dollarPerCredit:
@@ -256,6 +253,3 @@ components:
 externalDocs:
   description: Full API Reference
   url: https://www.vaquill.ai/docs/api-reference/
-x-refined-from:
-- vaquill-ai-openapi.json
-- vaquill-ai-openapi.yml

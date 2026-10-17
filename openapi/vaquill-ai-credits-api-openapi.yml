@@ -1,6 +1,7 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai Credits API
+  title: Vaquill Developer Credits API
+  description: Public API for legal statutes and legislation.
   version: 1.0.0
   contact:
     name: Vaquill API Support
@@ -10,7 +11,6 @@ info:
     name: Proprietary
     url: https://www.vaquill.ai/terms
   termsOfService: https://www.vaquill.ai/terms
-  description: 'Operations tagged Credits across 2 of this provider''s published API definitions: vaquill-ai-openapi.json, vaquill-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai
   description: Production
@@ -173,45 +173,8 @@ paths:
             application/json:
               example:
                 detail: Rate limit exceeded. Try again in 42 seconds.
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
 components:
   schemas:
-    CreditRateLimit:
-      properties:
-        perMinute:
-          type: integer
-          title: Perminute
-          description: Requests allowed per minute on this key, plan multiplier already applied.
-          examples:
-          - 150
-        perHour:
-          type: integer
-          title: Perhour
-          description: Requests allowed per hour on this key.
-          examples:
-          - 2000
-        perDay:
-          type: integer
-          title: Perday
-          description: Requests allowed per day on this key.
-          examples:
-          - 10000
-      type: object
-      required:
-      - perMinute
-      - perHour
-      - perDay
-      title: CreditRateLimit
-      description: 'Request-rate ceilings in force for the calling key.
-
-
-        A SECOND, independent ceiling alongside credits, and the two are unrelated:
-
-        you can hold credits and still be throttled, or sit far under these limits
-
-        and be refused for an empty balance.'
     CreditSourceBreakdown:
       properties:
         source:
@@ -302,6 +265,40 @@ components:
       - asOf
       title: ExternalCreditBalanceResponse
       description: Spendable credit balance for the calling API key's account.
+    CreditRateLimit:
+      properties:
+        perMinute:
+          type: integer
+          title: Perminute
+          description: Requests allowed per minute on this key, plan multiplier already applied.
+          examples:
+          - 150
+        perHour:
+          type: integer
+          title: Perhour
+          description: Requests allowed per hour on this key.
+          examples:
+          - 2000
+        perDay:
+          type: integer
+          title: Perday
+          description: Requests allowed per day on this key.
+          examples:
+          - 10000
+      type: object
+      required:
+      - perMinute
+      - perHour
+      - perDay
+      title: CreditRateLimit
+      description: 'Request-rate ceilings in force for the calling key.
+
+
+        A SECOND, independent ceiling alongside credits, and the two are unrelated:
+
+        you can hold credits and still be throttled, or sit far under these limits
+
+        and be refused for an empty balance.'
     CreditExpiry:
       properties:
         at:
@@ -342,6 +339,3 @@ components:
 externalDocs:
   description: Full API Reference
   url: https://www.vaquill.ai/docs/api-reference/
-x-refined-from:
-- vaquill-ai-openapi.json
-- vaquill-ai-openapi.yml

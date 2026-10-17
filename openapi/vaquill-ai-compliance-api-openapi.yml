@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai Compliance API
+  title: Vaquill Legal Workspace Compliance API
+  description: 'Organization-scoped API for driving your legal workspace from your own backend: matters, documents, drafting, review, compare and matrices.'
   version: 1.0.0
-  description: 'Operations tagged Compliance across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai/workspace
   description: Vaquill Legal Workspace API (production)
@@ -189,11 +189,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/compliance-checks/{complianceCheckId}:
     get:
       tags:
@@ -371,11 +366,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/compliance-checks/{complianceCheckId}/exports:
     post:
       tags:
@@ -527,143 +517,218 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
 components:
   schemas:
-    ToolReportExportRequest:
+    OperationError:
       properties:
-        format:
+        code:
           type: string
-          enum:
-          - pdf
-          - docx
-          title: Format
-          description: Format to render. `pdf` for something a person reads and forwards, `docx` for something an editor opens.
-          default: pdf
+          title: Code
+          description: Stable, machine-readable failure code. Branch on this, never on `message`.
           examples:
-          - pdf
+          - EXTRACTION_FAILED
+        message:
+          type: string
+          title: Message
+          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
+          examples:
+          - The upstream extraction did not finish.
       additionalProperties: false
       type: object
-      title: ToolReportExportRequest
-      description: Which format to render the finished analysis in.
-    OperationStatus:
-      type: string
-      enum:
-      - queued
-      - running
-      - succeeded
-      - failed
-      - cancelled
-      title: OperationStatus
-      description: 'The public five. There is no sixth, and there are no synonyms.
+      required:
+      - code
+      - message
+      title: OperationError
+      description: 'Why a failed operation failed, in terms a customer can act on.
 
 
-        Internal vocabularies spell terminal success `completed`, `ready`,
+        `code` is stable and machine-readable. `message` is sanitized: the internal
 
-        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+        job tables store stack traces and file paths in their `error_message`
 
-        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+        columns, and forwarding those verbatim leaks our internals into a customer''s
 
-        `app.workspace_api.adapters.status_map`, which refuses to guess.'
-    ToolReportExport:
+        logs.'
+    OperationResource:
       properties:
-        format:
+        kind:
           type: string
-          enum:
-          - pdf
-          - docx
-          title: Format
-          description: Format of the exported file.
+          title: Kind
+          description: What sort of thing was produced, for example `matrix` or `document`.
           examples:
-          - pdf
-        filename:
+          - matrix
+        id:
           type: string
-          title: Filename
-          description: Suggested filename for the download.
+          title: Id
+          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
           examples:
-          - msa-acme-v3.docx
+          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
         url:
-          type: string
+          anyOf:
+          - type: string
+          - type: 'null'
           title: Url
-          description: Short-lived signed URL to download the report. Fetch it promptly and do not store it.
+          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
           examples:
           - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
-        expiresAt:
-          type: string
-          format: date-time
-          title: Expiresat
-          description: When the URL stops working (RFC 3339).
-          examples:
-          - '2026-08-19T14:32:10Z'
-        sizeBytes:
-          type: integer
-          title: Sizebytes
-          description: Size of the exported file in bytes.
-          examples:
-          - 248193
       additionalProperties: false
       type: object
       required:
-      - format
-      - filename
-      - url
-      - expiresAt
-      - sizeBytes
-      title: ToolReportExport
-      description: 'A short-lived URL to the rendered report.
+      - kind
+      - id
+      title: OperationResource
+      description: 'What the operation produced, or is producing.
 
 
-        The route declares a response model and a PDF is not one, so the bytes live
+        `url` is a path on this API rather than an absolute URL, because the service
 
-        in object storage and the customer fetches them directly.'
-    OperationProgress:
+        is mounted today and gets its own hostname later (docs 07.5). A relative
+
+        path survives that move; a baked-in host does not.'
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
       properties:
-        done:
-          type: integer
-          minimum: 0.0
-          title: Done
-          description: How many units are finished.
-          examples:
-          - 24
-        total:
-          type: integer
-          minimum: 0.0
-          title: Total
-          description: How many units there are in total. Can legitimately be zero for an empty run.
-          examples:
-          - 128
-        unit:
+        type:
           type: string
-          enum:
-          - cells
-          - steps
-          - documents
-          - files
-          - rows
-          - percent
-          title: Unit
-          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
           examples:
-          - cells
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
+    ComplianceGap:
+      properties:
+        gapName:
+          type: string
+          title: Gapname
+          description: Short name for the gap.
+          examples:
+          - No subcontractor flow-down
+        description:
+          type: string
+          title: Description
+          description: What is missing, and why it matters.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        regulationReference:
+          type: string
+          title: Regulationreference
+          description: The provision the gap is measured against.
+          examples:
+          - 45 CFR 164.504(e)(2)(ii)(D)
+        riskLevel:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Risklevel
+          description: 'How risky the gap is: `critical`, `high`, `medium` or `low`.'
+          examples:
+          - high
+        remediation:
+          type: string
+          title: Remediation
+          description: Suggested language or action to close it.
+          examples:
+          - Add a clause requiring Acme Corporation to bind every subcontractor that receives protected health information to the same restrictions and conditions.
       additionalProperties: false
       type: object
       required:
-      - done
-      - total
-      - unit
-      title: OperationProgress
-      description: 'How far along, and in what units.
-
-
-        The unit is not decoration. A workflow run stores only a percentage while a
-
-        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
-
-        as 43 of 100 documents and a client builds a wrong estimate from it.'
+      - gapName
+      - description
+      - regulationReference
+      - remediation
+      title: ComplianceGap
+      description: One compliance gap, named so it can be tracked.
+    ComplianceRemediationAction:
+      properties:
+        action:
+          type: string
+          title: Action
+          description: What needs to be done.
+          examples:
+          - Add a subcontractor flow-down clause binding every subcontractor to the same restrictions.
+        priority:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Priority
+          description: '`critical`, `high`, `medium` or `low`.'
+          examples:
+          - high
+        effort:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Effort
+          description: '`high`, `medium` or `low`.'
+          examples:
+          - low
+        deadlineGuidance:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Deadlineguidance
+          description: Suggested timeline, for example `Within 30 days`.
+          examples:
+          - Within 30 days
+      additionalProperties: false
+      type: object
+      required:
+      - action
+      title: ComplianceRemediationAction
+      description: One thing to do, in priority order.
     Operation:
       properties:
         id:
@@ -742,282 +807,6 @@ components:
 
 
         Readable for `OPERATION_RETENTION_DAYS` after creation, per AIP-151.'
-    ComplianceGap:
-      properties:
-        gapName:
-          type: string
-          title: Gapname
-          description: Short name for the gap.
-          examples:
-          - No subcontractor flow-down
-        description:
-          type: string
-          title: Description
-          description: What is missing, and why it matters.
-          examples:
-          - Master services agreement with Acme for the 2026 platform rollout.
-        regulationReference:
-          type: string
-          title: Regulationreference
-          description: The provision the gap is measured against.
-          examples:
-          - 45 CFR 164.504(e)(2)(ii)(D)
-        riskLevel:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Risklevel
-          description: 'How risky the gap is: `critical`, `high`, `medium` or `low`.'
-          examples:
-          - high
-        remediation:
-          type: string
-          title: Remediation
-          description: Suggested language or action to close it.
-          examples:
-          - Add a clause requiring Acme Corporation to bind every subcontractor that receives protected health information to the same restrictions and conditions.
-      additionalProperties: false
-      type: object
-      required:
-      - gapName
-      - description
-      - regulationReference
-      - remediation
-      title: ComplianceGap
-      description: One compliance gap, named so it can be tracked.
-    ComplianceRequirement:
-      properties:
-        requirementId:
-          type: string
-          title: Requirementid
-          description: Stable identifier of this requirement.
-          examples:
-          - REQ-006
-        requirementName:
-          type: string
-          title: Requirementname
-          description: What the requirement is.
-          examples:
-          - Business Associate Agreement (BAA)
-        regulationReference:
-          type: string
-          title: Regulationreference
-          description: Where it comes from, for example `GDPR Article 28(3)(a)`.
-          examples:
-          - 45 CFR 164.504(e)
-        status:
-          type: string
-          title: Status
-          description: 'Whether the document meets it: `compliant`, `partially_compliant`, `non_compliant`, or `not_applicable`.'
-          examples:
-          - compliant
-        findings:
-          type: string
-          title: Findings
-          description: What the document actually says.
-          examples:
-          - The agreement names Acme Corporation as a business associate and requires appropriate safeguards, but it is silent on subcontractor flow-down and on return or destruction of protected health information at termination.
-        gapDescription:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Gapdescription
-          description: What is missing, where the document does not meet it.
-          examples:
-          - No obligation to bind subcontractors to the same restrictions, and no return or destruction of protected health information on termination.
-        recommendation:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Recommendation
-          description: What to change to meet it.
-          examples:
-          - Add a subcontractor flow-down clause and a termination clause requiring return or destruction of all protected health information.
-        priority:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Priority
-          description: 'How urgent the remediation is: `critical`, `high`, `medium` or `low`.'
-          examples:
-          - high
-      additionalProperties: false
-      type: object
-      required:
-      - requirementId
-      - requirementName
-      - regulationReference
-      - status
-      - findings
-      title: ComplianceRequirement
-      description: One requirement of the regulation, and whether the document meets it.
-    ValidationProblem:
-      type: object
-      title: ValidationProblem
-      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
-      required:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      - errors
-      properties:
-        type:
-          type: string
-          format: uri
-          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
-          examples:
-          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
-        title:
-          type: string
-          description: A short human-readable summary.
-          examples:
-          - Insufficient scope
-        status:
-          type: integer
-          description: The HTTP status code, repeated.
-          examples:
-          - 403
-        detail:
-          type: string
-          description: What went wrong on this specific request. May be reworded at any time.
-          examples:
-          - This credential carries matters:read. This operation needs matters:write.
-        instance:
-          type: string
-          description: The path this problem occurred on.
-          examples:
-          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        requestId:
-          type: string
-          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
-          examples:
-          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        errors:
-          type: array
-          description: One entry per rejected field.
-          items:
-            type: object
-            required:
-            - location
-            - message
-            - type
-            properties:
-              location:
-                type: string
-                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
-              message:
-                type: string
-                description: Why it was rejected.
-              type:
-                type: string
-                description: The validation rule that failed.
-      additionalProperties: true
-    OperationResource:
-      properties:
-        kind:
-          type: string
-          title: Kind
-          description: What sort of thing was produced, for example `matrix` or `document`.
-          examples:
-          - matrix
-        id:
-          type: string
-          title: Id
-          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
-          examples:
-          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        url:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Url
-          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
-          examples:
-          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
-      additionalProperties: false
-      type: object
-      required:
-      - kind
-      - id
-      title: OperationResource
-      description: 'What the operation produced, or is producing.
-
-
-        `url` is a path on this API rather than an absolute URL, because the service
-
-        is mounted today and gets its own hostname later (docs 07.5). A relative
-
-        path survives that move; a baked-in host does not.'
-    ComplianceRemediationAction:
-      properties:
-        action:
-          type: string
-          title: Action
-          description: What needs to be done.
-          examples:
-          - Add a subcontractor flow-down clause binding every subcontractor to the same restrictions.
-        priority:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Priority
-          description: '`critical`, `high`, `medium` or `low`.'
-          examples:
-          - high
-        effort:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Effort
-          description: '`high`, `medium` or `low`.'
-          examples:
-          - low
-        deadlineGuidance:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Deadlineguidance
-          description: Suggested timeline, for example `Within 30 days`.
-          examples:
-          - Within 30 days
-      additionalProperties: false
-      type: object
-      required:
-      - action
-      title: ComplianceRemediationAction
-      description: One thing to do, in priority order.
-    OperationError:
-      properties:
-        code:
-          type: string
-          title: Code
-          description: Stable, machine-readable failure code. Branch on this, never on `message`.
-          examples:
-          - EXTRACTION_FAILED
-        message:
-          type: string
-          title: Message
-          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
-          examples:
-          - The upstream extraction did not finish.
-      additionalProperties: false
-      type: object
-      required:
-      - code
-      - message
-      title: OperationError
-      description: 'Why a failed operation failed, in terms a customer can act on.
-
-
-        `code` is stable and machine-readable. `message` is sanitized: the internal
-
-        job tables store stack traces and file paths in their `error_message`
-
-        columns, and forwarding those verbatim leaks our internals into a customer''s
-
-        logs.'
     ComplianceCheckCreateRequest:
       properties:
         documentText:
@@ -1095,49 +884,92 @@ components:
       - regulationType
       title: ComplianceCheckCreateRequest
       description: Check one document against one regulation.
-    Problem:
-      type: object
-      title: Problem
-      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
-      required:
-      - type
-      - title
-      - status
-      - detail
-      - instance
+    ToolReportExport:
       properties:
-        type:
+        format:
           type: string
-          format: uri
-          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          enum:
+          - pdf
+          - docx
+          title: Format
+          description: Format of the exported file.
           examples:
-          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
-        title:
+          - pdf
+        filename:
           type: string
-          description: A short human-readable summary.
+          title: Filename
+          description: Suggested filename for the download.
           examples:
-          - Insufficient scope
-        status:
+          - msa-acme-v3.docx
+        url:
+          type: string
+          title: Url
+          description: Short-lived signed URL to download the report. Fetch it promptly and do not store it.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+        expiresAt:
+          type: string
+          format: date-time
+          title: Expiresat
+          description: When the URL stops working (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        sizeBytes:
           type: integer
-          description: The HTTP status code, repeated.
+          title: Sizebytes
+          description: Size of the exported file in bytes.
           examples:
-          - 403
-        detail:
+          - 248193
+      additionalProperties: false
+      type: object
+      required:
+      - format
+      - filename
+      - url
+      - expiresAt
+      - sizeBytes
+      title: ToolReportExport
+      description: 'A short-lived URL to the rendered report.
+
+
+        The route declares a response model and a PDF is not one, so the bytes live
+
+        in object storage and the customer fetches them directly.'
+    ToolReportExportRequest:
+      properties:
+        format:
           type: string
-          description: What went wrong on this specific request. May be reworded at any time.
+          enum:
+          - pdf
+          - docx
+          title: Format
+          description: Format to render. `pdf` for something a person reads and forwards, `docx` for something an editor opens.
+          default: pdf
           examples:
-          - This credential carries matters:read. This operation needs matters:write.
-        instance:
-          type: string
-          description: The path this problem occurred on.
-          examples:
-          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        requestId:
-          type: string
-          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
-          examples:
-          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-      additionalProperties: true
+          - pdf
+      additionalProperties: false
+      type: object
+      title: ToolReportExportRequest
+      description: Which format to render the finished analysis in.
+    OperationStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: OperationStatus
+      description: 'The public five. There is no sixth, and there are no synonyms.
+
+
+        Internal vocabularies spell terminal success `completed`, `ready`,
+
+        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+
+        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+
+        `app.workspace_api.adapters.status_map`, which refuses to guess.'
     ComplianceCheck:
       properties:
         id:
@@ -1299,6 +1131,159 @@ components:
       - createdAt
       title: ComplianceCheck
       description: 'One compliance check: its findings, or its progress toward them.'
+    OperationProgress:
+      properties:
+        done:
+          type: integer
+          minimum: 0.0
+          title: Done
+          description: How many units are finished.
+          examples:
+          - 24
+        total:
+          type: integer
+          minimum: 0.0
+          title: Total
+          description: How many units there are in total. Can legitimately be zero for an empty run.
+          examples:
+          - 128
+        unit:
+          type: string
+          enum:
+          - cells
+          - steps
+          - documents
+          - files
+          - rows
+          - percent
+          title: Unit
+          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
+          examples:
+          - cells
+      additionalProperties: false
+      type: object
+      required:
+      - done
+      - total
+      - unit
+      title: OperationProgress
+      description: 'How far along, and in what units.
+
+
+        The unit is not decoration. A workflow run stores only a percentage while a
+
+        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
+
+        as 43 of 100 documents and a client builds a wrong estimate from it.'
+    ComplianceRequirement:
+      properties:
+        requirementId:
+          type: string
+          title: Requirementid
+          description: Stable identifier of this requirement.
+          examples:
+          - REQ-006
+        requirementName:
+          type: string
+          title: Requirementname
+          description: What the requirement is.
+          examples:
+          - Business Associate Agreement (BAA)
+        regulationReference:
+          type: string
+          title: Regulationreference
+          description: Where it comes from, for example `GDPR Article 28(3)(a)`.
+          examples:
+          - 45 CFR 164.504(e)
+        status:
+          type: string
+          title: Status
+          description: 'Whether the document meets it: `compliant`, `partially_compliant`, `non_compliant`, or `not_applicable`.'
+          examples:
+          - compliant
+        findings:
+          type: string
+          title: Findings
+          description: What the document actually says.
+          examples:
+          - The agreement names Acme Corporation as a business associate and requires appropriate safeguards, but it is silent on subcontractor flow-down and on return or destruction of protected health information at termination.
+        gapDescription:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Gapdescription
+          description: What is missing, where the document does not meet it.
+          examples:
+          - No obligation to bind subcontractors to the same restrictions, and no return or destruction of protected health information on termination.
+        recommendation:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Recommendation
+          description: What to change to meet it.
+          examples:
+          - Add a subcontractor flow-down clause and a termination clause requiring return or destruction of all protected health information.
+        priority:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Priority
+          description: 'How urgent the remediation is: `critical`, `high`, `medium` or `low`.'
+          examples:
+          - high
+      additionalProperties: false
+      type: object
+      required:
+      - requirementId
+      - requirementName
+      - regulationReference
+      - status
+      - findings
+      title: ComplianceRequirement
+      description: One requirement of the regulation, and whether the document meets it.
+    Problem:
+      type: object
+      title: Problem
+      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: true
   securitySchemes:
     WorkspaceAuth:
       type: http
@@ -1308,6 +1293,3 @@ components:
 externalDocs:
   description: Getting started guide and error reference
   url: https://vaquill.ai/docs/workspace-api
-x-refined-from:
-- vaquill-ai-workspace-openapi.json
-- vaquill-ai-workspace-openapi.yml

@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai Matters API
+  title: Vaquill Legal Workspace Matters API
+  description: 'Organization-scoped API for driving your legal workspace from your own backend: matters, documents, drafting, review, compare and matrices.'
   version: 1.0.0
-  description: 'Operations tagged Matters across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai/workspace
   description: Vaquill Legal Workspace API (production)
@@ -332,11 +332,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/default:
     get:
       tags:
@@ -472,11 +467,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}:
     get:
       tags:
@@ -955,13 +945,291 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
 components:
   schemas:
+    MatterCreateRequest:
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Name
+          description: Display name for the matter. Trimmed; whitespace alone is refused.
+          examples:
+          - Acme / Series B Financing
+        clientId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Clientid
+          description: '`cli_` identifier of the client to file this matter under. Must belong to your organization.'
+          examples:
+          - cli_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        description:
+          anyOf:
+          - type: string
+            maxLength: 5000
+          - type: 'null'
+          title: Description
+          description: Free-text description of the matter.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        instructions:
+          anyOf:
+          - type: string
+            maxLength: 10000
+          - type: 'null'
+          title: Instructions
+          description: Standing instructions to apply to AI work on this matter. Carried into drafting and review prompts, so this is where house style and known counterparties belong.
+          examples:
+          - House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
+        status:
+          $ref: '#/components/schemas/MatterStatus'
+          description: Lifecycle status. Defaults to `open`.
+          default: open
+          examples:
+          - open
+        practiceArea:
+          anyOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+          title: Practicearea
+          description: Practice area, for example `employment`. Free text.
+          examples:
+          - commercial
+        matterType:
+          anyOf:
+          - type: string
+            maxLength: 50
+          - type: 'null'
+          title: Mattertype
+          description: Your own sub-classification of the matter. Free text.
+          examples:
+          - financing
+        caseNumber:
+          anyOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+          title: Casenumber
+          description: Docket or internal case reference.
+          examples:
+          - 2026-CV-0117
+        responsibleAttorneyName:
+          anyOf:
+          - type: string
+            maxLength: 255
+          - type: 'null'
+          title: Responsibleattorneyname
+          description: 'Name of the responsible attorney. A name, not an identifier: this API does not resolve users.'
+          examples:
+          - Dana Whitfield
+        openDate:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Opendate
+          description: Date the matter opened (`YYYY-MM-DD`).
+          examples:
+          - '2026-08-19'
+        closeDate:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Closedate
+          description: Date the matter closed (`YYYY-MM-DD`).
+          examples:
+          - '2026-08-19'
+        billingType:
+          anyOf:
+          - $ref: '#/components/schemas/BillingType'
+          - type: 'null'
+          description: Billing arrangement for the matter.
+          examples:
+          - hourly
+        billingRate:
+          anyOf:
+          - type: number
+            minimum: 0.0
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: 'null'
+          title: Billingrate
+          description: Billing rate in `billingCurrency`. Send it as a JSON string to keep the value exact.
+          examples:
+          - '450.00'
+        billingCurrency:
+          anyOf:
+          - type: string
+            pattern: ^[A-Z]{3}$
+          - type: 'null'
+          title: Billingcurrency
+          description: ISO 4217 currency code for `billingRate`, three uppercase letters, for example `USD`.
+          examples:
+          - USD
+        country:
+          anyOf:
+          - type: string
+            pattern: ^[A-Z]{2}$
+          - type: 'null'
+          title: Country
+          description: ISO 3166-1 alpha-2 country code, two uppercase letters, for example `US`.
+          examples:
+          - US
+        metadata:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Metadata
+          description: Arbitrary JSON to store against the matter. Vaquill never reads it.
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      title: MatterCreateRequest
+      description: Everything a caller may set when creating a matter.
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
+    BillingType:
+      type: string
+      enum:
+      - hourly
+      - flat_fee
+      - contingency
+      - pro_bono
+      title: BillingType
+      description: 'Closed at the four arrangements in use.
+
+
+        There is no CHECK on this column, so an open string here would let a
+
+        customer populate it with anything and make it impossible to narrow later.
+
+        Adding a fifth arrangement is a one-line additive change; withdrawing a
+
+        free-form string is not.'
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
+          examples:
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
+
+
+        `total` is the count of rows matching the filter, not the count returned,
+
+        so a caller can size a job before running it.'
+    Page_Matter_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Matter'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[Matter]
     Matter:
       properties:
         id:
@@ -1128,6 +1396,14 @@ components:
       - name
       title: Matter
       description: A matter as this API publishes it.
+    MatterStatus:
+      type: string
+      enum:
+      - open
+      - pending
+      - closed
+      title: MatterStatus
+      description: The write vocabulary. The read side accepts whatever is stored.
     MatterUpdateRequest:
       properties:
         name:
@@ -1274,297 +1550,6 @@ components:
       type: object
       title: MatterUpdateRequest
       description: A partial update. Absent leaves alone; explicit null clears.
-    MatterStatus:
-      type: string
-      enum:
-      - open
-      - pending
-      - closed
-      title: MatterStatus
-      description: The write vocabulary. The read side accepts whatever is stored.
-    MatterCreateRequest:
-      properties:
-        name:
-          type: string
-          maxLength: 100
-          minLength: 1
-          title: Name
-          description: Display name for the matter. Trimmed; whitespace alone is refused.
-          examples:
-          - Acme / Series B Financing
-        clientId:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Clientid
-          description: '`cli_` identifier of the client to file this matter under. Must belong to your organization.'
-          examples:
-          - cli_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        description:
-          anyOf:
-          - type: string
-            maxLength: 5000
-          - type: 'null'
-          title: Description
-          description: Free-text description of the matter.
-          examples:
-          - Master services agreement with Acme for the 2026 platform rollout.
-        instructions:
-          anyOf:
-          - type: string
-            maxLength: 10000
-          - type: 'null'
-          title: Instructions
-          description: Standing instructions to apply to AI work on this matter. Carried into drafting and review prompts, so this is where house style and known counterparties belong.
-          examples:
-          - House paper. Cap liability at 12 months of fees; never accept uncapped indemnity.
-        status:
-          $ref: '#/components/schemas/MatterStatus'
-          description: Lifecycle status. Defaults to `open`.
-          default: open
-          examples:
-          - open
-        practiceArea:
-          anyOf:
-          - type: string
-            maxLength: 100
-          - type: 'null'
-          title: Practicearea
-          description: Practice area, for example `employment`. Free text.
-          examples:
-          - commercial
-        matterType:
-          anyOf:
-          - type: string
-            maxLength: 50
-          - type: 'null'
-          title: Mattertype
-          description: Your own sub-classification of the matter. Free text.
-          examples:
-          - financing
-        caseNumber:
-          anyOf:
-          - type: string
-            maxLength: 100
-          - type: 'null'
-          title: Casenumber
-          description: Docket or internal case reference.
-          examples:
-          - 2026-CV-0117
-        responsibleAttorneyName:
-          anyOf:
-          - type: string
-            maxLength: 255
-          - type: 'null'
-          title: Responsibleattorneyname
-          description: 'Name of the responsible attorney. A name, not an identifier: this API does not resolve users.'
-          examples:
-          - Dana Whitfield
-        openDate:
-          anyOf:
-          - type: string
-            format: date
-          - type: 'null'
-          title: Opendate
-          description: Date the matter opened (`YYYY-MM-DD`).
-          examples:
-          - '2026-08-19'
-        closeDate:
-          anyOf:
-          - type: string
-            format: date
-          - type: 'null'
-          title: Closedate
-          description: Date the matter closed (`YYYY-MM-DD`).
-          examples:
-          - '2026-08-19'
-        billingType:
-          anyOf:
-          - $ref: '#/components/schemas/BillingType'
-          - type: 'null'
-          description: Billing arrangement for the matter.
-          examples:
-          - hourly
-        billingRate:
-          anyOf:
-          - type: number
-            minimum: 0.0
-          - type: string
-            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
-          - type: 'null'
-          title: Billingrate
-          description: Billing rate in `billingCurrency`. Send it as a JSON string to keep the value exact.
-          examples:
-          - '450.00'
-        billingCurrency:
-          anyOf:
-          - type: string
-            pattern: ^[A-Z]{3}$
-          - type: 'null'
-          title: Billingcurrency
-          description: ISO 4217 currency code for `billingRate`, three uppercase letters, for example `USD`.
-          examples:
-          - USD
-        country:
-          anyOf:
-          - type: string
-            pattern: ^[A-Z]{2}$
-          - type: 'null'
-          title: Country
-          description: ISO 3166-1 alpha-2 country code, two uppercase letters, for example `US`.
-          examples:
-          - US
-        metadata:
-          anyOf:
-          - additionalProperties: true
-            type: object
-          - type: 'null'
-          title: Metadata
-          description: Arbitrary JSON to store against the matter. Vaquill never reads it.
-      additionalProperties: false
-      type: object
-      required:
-      - name
-      title: MatterCreateRequest
-      description: Everything a caller may set when creating a matter.
-    Page_Matter_:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/Matter'
-          type: array
-          title: Data
-          description: The rows in this window, in the collection's default order.
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-          description: Where this window sits in the full result set.
-      additionalProperties: false
-      type: object
-      required:
-      - data
-      - pagination
-      title: Page[Matter]
-    ValidationProblem:
-      type: object
-      title: ValidationProblem
-      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
-      required:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      - errors
-      properties:
-        type:
-          type: string
-          format: uri
-          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
-          examples:
-          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
-        title:
-          type: string
-          description: A short human-readable summary.
-          examples:
-          - Insufficient scope
-        status:
-          type: integer
-          description: The HTTP status code, repeated.
-          examples:
-          - 403
-        detail:
-          type: string
-          description: What went wrong on this specific request. May be reworded at any time.
-          examples:
-          - This credential carries matters:read. This operation needs matters:write.
-        instance:
-          type: string
-          description: The path this problem occurred on.
-          examples:
-          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        requestId:
-          type: string
-          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
-          examples:
-          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        errors:
-          type: array
-          description: One entry per rejected field.
-          items:
-            type: object
-            required:
-            - location
-            - message
-            - type
-            properties:
-              location:
-                type: string
-                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
-              message:
-                type: string
-                description: Why it was rejected.
-              type:
-                type: string
-                description: The validation rule that failed.
-      additionalProperties: true
-    Pagination:
-      properties:
-        limit:
-          type: integer
-          title: Limit
-          description: The `limit` that was applied to this request.
-          examples:
-          - 50
-        offset:
-          type: integer
-          title: Offset
-          description: The `offset` that was applied to this request.
-          examples:
-          - 0
-        total:
-          type: integer
-          title: Total
-          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
-          examples:
-          - 128
-        hasMore:
-          type: boolean
-          title: Hasmore
-          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
-          examples:
-          - false
-      additionalProperties: false
-      type: object
-      required:
-      - limit
-      - offset
-      - total
-      - hasMore
-      title: Pagination
-      description: 'Where the caller is, and whether there is more.
-
-
-        `total` is the count of rows matching the filter, not the count returned,
-
-        so a caller can size a job before running it.'
-    BillingType:
-      type: string
-      enum:
-      - hourly
-      - flat_fee
-      - contingency
-      - pro_bono
-      title: BillingType
-      description: 'Closed at the four arrangements in use.
-
-
-        There is no CHECK on this column, so an open string here would let a
-
-        customer populate it with anything and make it impossible to narrow later.
-
-        Adding a fifth arrangement is a one-line additive change; withdrawing a
-
-        free-form string is not.'
     Problem:
       type: object
       title: Problem
@@ -1617,6 +1602,3 @@ components:
 externalDocs:
   description: Getting started guide and error reference
   url: https://vaquill.ai/docs/workspace-api
-x-refined-from:
-- vaquill-ai-workspace-openapi.json
-- vaquill-ai-workspace-openapi.yml

@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai Facts API
+  title: Vaquill Legal Workspace Facts API
+  description: 'Organization-scoped API for driving your legal workspace from your own backend: matters, documents, drafting, review, compare and matrices.'
   version: 1.0.0
-  description: 'Operations tagged Facts across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai/workspace
   description: Vaquill Legal Workspace API (production)
@@ -380,11 +380,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/fact-sets/{factSetId}:
     get:
       tags:
@@ -554,11 +549,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/fact-sets/{factSetId}/facts:
     get:
       tags:
@@ -763,11 +753,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/fact-sets/{factSetId}/exports:
     post:
       tags:
@@ -928,18 +913,279 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
 components:
   schemas:
-    Page_Fact_:
+    OperationError:
+      properties:
+        code:
+          type: string
+          title: Code
+          description: Stable, machine-readable failure code. Branch on this, never on `message`.
+          examples:
+          - EXTRACTION_FAILED
+        message:
+          type: string
+          title: Message
+          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
+          examples:
+          - The upstream extraction did not finish.
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - message
+      title: OperationError
+      description: 'Why a failed operation failed, in terms a customer can act on.
+
+
+        `code` is stable and machine-readable. `message` is sanitized: the internal
+
+        job tables store stack traces and file paths in their `error_message`
+
+        columns, and forwarding those verbatim leaks our internals into a customer''s
+
+        logs.'
+    FactSetGenerateRequest:
+      properties:
+        mode:
+          type: string
+          enum:
+          - standard
+          - incremental
+          title: Mode
+          description: '`standard` re-reads every document in the matter. `incremental` reads only documents that changed since the current set, which is cheaper and reports its progress against the changed count rather than the matter size.'
+          default: standard
+          examples:
+          - standard
+      additionalProperties: false
+      type: object
+      title: FactSetGenerateRequest
+      description: 'What to generate.
+
+
+        Empty is valid and means `standard`. There is no `force` flag: on the Facts
+
+        side that word is the delete-and-reinsert path through the shared evidence
+
+        spine, and a caller that genuinely needs a rebuild changes something the
+
+        corpus hash can see.'
+    OperationResource:
+      properties:
+        kind:
+          type: string
+          title: Kind
+          description: What sort of thing was produced, for example `matrix` or `document`.
+          examples:
+          - matrix
+        id:
+          type: string
+          title: Id
+          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
+          examples:
+          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+      additionalProperties: false
+      type: object
+      required:
+      - kind
+      - id
+      title: OperationResource
+      description: 'What the operation produced, or is producing.
+
+
+        `url` is a path on this API rather than an absolute URL, because the service
+
+        is mounted today and gets its own hostname later (docs 07.5). A relative
+
+        path survives that move; a baked-in host does not.'
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
+          examples:
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
+
+
+        `total` is the count of rows matching the filter, not the count returned,
+
+        so a caller can size a job before running it.'
+    FactCitation:
+      properties:
+        documentId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Documentid
+          description: The `doc_` document this passage came from, or null when the citation predates a document that has since been deleted.
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        documentName:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Documentname
+          description: The document's filename at the moment the set was generated.
+          examples:
+          - msa-acme-v3.docx
+        quote:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Quote
+          description: 'The verbatim passage. This is the citation''s anchor: locate it in the document''s text rather than relying on any offset.'
+          examples:
+          - in no event shall either party be liable for indirect damages
+        pageStart:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Pagestart
+          description: First page the quote appears on.
+          examples:
+          - 1
+        pageEnd:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Pageend
+          description: Last page the quote appears on.
+          examples:
+          - 1
+        citationRole:
+          type: string
+          title: Citationrole
+          description: '`primary` for the strongest passage behind the fact, `support` for the others that were clustered with it.'
+          default: support
+          examples:
+          - primary
+        sourceAvailable:
+          type: boolean
+          title: Sourceavailable
+          description: False when the document this quote came from is no longer in the workspace. The quote is still accurate (it is a snapshot), but there is nothing to fetch and nothing to highlight it in.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - sourceAvailable
+      title: FactCitation
+      description: 'One verified passage behind a fact.
+
+
+        An immutable snapshot taken when the set was generated, so it survives the
+
+        document being deleted and the evidence being re-extracted. Resolve it by
+
+        searching for `quote` inside `GET /v1/matters/{matterId}/documents/{id}/text`;
+
+        that is the durable mechanism, and it is what the product''s own verifier
+
+        uses.'
+    Page_FactSet_:
       properties:
         data:
           items:
-            $ref: '#/components/schemas/Fact'
+            $ref: '#/components/schemas/FactSet'
           type: array
           title: Data
           description: The rows in this window, in the collection's default order.
@@ -951,43 +1197,7 @@ components:
       required:
       - data
       - pagination
-      title: Page[Fact]
-    OperationStatus:
-      type: string
-      enum:
-      - queued
-      - running
-      - succeeded
-      - failed
-      - cancelled
-      title: OperationStatus
-      description: 'The public five. There is no sixth, and there are no synonyms.
-
-
-        Internal vocabularies spell terminal success `completed`, `ready`,
-
-        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
-
-        queued `pending`, `queued` and `draft`. All of that is collapsed here by
-
-        `app.workspace_api.adapters.status_map`, which refuses to guess.'
-    FactSetExportRequest:
-      properties:
-        format:
-          type: string
-          enum:
-          - csv
-          - pdf
-          - docx
-          title: Format
-          description: '`csv` for a spreadsheet, `pdf` or `docx` for a document.'
-          examples:
-          - csv
-      additionalProperties: false
-      type: object
-      required:
-      - format
-      title: FactSetExportRequest
+      title: Page[FactSet]
     Fact:
       properties:
         id:
@@ -1131,155 +1341,6 @@ components:
       - position
       title: Fact
       description: One clustered statement, with every passage that supports it.
-    FactCitation:
-      properties:
-        documentId:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Documentid
-          description: The `doc_` document this passage came from, or null when the citation predates a document that has since been deleted.
-          examples:
-          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        documentName:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Documentname
-          description: The document's filename at the moment the set was generated.
-          examples:
-          - msa-acme-v3.docx
-        quote:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Quote
-          description: 'The verbatim passage. This is the citation''s anchor: locate it in the document''s text rather than relying on any offset.'
-          examples:
-          - in no event shall either party be liable for indirect damages
-        pageStart:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Pagestart
-          description: First page the quote appears on.
-          examples:
-          - 1
-        pageEnd:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Pageend
-          description: Last page the quote appears on.
-          examples:
-          - 1
-        citationRole:
-          type: string
-          title: Citationrole
-          description: '`primary` for the strongest passage behind the fact, `support` for the others that were clustered with it.'
-          default: support
-          examples:
-          - primary
-        sourceAvailable:
-          type: boolean
-          title: Sourceavailable
-          description: False when the document this quote came from is no longer in the workspace. The quote is still accurate (it is a snapshot), but there is nothing to fetch and nothing to highlight it in.
-          examples:
-          - false
-      additionalProperties: false
-      type: object
-      required:
-      - sourceAvailable
-      title: FactCitation
-      description: 'One verified passage behind a fact.
-
-
-        An immutable snapshot taken when the set was generated, so it survives the
-
-        document being deleted and the evidence being re-extracted. Resolve it by
-
-        searching for `quote` inside `GET /v1/matters/{matterId}/documents/{id}/text`;
-
-        that is the durable mechanism, and it is what the product''s own verifier
-
-        uses.'
-    FactSetCoverage:
-      properties:
-        included:
-          type: integer
-          title: Included
-          description: Documents whose evidence went into this set.
-          examples:
-          - 1
-        total:
-          type: integer
-          title: Total
-          description: Documents in the matter at generation time.
-          examples:
-          - 128
-        excluded:
-          type: integer
-          title: Excluded
-          description: Documents in the matter that this generation did not read, because it hit the per-run inline ceiling. Generate again to pick up more.
-          examples:
-          - 1
-      additionalProperties: false
-      type: object
-      required:
-      - included
-      - total
-      - excluded
-      title: FactSetCoverage
-      description: 'What the generation actually read, and what it did not.
-
-
-        Not decoration. The reducer extracts at most 60 documents inline, so on a
-
-        larger matter `included` is 60 and `excluded` is the rest, while the
-
-        operation reports 60 of 60 and looks complete. It IS complete, for what it
-
-        read. This is the only place that says what that was.'
-    Pagination:
-      properties:
-        limit:
-          type: integer
-          title: Limit
-          description: The `limit` that was applied to this request.
-          examples:
-          - 50
-        offset:
-          type: integer
-          title: Offset
-          description: The `offset` that was applied to this request.
-          examples:
-          - 0
-        total:
-          type: integer
-          title: Total
-          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
-          examples:
-          - 128
-        hasMore:
-          type: boolean
-          title: Hasmore
-          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
-          examples:
-          - false
-      additionalProperties: false
-      type: object
-      required:
-      - limit
-      - offset
-      - total
-      - hasMore
-      title: Pagination
-      description: 'Where the caller is, and whether there is more.
-
-
-        `total` is the count of rows matching the filter, not the count returned,
-
-        so a caller can size a job before running it.'
     Operation:
       properties:
         id:
@@ -1358,69 +1419,25 @@ components:
 
 
         Readable for `OPERATION_RETENTION_DAYS` after creation, per AIP-151.'
-    ValidationProblem:
-      type: object
-      title: ValidationProblem
-      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
-      required:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      - errors
-      properties:
-        type:
-          type: string
-          format: uri
-          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
-          examples:
-          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
-        title:
-          type: string
-          description: A short human-readable summary.
-          examples:
-          - Insufficient scope
-        status:
-          type: integer
-          description: The HTTP status code, repeated.
-          examples:
-          - 403
-        detail:
-          type: string
-          description: What went wrong on this specific request. May be reworded at any time.
-          examples:
-          - This credential carries matters:read. This operation needs matters:write.
-        instance:
-          type: string
-          description: The path this problem occurred on.
-          examples:
-          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        requestId:
-          type: string
-          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
-          examples:
-          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        errors:
-          type: array
-          description: One entry per rejected field.
-          items:
-            type: object
-            required:
-            - location
-            - message
-            - type
-            properties:
-              location:
-                type: string
-                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
-              message:
-                type: string
-                description: Why it was rejected.
-              type:
-                type: string
-                description: The validation rule that failed.
-      additionalProperties: true
+    OperationStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: OperationStatus
+      description: 'The public five. There is no sixth, and there are no synonyms.
+
+
+        Internal vocabularies spell terminal success `completed`, `ready`,
+
+        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+
+        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+
+        `app.workspace_api.adapters.status_map`, which refuses to guess.'
     OperationProgress:
       properties:
         done:
@@ -1465,67 +1482,77 @@ components:
         matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
 
         as 43 of 100 documents and a client builds a wrong estimate from it.'
-    FactSetGenerateRequest:
+    FactSetExportRequest:
       properties:
-        mode:
+        format:
           type: string
           enum:
-          - standard
-          - incremental
-          title: Mode
-          description: '`standard` re-reads every document in the matter. `incremental` reads only documents that changed since the current set, which is cheaper and reports its progress against the changed count rather than the matter size.'
-          default: standard
+          - csv
+          - pdf
+          - docx
+          title: Format
+          description: '`csv` for a spreadsheet, `pdf` or `docx` for a document.'
           examples:
-          - standard
-      additionalProperties: false
-      type: object
-      title: FactSetGenerateRequest
-      description: 'What to generate.
-
-
-        Empty is valid and means `standard`. There is no `force` flag: on the Facts
-
-        side that word is the delete-and-reinsert path through the shared evidence
-
-        spine, and a caller that genuinely needs a rebuild changes something the
-
-        corpus hash can see.'
-    OperationResource:
-      properties:
-        kind:
-          type: string
-          title: Kind
-          description: What sort of thing was produced, for example `matrix` or `document`.
-          examples:
-          - matrix
-        id:
-          type: string
-          title: Id
-          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
-          examples:
-          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        url:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Url
-          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
-          examples:
-          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
+          - csv
       additionalProperties: false
       type: object
       required:
-      - kind
-      - id
-      title: OperationResource
-      description: 'What the operation produced, or is producing.
+      - format
+      title: FactSetExportRequest
+    FactSetCoverage:
+      properties:
+        included:
+          type: integer
+          title: Included
+          description: Documents whose evidence went into this set.
+          examples:
+          - 1
+        total:
+          type: integer
+          title: Total
+          description: Documents in the matter at generation time.
+          examples:
+          - 128
+        excluded:
+          type: integer
+          title: Excluded
+          description: Documents in the matter that this generation did not read, because it hit the per-run inline ceiling. Generate again to pick up more.
+          examples:
+          - 1
+      additionalProperties: false
+      type: object
+      required:
+      - included
+      - total
+      - excluded
+      title: FactSetCoverage
+      description: 'What the generation actually read, and what it did not.
 
 
-        `url` is a path on this API rather than an absolute URL, because the service
+        Not decoration. The reducer extracts at most 60 documents inline, so on a
 
-        is mounted today and gets its own hostname later (docs 07.5). A relative
+        larger matter `included` is 60 and `excluded` is the rest, while the
 
-        path survives that move; a baked-in host does not.'
+        operation reports 60 of 60 and looks complete. It IS complete, for what it
+
+        read. This is the only place that says what that was.'
+    Page_Fact_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Fact'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[Fact]
     FactSet:
       properties:
         id:
@@ -1618,53 +1645,6 @@ components:
       - createdAt
       title: FactSet
       description: One generated ledger.
-    Page_FactSet_:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/FactSet'
-          type: array
-          title: Data
-          description: The rows in this window, in the collection's default order.
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-          description: Where this window sits in the full result set.
-      additionalProperties: false
-      type: object
-      required:
-      - data
-      - pagination
-      title: Page[FactSet]
-    OperationError:
-      properties:
-        code:
-          type: string
-          title: Code
-          description: Stable, machine-readable failure code. Branch on this, never on `message`.
-          examples:
-          - EXTRACTION_FAILED
-        message:
-          type: string
-          title: Message
-          description: Human-readable explanation, sanitized of internal paths and stack frames. Wording may change; do not parse it.
-          examples:
-          - The upstream extraction did not finish.
-      additionalProperties: false
-      type: object
-      required:
-      - code
-      - message
-      title: OperationError
-      description: 'Why a failed operation failed, in terms a customer can act on.
-
-
-        `code` is stable and machine-readable. `message` is sanitized: the internal
-
-        job tables store stack traces and file paths in their `error_message`
-
-        columns, and forwarding those verbatim leaks our internals into a customer''s
-
-        logs.'
     FactSetExport:
       properties:
         format:
@@ -1768,6 +1748,3 @@ components:
 externalDocs:
   description: Getting started guide and error reference
   url: https://vaquill.ai/docs/workspace-api
-x-refined-from:
-- vaquill-ai-workspace-openapi.json
-- vaquill-ai-workspace-openapi.yml

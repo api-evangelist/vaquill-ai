@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai Research API
+  title: Vaquill Legal Workspace Research API
+  description: 'Organization-scoped API for driving your legal workspace from your own backend: matters, documents, drafting, review, compare and matrices.'
   version: 1.0.0
-  description: 'Operations tagged Research across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai/workspace
   description: Vaquill Legal Workspace API (production)
@@ -332,11 +332,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/chats/{chatId}:
     get:
       tags:
@@ -791,11 +786,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/chats/{chatId}/messages:
     post:
       tags:
@@ -1208,11 +1198,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/messages/{messageId}:
     get:
       tags:
@@ -1391,11 +1376,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/messages/{messageId}/verifications:
     post:
       tags:
@@ -1736,11 +1716,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/chats/{chatId}/deep-research:
     post:
       tags:
@@ -1926,11 +1901,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/skills:
     get:
       tags:
@@ -2081,11 +2051,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/research-config:
     get:
       tags:
@@ -2424,11 +2389,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/web-search/queries:
     post:
       tags:
@@ -2566,11 +2526,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/web-search/similar:
     post:
       tags:
@@ -2704,11 +2659,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/web-search/contents:
     post:
       tags:
@@ -2836,175 +2786,8 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
 components:
   schemas:
-    DeepResearchRequest:
-      properties:
-        query:
-          type: string
-          maxLength: 5000
-          minLength: 10
-          title: Query
-          description: The research question, 10 to 5,000 characters. Detailed questions work best; this is a research brief rather than a search query.
-          examples:
-          - value valu
-        jurisdiction:
-          type: string
-          maxLength: 32
-          title: Jurisdiction
-          description: Legal jurisdiction context for the research prompt. Defaults to `us`.
-          default: us
-          examples:
-          - US
-        usState:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Usstate
-          description: 'Two-letter lowercase state code to steer the research toward, honoured only when `jurisdiction` is `us`. A soft steer: there is no hard state filter on web research.'
-          examples:
-          - ca
-      additionalProperties: false
-      type: object
-      required:
-      - query
-      title: DeepResearchRequest
-      description: 'A long web-research pass, posted into a conversation.
-
-
-        Answers 202. The report lands as an assistant message in the chat named in
-
-        the path, which is what "somewhere a customer can read it later" means on a
-
-        surface where conversation state is ours: there is no second place a
-
-        research report belongs, and inventing one would be a second transcript.'
-    WebSearchRequest:
-      properties:
-        query:
-          type: string
-          maxLength: 10000
-          minLength: 2
-          title: Query
-          description: What to search for. Written as a search query rather than as a question; the provider is a search engine, not a model.
-          examples:
-          - California non-compete enforceability 2026
-        limit:
-          type: integer
-          maximum: 20.0
-          minimum: 1.0
-          title: Limit
-          description: How many results to return, 1 to 20.
-          default: 8
-          examples:
-          - 8
-        jurisdiction:
-          type: string
-          maxLength: 32
-          title: Jurisdiction
-          description: Legal jurisdiction to steer the search toward.
-          default: us
-          examples:
-          - US
-      additionalProperties: false
-      type: object
-      required:
-      - query
-      title: WebSearchRequest
-      description: A one-off web search. Touches no client data and stores nothing.
-    SimilarRequest:
-      properties:
-        url:
-          type: string
-          maxLength: 2083
-          minLength: 1
-          format: uri
-          title: Url
-          description: The page to find neighbours of.
-          examples:
-          - https://example.com
-        limit:
-          type: integer
-          maximum: 20.0
-          minimum: 1.0
-          title: Limit
-          description: How many results to return.
-          default: 8
-          examples:
-          - 8
-        jurisdiction:
-          type: string
-          maxLength: 32
-          title: Jurisdiction
-          description: Jurisdiction to steer toward.
-          default: us
-          examples:
-          - US
-      additionalProperties: false
-      type: object
-      required:
-      - url
-      title: SimilarRequest
-      description: 'Find pages similar to one you already have.
-
-
-        The URL is handed to the search provider, which does the fetching, so this
-
-        is not a request-forgery primitive against our own network. **If anyone ever
-
-        replaces that call with a direct fetch, this URL becomes attacker-controlled
-
-        input to our egress and needs an allowlist.** `HttpUrl` is what rejects a
-
-        non-HTTP scheme today; do not widen it to `str`.'
-    Problem:
-      type: object
-      title: Problem
-      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
-      required:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      properties:
-        type:
-          type: string
-          format: uri
-          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
-          examples:
-          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
-        title:
-          type: string
-          description: A short human-readable summary.
-          examples:
-          - Insufficient scope
-        status:
-          type: integer
-          description: The HTTP status code, repeated.
-          examples:
-          - 403
-        detail:
-          type: string
-          description: What went wrong on this specific request. May be reworded at any time.
-          examples:
-          - This credential carries matters:read. This operation needs matters:write.
-        instance:
-          type: string
-          description: The path this problem occurred on.
-          examples:
-          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        requestId:
-          type: string
-          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
-          examples:
-          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-      additionalProperties: true
     Citation:
       properties:
         index:
@@ -3087,344 +2870,23 @@ components:
       - sourceType
       title: Citation
       description: One source behind an answer, matched to its `[N]` marker in the text.
-    WebSearchResults:
+    Page_Chat_:
       properties:
-        query:
-          type: string
-          title: Query
-          description: The query that was run.
-          examples:
-          - California non-compete enforceability 2026
-        results:
+        data:
           items:
-            $ref: '#/components/schemas/WebResult'
+            $ref: '#/components/schemas/Chat'
           type: array
-          title: Results
-          description: The pages found.
-        totalFound:
-          type: integer
-          title: Totalfound
-          description: How many are in `results`.
-          default: 0
-          examples:
-          - 0
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
       additionalProperties: false
       type: object
       required:
-      - query
-      title: WebSearchResults
-      description: What a web search returned. Nothing is stored.
-    Chat:
-      properties:
-        id:
-          type: string
-          title: Id
-          description: Public identifier, `cht_` followed by 32 hex characters. Post turns to it and read its transcript back.
-          examples:
-          - cht_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        matterId:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Matterid
-          description: '`mat_` identifier of the matter this conversation belongs to. Null only for a conversation created before matters existed; every chat this API creates has one.'
-          examples:
-          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        title:
-          type: string
-          title: Title
-          description: Display title. Set at creation and editable; this API never renames a conversation for you.
-          examples:
-          - Master Services Agreement
-        hasDocuments:
-          type: boolean
-          title: Hasdocuments
-          description: Whether any turn in this conversation pinned a document. Maintained by the pipeline, not writable.
-          examples:
-          - false
-        documentCount:
-          type: integer
-          title: Documentcount
-          description: How many distinct documents have been pinned across this conversation's turns.
-          examples:
-          - 1
-        usedSkill:
-          type: boolean
-          title: Usedskill
-          description: Whether any turn ran with a skill. Maintained by the pipeline, not writable.
-          examples:
-          - false
-        usedAgentic:
-          type: boolean
-          title: Usedagentic
-          description: Whether any turn ran in agentic mode. Maintained by the pipeline, not writable.
-          examples:
-          - false
-        createdAt:
-          type: string
-          format: date-time
-          title: Createdat
-          description: When the conversation was created.
-          examples:
-          - '2026-08-19T14:32:10Z'
-        updatedAt:
-          type: string
-          format: date-time
-          title: Updatedat
-          description: When the conversation last changed. Maintained by a database trigger, and the order `chats.list` uses.
-          examples:
-          - '2026-08-19T14:32:10Z'
-      additionalProperties: false
-      type: object
-      required:
-      - id
-      - title
-      - hasDocuments
-      - documentCount
-      - usedSkill
-      - usedAgentic
-      - createdAt
-      - updatedAt
-      title: Chat
-      description: One conversation inside a matter.
-    OperationProgress:
-      properties:
-        done:
-          type: integer
-          minimum: 0.0
-          title: Done
-          description: How many units are finished.
-          examples:
-          - 24
-        total:
-          type: integer
-          minimum: 0.0
-          title: Total
-          description: How many units there are in total. Can legitimately be zero for an empty run.
-          examples:
-          - 128
-        unit:
-          type: string
-          enum:
-          - cells
-          - steps
-          - documents
-          - files
-          - rows
-          - percent
-          title: Unit
-          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
-          examples:
-          - cells
-      additionalProperties: false
-      type: object
-      required:
-      - done
-      - total
-      - unit
-      title: OperationProgress
-      description: 'How far along, and in what units.
-
-
-        The unit is not decoration. A workflow run stores only a percentage while a
-
-        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
-
-        as 43 of 100 documents and a client builds a wrong estimate from it.'
-    ChatCreateRequest:
-      properties:
-        title:
-          type: string
-          maxLength: 255
-          minLength: 1
-          title: Title
-          description: Display title for the conversation, 1 to 255 characters. Whitespace is trimmed and a whitespace-only title is refused.
-          examples:
-          - Master Services Agreement
-      additionalProperties: false
-      type: object
-      required:
-      - title
-      title: ChatCreateRequest
-      description: 'Open a conversation. One INSERT; nothing is generated and nothing is spent.
-
-
-        A title is required rather than derived from the first question, because the
-
-        web app derives one from a human''s opening message and a machine''s opening
-
-        message is usually a template. A caller that wants our derivation can send
-
-        the question as the title.'
-    OperationResource:
-      properties:
-        kind:
-          type: string
-          title: Kind
-          description: What sort of thing was produced, for example `matrix` or `document`.
-          examples:
-          - matrix
-        id:
-          type: string
-          title: Id
-          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
-          examples:
-          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        url:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Url
-          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
-          examples:
-          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
-      additionalProperties: false
-      type: object
-      required:
-      - kind
-      - id
-      title: OperationResource
-      description: 'What the operation produced, or is producing.
-
-
-        `url` is a path on this API rather than an absolute URL, because the service
-
-        is mounted today and gets its own hostname later (docs 07.5). A relative
-
-        path survives that move; a baked-in host does not.'
-    Skill:
-      properties:
-        slug:
-          type: string
-          title: Slug
-          description: The value to send as `skillSlug` on an ask.
-          examples:
-          - msa-buyer-side
-        title:
-          type: string
-          title: Title
-          description: Display title.
-          examples:
-          - Master Services Agreement
-        description:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Description
-          description: What the skill is for.
-          examples:
-          - Master services agreement with Acme for the 2026 platform rollout.
-        scope:
-          type: string
-          title: Scope
-          description: '`system` for one of ours, `organization` for one your organization authored. Personal skills are never listed here.'
-          examples:
-          - system
-        category:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Category
-          description: Grouping label, where the skill has one.
-          examples:
-          - commercial
-        jurisdiction:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Jurisdiction
-          description: Jurisdiction the skill was written for, where it is scoped to one.
-          examples:
-          - US
-      additionalProperties: false
-      type: object
-      required:
-      - slug
-      - title
-      - scope
-      title: Skill
-      description: 'A named prompt a question can be asked through.
-
-
-        Read-only on this API. Skill authoring is a product surface with an upload
-
-        parser behind it, and publishing a write here would make this API a second
-
-        authoring path for prompts that steer every future answer.'
-    ChatUpdateRequest:
-      properties:
-        title:
-          anyOf:
-          - type: string
-            maxLength: 255
-            minLength: 1
-          - type: 'null'
-          title: Title
-          description: New display title. Cannot be set to null; omit it to leave the title alone.
-          examples:
-          - Master Services Agreement
-      additionalProperties: false
-      type: object
-      title: ChatUpdateRequest
-      description: Rename a conversation. Absent leaves alone; an explicit null is refused.
-    VerifiedClaim:
-      properties:
-        text:
-          type: string
-          title: Text
-          description: The claim as it appears in the answer.
-          examples:
-          - Neither party shall be liable for indirect or consequential damages.
-        status:
-          type: string
-          enum:
-          - verified
-          - partially_verified
-          - unverified
-          - contradicted
-          - unable_to_verify
-          title: Status
-          description: '`contradicted` is the one that matters: a source says something different. `unverified` means no source was found for it, which for a claim of general law is common and not by itself an error.'
-          examples:
-          - verified
-        confidence:
-          type: number
-          title: Confidence
-          description: How sure the verifier is of this verdict, 0 to 1.
-          examples:
-          - 0.92
-        citationIndex:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Citationindex
-          description: The `[N]` marker the claim itself cited, when it cited one.
-          examples:
-          - 1
-        explanation:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Explanation
-          description: Why the verifier reached this verdict, in a sentence or two.
-          examples:
-          - Source [2] is section 8.1 of the agreement, which excludes indirect and consequential damages for both parties, so the claim is supported as written.
-        issue:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Issue
-          description: 'The specific problem, when there is one: a wrong number, a missing qualifier, a misattributed holding.'
-          examples:
-          - The answer says the cap is eighteen months of fees; the cited clause says twelve.
-      additionalProperties: false
-      type: object
-      required:
-      - text
-      - status
-      - confidence
-      title: VerifiedClaim
-      description: One statement pulled out of an answer, and whether the sources support it.
+      - data
+      - pagination
+      title: Page[Chat]
     AskRequest:
       properties:
         question:
@@ -3571,6 +3033,207 @@ components:
         over the ten-second threshold that decides 200 from 202, and one capability
 
         with two response shapes is two integrations to test.'
+    Page_Skill_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Skill'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[Skill]
+    Chat:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `cht_` followed by 32 hex characters. Post turns to it and read its transcript back.
+          examples:
+          - cht_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        matterId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matterid
+          description: '`mat_` identifier of the matter this conversation belongs to. Null only for a conversation created before matters existed; every chat this API creates has one.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        title:
+          type: string
+          title: Title
+          description: Display title. Set at creation and editable; this API never renames a conversation for you.
+          examples:
+          - Master Services Agreement
+        hasDocuments:
+          type: boolean
+          title: Hasdocuments
+          description: Whether any turn in this conversation pinned a document. Maintained by the pipeline, not writable.
+          examples:
+          - false
+        documentCount:
+          type: integer
+          title: Documentcount
+          description: How many distinct documents have been pinned across this conversation's turns.
+          examples:
+          - 1
+        usedSkill:
+          type: boolean
+          title: Usedskill
+          description: Whether any turn ran with a skill. Maintained by the pipeline, not writable.
+          examples:
+          - false
+        usedAgentic:
+          type: boolean
+          title: Usedagentic
+          description: Whether any turn ran in agentic mode. Maintained by the pipeline, not writable.
+          examples:
+          - false
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the conversation was created.
+          examples:
+          - '2026-08-19T14:32:10Z'
+        updatedAt:
+          type: string
+          format: date-time
+          title: Updatedat
+          description: When the conversation last changed. Maintained by a database trigger, and the order `chats.list` uses.
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - title
+      - hasDocuments
+      - documentCount
+      - usedSkill
+      - usedAgentic
+      - createdAt
+      - updatedAt
+      title: Chat
+      description: One conversation inside a matter.
+    SimilarRequest:
+      properties:
+        url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Url
+          description: The page to find neighbours of.
+          examples:
+          - https://example.com
+        limit:
+          type: integer
+          maximum: 20.0
+          minimum: 1.0
+          title: Limit
+          description: How many results to return.
+          default: 8
+          examples:
+          - 8
+        jurisdiction:
+          type: string
+          maxLength: 32
+          title: Jurisdiction
+          description: Jurisdiction to steer toward.
+          default: us
+          examples:
+          - US
+      additionalProperties: false
+      type: object
+      required:
+      - url
+      title: SimilarRequest
+      description: 'Find pages similar to one you already have.
+
+
+        The URL is handed to the search provider, which does the fetching, so this
+
+        is not a request-forgery primitive against our own network. **If anyone ever
+
+        replaces that call with a direct fetch, this URL becomes attacker-controlled
+
+        input to our egress and needs an allowlist.** `HttpUrl` is what rejects a
+
+        non-HTTP scheme today; do not widen it to `str`.'
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
+          examples:
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
+
+
+        `total` is the count of rows matching the filter, not the count returned,
+
+        so a caller can size a job before running it.'
+    ArticleRequest:
+      properties:
+        url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Url
+          description: The page to read.
+          examples:
+          - https://example.com
+        maxCharacters:
+          type: integer
+          maximum: 100000.0
+          minimum: 1000.0
+          title: Maxcharacters
+          description: Ceiling on the text returned.
+          default: 50000
+          examples:
+          - 50000
+      additionalProperties: false
+      type: object
+      required:
+      - url
+      title: ArticleRequest
+      description: Fetch one page's full text. Same egress note as `SimilarRequest`.
     ArticleContent:
       properties:
         url:
@@ -3631,6 +3294,118 @@ components:
       - url
       title: ArticleContent
       description: One page, read in full.
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
+          type: array
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
+    WebSearchRequest:
+      properties:
+        query:
+          type: string
+          maxLength: 10000
+          minLength: 2
+          title: Query
+          description: What to search for. Written as a search query rather than as a question; the provider is a search engine, not a model.
+          examples:
+          - California non-compete enforceability 2026
+        limit:
+          type: integer
+          maximum: 20.0
+          minimum: 1.0
+          title: Limit
+          description: How many results to return, 1 to 20.
+          default: 8
+          examples:
+          - 8
+        jurisdiction:
+          type: string
+          maxLength: 32
+          title: Jurisdiction
+          description: Legal jurisdiction to steer the search toward.
+          default: us
+          examples:
+          - US
+      additionalProperties: false
+      type: object
+      required:
+      - query
+      title: WebSearchRequest
+      description: A one-off web search. Touches no client data and stores nothing.
+    ChatUpdateRequest:
+      properties:
+        title:
+          anyOf:
+          - type: string
+            maxLength: 255
+            minLength: 1
+          - type: 'null'
+          title: Title
+          description: New display title. Cannot be set to null; omit it to leave the title alone.
+          examples:
+          - Master Services Agreement
+      additionalProperties: false
+      type: object
+      title: ChatUpdateRequest
+      description: Rename a conversation. Absent leaves alone; an explicit null is refused.
     Operation:
       properties:
         id:
@@ -3709,96 +3484,25 @@ components:
 
 
         Readable for `OPERATION_RETENTION_DAYS` after creation, per AIP-151.'
-    ValidationProblem:
-      type: object
-      title: ValidationProblem
-      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
-      required:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      - errors
-      properties:
-        type:
-          type: string
-          format: uri
-          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
-          examples:
-          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
-        title:
-          type: string
-          description: A short human-readable summary.
-          examples:
-          - Insufficient scope
-        status:
-          type: integer
-          description: The HTTP status code, repeated.
-          examples:
-          - 403
-        detail:
-          type: string
-          description: What went wrong on this specific request. May be reworded at any time.
-          examples:
-          - This credential carries matters:read. This operation needs matters:write.
-        instance:
-          type: string
-          description: The path this problem occurred on.
-          examples:
-          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        requestId:
-          type: string
-          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
-          examples:
-          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        errors:
-          type: array
-          description: One entry per rejected field.
-          items:
-            type: object
-            required:
-            - location
-            - message
-            - type
-            properties:
-              location:
-                type: string
-                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
-              message:
-                type: string
-                description: Why it was rejected.
-              type:
-                type: string
-                description: The validation rule that failed.
-      additionalProperties: true
-    SimilarDocuments:
-      properties:
-        sourceUrl:
-          type: string
-          title: Sourceurl
-          description: The page the neighbours were found for.
-          examples:
-          - https://www.ftc.gov/legal-library/browse/rules/noncompete-rule
-        results:
-          items:
-            $ref: '#/components/schemas/WebResult'
-          type: array
-          title: Results
-          description: The neighbouring pages.
-        totalFound:
-          type: integer
-          title: Totalfound
-          description: How many are in `results`.
-          default: 0
-          examples:
-          - 0
-      additionalProperties: false
-      type: object
-      required:
-      - sourceUrl
-      title: SimilarDocuments
-      description: Pages similar to the one asked about.
+    OperationStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: OperationStatus
+      description: 'The public five. There is no sixth, and there are no synonyms.
+
+
+        Internal vocabularies spell terminal success `completed`, `ready`,
+
+        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+
+        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+
+        `app.workspace_api.adapters.status_map`, which refuses to guess.'
     ResearchConfig:
       properties:
         matterId:
@@ -3951,193 +3655,6 @@ components:
         estimate we do not stand behind. `agenticToolConfig` is six keys that are
 
         accepted, stored, and dropped on read by a model that declares no fields.'
-    ArticleRequest:
-      properties:
-        url:
-          type: string
-          maxLength: 2083
-          minLength: 1
-          format: uri
-          title: Url
-          description: The page to read.
-          examples:
-          - https://example.com
-        maxCharacters:
-          type: integer
-          maximum: 100000.0
-          minimum: 1000.0
-          title: Maxcharacters
-          description: Ceiling on the text returned.
-          default: 50000
-          examples:
-          - 50000
-      additionalProperties: false
-      type: object
-      required:
-      - url
-      title: ArticleRequest
-      description: Fetch one page's full text. Same egress note as `SimilarRequest`.
-    Page_Skill_:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/Skill'
-          type: array
-          title: Data
-          description: The rows in this window, in the collection's default order.
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-          description: Where this window sits in the full result set.
-      additionalProperties: false
-      type: object
-      required:
-      - data
-      - pagination
-      title: Page[Skill]
-    Page_Chat_:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/Chat'
-          type: array
-          title: Data
-          description: The rows in this window, in the collection's default order.
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-          description: Where this window sits in the full result set.
-      additionalProperties: false
-      type: object
-      required:
-      - data
-      - pagination
-      title: Page[Chat]
-    OperationStatus:
-      type: string
-      enum:
-      - queued
-      - running
-      - succeeded
-      - failed
-      - cancelled
-      title: OperationStatus
-      description: 'The public five. There is no sixth, and there are no synonyms.
-
-
-        Internal vocabularies spell terminal success `completed`, `ready`,
-
-        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
-
-        queued `pending`, `queued` and `draft`. All of that is collapsed here by
-
-        `app.workspace_api.adapters.status_map`, which refuses to guess.'
-    Verification:
-      properties:
-        messageId:
-          type: string
-          title: Messageid
-          description: '`msg_` identifier of the message that was verified.'
-          examples:
-          - msg_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        status:
-          $ref: '#/components/schemas/OperationStatus'
-          description: Where the verification got to. `succeeded` means the numbers below are final; before that they are zero.
-          examples:
-          - queued
-        overallStatus:
-          anyOf:
-          - type: string
-            enum:
-            - fully_verified
-            - mostly_verified
-            - partially_verified
-            - mostly_unverified
-            - no_claims
-            - web_sources_only
-            - error
-          - type: 'null'
-          title: Overallstatus
-          description: 'The headline verdict. `web_sources_only` is not a failure: the answer was built from web pages, which this verifier does not re-fetch. `no_claims` means nothing in the answer was checkable, which is the honest result for a clarifying question.'
-          examples:
-          - fully_verified
-        verificationScore:
-          anyOf:
-          - type: number
-          - type: 'null'
-          title: Verificationscore
-          description: Share of claims that came back verified, 0 to 1.
-          examples:
-          - 1.0
-        calibratedScore:
-          anyOf:
-          - type: number
-          - type: 'null'
-          title: Calibratedscore
-          description: The same score adjusted for the model's known overconfidence. Prefer this one when you are thresholding.
-          examples:
-          - 1.0
-        totalClaims:
-          type: integer
-          title: Totalclaims
-          description: How many checkable claims were extracted.
-          default: 0
-          examples:
-          - 0
-        verifiedClaims:
-          type: integer
-          title: Verifiedclaims
-          description: How many were supported by a source.
-          default: 0
-          examples:
-          - 0
-        unverifiedClaims:
-          type: integer
-          title: Unverifiedclaims
-          description: How many had no supporting source.
-          default: 0
-          examples:
-          - 0
-        contradictedClaims:
-          type: integer
-          title: Contradictedclaims
-          description: How many a source actively contradicted.
-          default: 0
-          examples:
-          - 0
-        claims:
-          items:
-            $ref: '#/components/schemas/VerifiedClaim'
-          type: array
-          title: Claims
-          description: The per-claim verdicts, in the order they appear.
-        verifiedAt:
-          anyOf:
-          - type: string
-            format: date-time
-          - type: 'null'
-          title: Verifiedat
-          description: When the verification finished. Null while it is still running.
-          examples:
-          - '2026-08-19T14:32:10Z'
-      additionalProperties: false
-      type: object
-      required:
-      - messageId
-      - status
-      title: Verification
-      description: 'Whether an answer accurately represented the sources it was built from.
-
-
-        RAG-NATIVE, and deliberately so: it checks the answer against the passages
-
-        that produced it, not against the open web. When a customer scopes a question
-
-        to its own documents, fact-checking the answer against the internet
-
-        contradicts what they asked for. The internal product has a web-backed
-
-        variant; publishing both would publish a choice this API has no way to
-
-        explain.'
     WebResult:
       properties:
         url:
@@ -4212,46 +3729,291 @@ components:
       - url
       title: WebResult
       description: One page a web search found.
-    Pagination:
+    ResearchSettings:
       properties:
-        limit:
-          type: integer
-          title: Limit
-          description: The `limit` that was applied to this request.
+        ragTier:
+          anyOf:
+          - type: string
+            enum:
+            - standard
+            - deep
+          - type: 'null'
+          title: Ragtier
+          description: The quality-versus-cost tier that ran. Null on `effectiveSettings` when the turn was not answered by the research pipeline at all; see `answeredBy`.
           examples:
-          - 50
-        offset:
-          type: integer
-          title: Offset
-          description: The `offset` that was applied to this request.
+          - standard
+        answeredBy:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Answeredby
+          description: 'Which engine produced the answer, when it was not the research pipeline: `document_summary`, `chat_redline`, `meta_intent`, `draft_handoff` and similar. Present only on `effectiveSettings`. A turn answered this way has no source cards, which is why it cannot be verified.'
           examples:
-          - 0
-        total:
-          type: integer
-          title: Total
-          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
-          examples:
-          - 128
-        hasMore:
-          type: boolean
-          title: Hasmore
-          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          - document_summary
+        webSearch:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Websearch
+          description: Whether web search was in play.
           examples:
           - false
+        corpusSearch:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Corpussearch
+          description: Whether the shared legal corpus was in play.
+          examples:
+          - false
+        matterDocsSearch:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Matterdocssearch
+          description: Whether the matter's own documents were searched.
+          examples:
+          - false
+        agenticMode:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Agenticmode
+          description: Whether the LLM-driven tool loop was in play.
+          examples:
+          - false
+        deepResearchMode:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Deepresearchmode
+          description: 'Whether Exa-only deep research was requested. Present on `requestedSettings` only: the pipeline records no flag for it, and a turn that pinned a document has it forced off, so a `true` here with no web citations is that demotion.'
+          examples:
+          - false
+        skillSlug:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Skillslug
+          description: The skill whose prompt steered the answer, if one was named.
+          examples:
+          - nda-review
+      additionalProperties: false
+      type: object
+      title: ResearchSettings
+      description: 'What a turn was asked to do, or what it recorded doing.
+
+
+        Every field is nullable because the two instances of this model are filled
+
+        from different places and neither knows everything. `requestedSettings` is
+
+        what this API recorded at launch; `effectiveSettings` is read back out of
+
+        what the pipeline wrote, and the doc-task routes (summarize, extract,
+
+        rewrite, redline) write no toggles at all.'
+    OperationResource:
+      properties:
+        kind:
+          type: string
+          title: Kind
+          description: What sort of thing was produced, for example `matrix` or `document`.
+          examples:
+          - matrix
+        id:
+          type: string
+          title: Id
+          description: Public identifier of the produced resource, carrying its own type prefix, for example `mtx_` for a matrix.
+          examples:
+          - mtx_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+          description: Path on this API where the resource can be read, RELATIVE to the API root and never absolute. Absent when the resource has no addressable path, which happens for work started outside a matter. Absent means the id is real and there is nowhere to GET it; it is not an error.
+          examples:
+          - https://storage.vaquill.ai/exports/msa-acme-v3-redline.docx?signature=...
       additionalProperties: false
       type: object
       required:
-      - limit
-      - offset
-      - total
-      - hasMore
-      title: Pagination
-      description: 'Where the caller is, and whether there is more.
+      - kind
+      - id
+      title: OperationResource
+      description: 'What the operation produced, or is producing.
 
 
-        `total` is the count of rows matching the filter, not the count returned,
+        `url` is a path on this API rather than an absolute URL, because the service
 
-        so a caller can size a job before running it.'
+        is mounted today and gets its own hostname later (docs 07.5). A relative
+
+        path survives that move; a baked-in host does not.'
+    Message:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `msg_` followed by 32 hex characters. An assistant message's id is also the id of the operation resource that produced it.
+          examples:
+          - msg_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        chatId:
+          type: string
+          title: Chatid
+          description: '`cht_` identifier of the conversation this turn belongs to.'
+          examples:
+          - cht_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        matterId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matterid
+          description: '`mat_` identifier of the matter the conversation belongs to.'
+          examples:
+          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        role:
+          type: string
+          title: Role
+          description: '`user` or `assistant`. Read as an open string: the column has no constraint, so treat an unfamiliar value as unknown rather than failing.'
+          examples:
+          - assistant
+        content:
+          type: string
+          title: Content
+          description: The turn's text. Empty on an assistant message that is still being generated; check `status`.
+          examples:
+          - UEsDBBQABgAIAAAAIQ...
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: Where this turn got to, in the same five values every operation on this API uses. A `user` message is always `succeeded`. An assistant message follows the job that produced it, so poll here or poll the operation; both answer the same thing.
+          examples:
+          - queued
+        sequence:
+          type: integer
+          title: Sequence
+          description: 'Position in the conversation, ascending. The order `messages.list` returns, and the only stable one: a bulk insert gives every row the same `createdAt`.'
+          examples:
+          - 1
+        citations:
+          items:
+            $ref: '#/components/schemas/Citation'
+          type: array
+          title: Citations
+          description: The sources behind this answer, matched to the `[N]` markers in `content`. Empty on a user message and on an answer produced without retrieval.
+        requestedSettings:
+          anyOf:
+          - $ref: '#/components/schemas/ResearchSettings'
+          - type: 'null'
+          description: What this API was asked for when the turn was launched. Absent on turns created outside this API.
+        effectiveSettings:
+          anyOf:
+          - $ref: '#/components/schemas/ResearchSettings'
+          - type: 'null'
+          description: What the pipeline recorded actually running. Compare with `requestedSettings` to see a demotion.
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+          description: When the turn was created.
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - chatId
+      - role
+      - content
+      - status
+      - sequence
+      - createdAt
+      title: Message
+      description: 'One turn: what was asked, or what was answered.'
+    DeepResearchRequest:
+      properties:
+        query:
+          type: string
+          maxLength: 5000
+          minLength: 10
+          title: Query
+          description: The research question, 10 to 5,000 characters. Detailed questions work best; this is a research brief rather than a search query.
+          examples:
+          - value valu
+        jurisdiction:
+          type: string
+          maxLength: 32
+          title: Jurisdiction
+          description: Legal jurisdiction context for the research prompt. Defaults to `us`.
+          default: us
+          examples:
+          - US
+        usState:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Usstate
+          description: 'Two-letter lowercase state code to steer the research toward, honoured only when `jurisdiction` is `us`. A soft steer: there is no hard state filter on web research.'
+          examples:
+          - ca
+      additionalProperties: false
+      type: object
+      required:
+      - query
+      title: DeepResearchRequest
+      description: 'A long web-research pass, posted into a conversation.
+
+
+        Answers 202. The report lands as an assistant message in the chat named in
+
+        the path, which is what "somewhere a customer can read it later" means on a
+
+        surface where conversation state is ours: there is no second place a
+
+        research report belongs, and inventing one would be a second transcript.'
+    SimilarDocuments:
+      properties:
+        sourceUrl:
+          type: string
+          title: Sourceurl
+          description: The page the neighbours were found for.
+          examples:
+          - https://www.ftc.gov/legal-library/browse/rules/noncompete-rule
+        results:
+          items:
+            $ref: '#/components/schemas/WebResult'
+          type: array
+          title: Results
+          description: The neighbouring pages.
+        totalFound:
+          type: integer
+          title: Totalfound
+          description: How many are in `results`.
+          default: 0
+          examples:
+          - 0
+      additionalProperties: false
+      type: object
+      required:
+      - sourceUrl
+      title: SimilarDocuments
+      description: Pages similar to the one asked about.
+    Page_Message_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Message'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[Message]
     ResearchConfigUpdateRequest:
       properties:
         ragTier:
@@ -4372,6 +4134,141 @@ components:
         and a credential that may read research results should not be able to turn
 
         on a mode that changes what every future answer costs.'
+    Verification:
+      properties:
+        messageId:
+          type: string
+          title: Messageid
+          description: '`msg_` identifier of the message that was verified.'
+          examples:
+          - msg_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: Where the verification got to. `succeeded` means the numbers below are final; before that they are zero.
+          examples:
+          - queued
+        overallStatus:
+          anyOf:
+          - type: string
+            enum:
+            - fully_verified
+            - mostly_verified
+            - partially_verified
+            - mostly_unverified
+            - no_claims
+            - web_sources_only
+            - error
+          - type: 'null'
+          title: Overallstatus
+          description: 'The headline verdict. `web_sources_only` is not a failure: the answer was built from web pages, which this verifier does not re-fetch. `no_claims` means nothing in the answer was checkable, which is the honest result for a clarifying question.'
+          examples:
+          - fully_verified
+        verificationScore:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Verificationscore
+          description: Share of claims that came back verified, 0 to 1.
+          examples:
+          - 1.0
+        calibratedScore:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Calibratedscore
+          description: The same score adjusted for the model's known overconfidence. Prefer this one when you are thresholding.
+          examples:
+          - 1.0
+        totalClaims:
+          type: integer
+          title: Totalclaims
+          description: How many checkable claims were extracted.
+          default: 0
+          examples:
+          - 0
+        verifiedClaims:
+          type: integer
+          title: Verifiedclaims
+          description: How many were supported by a source.
+          default: 0
+          examples:
+          - 0
+        unverifiedClaims:
+          type: integer
+          title: Unverifiedclaims
+          description: How many had no supporting source.
+          default: 0
+          examples:
+          - 0
+        contradictedClaims:
+          type: integer
+          title: Contradictedclaims
+          description: How many a source actively contradicted.
+          default: 0
+          examples:
+          - 0
+        claims:
+          items:
+            $ref: '#/components/schemas/VerifiedClaim'
+          type: array
+          title: Claims
+          description: The per-claim verdicts, in the order they appear.
+        verifiedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Verifiedat
+          description: When the verification finished. Null while it is still running.
+          examples:
+          - '2026-08-19T14:32:10Z'
+      additionalProperties: false
+      type: object
+      required:
+      - messageId
+      - status
+      title: Verification
+      description: 'Whether an answer accurately represented the sources it was built from.
+
+
+        RAG-NATIVE, and deliberately so: it checks the answer against the passages
+
+        that produced it, not against the open web. When a customer scopes a question
+
+        to its own documents, fact-checking the answer against the internet
+
+        contradicts what they asked for. The internal product has a web-backed
+
+        variant; publishing both would publish a choice this API has no way to
+
+        explain.'
+    WebSearchResults:
+      properties:
+        query:
+          type: string
+          title: Query
+          description: The query that was run.
+          examples:
+          - California non-compete enforceability 2026
+        results:
+          items:
+            $ref: '#/components/schemas/WebResult'
+          type: array
+          title: Results
+          description: The pages found.
+        totalFound:
+          type: integer
+          title: Totalfound
+          description: How many are in `results`.
+          default: 0
+          examples:
+          - 0
+      additionalProperties: false
+      type: object
+      required:
+      - query
+      title: WebSearchResults
+      description: What a web search returned. Nothing is stored.
     OperationError:
       properties:
         code:
@@ -4402,187 +4299,235 @@ components:
         columns, and forwarding those verbatim leaks our internals into a customer''s
 
         logs.'
-    Page_Message_:
+    ChatCreateRequest:
       properties:
-        data:
-          items:
-            $ref: '#/components/schemas/Message'
-          type: array
-          title: Data
-          description: The rows in this window, in the collection's default order.
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-          description: Where this window sits in the full result set.
+        title:
+          type: string
+          maxLength: 255
+          minLength: 1
+          title: Title
+          description: Display title for the conversation, 1 to 255 characters. Whitespace is trimmed and a whitespace-only title is refused.
+          examples:
+          - Master Services Agreement
       additionalProperties: false
       type: object
       required:
-      - data
-      - pagination
-      title: Page[Message]
-    Message:
+      - title
+      title: ChatCreateRequest
+      description: 'Open a conversation. One INSERT; nothing is generated and nothing is spent.
+
+
+        A title is required rather than derived from the first question, because the
+
+        web app derives one from a human''s opening message and a machine''s opening
+
+        message is usually a template. A caller that wants our derivation can send
+
+        the question as the title.'
+    VerifiedClaim:
       properties:
-        id:
+        text:
           type: string
-          title: Id
-          description: Public identifier, `msg_` followed by 32 hex characters. An assistant message's id is also the id of the operation resource that produced it.
+          title: Text
+          description: The claim as it appears in the answer.
           examples:
-          - msg_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        chatId:
-          type: string
-          title: Chatid
-          description: '`cht_` identifier of the conversation this turn belongs to.'
-          examples:
-          - cht_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        matterId:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Matterid
-          description: '`mat_` identifier of the matter the conversation belongs to.'
-          examples:
-          - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        role:
-          type: string
-          title: Role
-          description: '`user` or `assistant`. Read as an open string: the column has no constraint, so treat an unfamiliar value as unknown rather than failing.'
-          examples:
-          - assistant
-        content:
-          type: string
-          title: Content
-          description: The turn's text. Empty on an assistant message that is still being generated; check `status`.
-          examples:
-          - UEsDBBQABgAIAAAAIQ...
+          - Neither party shall be liable for indirect or consequential damages.
         status:
-          $ref: '#/components/schemas/OperationStatus'
-          description: Where this turn got to, in the same five values every operation on this API uses. A `user` message is always `succeeded`. An assistant message follows the job that produced it, so poll here or poll the operation; both answer the same thing.
+          type: string
+          enum:
+          - verified
+          - partially_verified
+          - unverified
+          - contradicted
+          - unable_to_verify
+          title: Status
+          description: '`contradicted` is the one that matters: a source says something different. `unverified` means no source was found for it, which for a claim of general law is common and not by itself an error.'
           examples:
-          - queued
-        sequence:
-          type: integer
-          title: Sequence
-          description: 'Position in the conversation, ascending. The order `messages.list` returns, and the only stable one: a bulk insert gives every row the same `createdAt`.'
+          - verified
+        confidence:
+          type: number
+          title: Confidence
+          description: How sure the verifier is of this verdict, 0 to 1.
+          examples:
+          - 0.92
+        citationIndex:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Citationindex
+          description: The `[N]` marker the claim itself cited, when it cited one.
           examples:
           - 1
-        citations:
-          items:
-            $ref: '#/components/schemas/Citation'
-          type: array
-          title: Citations
-          description: The sources behind this answer, matched to the `[N]` markers in `content`. Empty on a user message and on an answer produced without retrieval.
-        requestedSettings:
+        explanation:
           anyOf:
-          - $ref: '#/components/schemas/ResearchSettings'
+          - type: string
           - type: 'null'
-          description: What this API was asked for when the turn was launched. Absent on turns created outside this API.
-        effectiveSettings:
-          anyOf:
-          - $ref: '#/components/schemas/ResearchSettings'
-          - type: 'null'
-          description: What the pipeline recorded actually running. Compare with `requestedSettings` to see a demotion.
-        createdAt:
-          type: string
-          format: date-time
-          title: Createdat
-          description: When the turn was created.
+          title: Explanation
+          description: Why the verifier reached this verdict, in a sentence or two.
           examples:
-          - '2026-08-19T14:32:10Z'
+          - Source [2] is section 8.1 of the agreement, which excludes indirect and consequential damages for both parties, so the claim is supported as written.
+        issue:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Issue
+          description: 'The specific problem, when there is one: a wrong number, a missing qualifier, a misattributed holding.'
+          examples:
+          - The answer says the cap is eighteen months of fees; the cited clause says twelve.
       additionalProperties: false
       type: object
       required:
-      - id
-      - chatId
-      - role
-      - content
+      - text
       - status
-      - sequence
-      - createdAt
-      title: Message
-      description: 'One turn: what was asked, or what was answered.'
-    ResearchSettings:
+      - confidence
+      title: VerifiedClaim
+      description: One statement pulled out of an answer, and whether the sources support it.
+    OperationProgress:
       properties:
-        ragTier:
-          anyOf:
-          - type: string
-            enum:
-            - standard
-            - deep
-          - type: 'null'
-          title: Ragtier
-          description: The quality-versus-cost tier that ran. Null on `effectiveSettings` when the turn was not answered by the research pipeline at all; see `answeredBy`.
+        done:
+          type: integer
+          minimum: 0.0
+          title: Done
+          description: How many units are finished.
           examples:
-          - standard
-        answeredBy:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Answeredby
-          description: 'Which engine produced the answer, when it was not the research pipeline: `document_summary`, `chat_redline`, `meta_intent`, `draft_handoff` and similar. Present only on `effectiveSettings`. A turn answered this way has no source cards, which is why it cannot be verified.'
+          - 24
+        total:
+          type: integer
+          minimum: 0.0
+          title: Total
+          description: How many units there are in total. Can legitimately be zero for an empty run.
           examples:
-          - document_summary
-        webSearch:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Websearch
-          description: Whether web search was in play.
+          - 128
+        unit:
+          type: string
+          enum:
+          - cells
+          - steps
+          - documents
+          - files
+          - rows
+          - percent
+          title: Unit
+          description: 'What `done` and `total` are counting. Always read it: a workflow run counts `percent` while a matrix run counts `cells`, so `{done: 43, total: 100}` alone is ambiguous.'
           examples:
-          - false
-        corpusSearch:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Corpussearch
-          description: Whether the shared legal corpus was in play.
-          examples:
-          - false
-        matterDocsSearch:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Matterdocssearch
-          description: Whether the matter's own documents were searched.
-          examples:
-          - false
-        agenticMode:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Agenticmode
-          description: Whether the LLM-driven tool loop was in play.
-          examples:
-          - false
-        deepResearchMode:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Deepresearchmode
-          description: 'Whether Exa-only deep research was requested. Present on `requestedSettings` only: the pipeline records no flag for it, and a turn that pinned a document has it forced off, so a `true` here with no web citations is that demotion.'
-          examples:
-          - false
-        skillSlug:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Skillslug
-          description: The skill whose prompt steered the answer, if one was named.
-          examples:
-          - nda-review
+          - cells
       additionalProperties: false
       type: object
-      title: ResearchSettings
-      description: 'What a turn was asked to do, or what it recorded doing.
+      required:
+      - done
+      - total
+      - unit
+      title: OperationProgress
+      description: 'How far along, and in what units.
 
 
-        Every field is nullable because the two instances of this model are filled
+        The unit is not decoration. A workflow run stores only a percentage while a
 
-        from different places and neither knows everything. `requestedSettings` is
+        matrix run stores cell counts, so `{done: 43, total: 100}` with no unit reads
 
-        what this API recorded at launch; `effectiveSettings` is read back out of
+        as 43 of 100 documents and a client builds a wrong estimate from it.'
+    Skill:
+      properties:
+        slug:
+          type: string
+          title: Slug
+          description: The value to send as `skillSlug` on an ask.
+          examples:
+          - msa-buyer-side
+        title:
+          type: string
+          title: Title
+          description: Display title.
+          examples:
+          - Master Services Agreement
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: What the skill is for.
+          examples:
+          - Master services agreement with Acme for the 2026 platform rollout.
+        scope:
+          type: string
+          title: Scope
+          description: '`system` for one of ours, `organization` for one your organization authored. Personal skills are never listed here.'
+          examples:
+          - system
+        category:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Category
+          description: Grouping label, where the skill has one.
+          examples:
+          - commercial
+        jurisdiction:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Jurisdiction
+          description: Jurisdiction the skill was written for, where it is scoped to one.
+          examples:
+          - US
+      additionalProperties: false
+      type: object
+      required:
+      - slug
+      - title
+      - scope
+      title: Skill
+      description: 'A named prompt a question can be asked through.
 
-        what the pipeline wrote, and the doc-task routes (summarize, extract,
 
-        rewrite, redline) write no toggles at all.'
+        Read-only on this API. Skill authoring is a product surface with an upload
+
+        parser behind it, and publishing a write here would make this API a second
+
+        authoring path for prompts that steer every future answer.'
+    Problem:
+      type: object
+      title: Problem
+      description: An RFC 9457 problem document. Branch on `type`, which is stable; `title` and `detail` are written for people and may be reworded. Some problems carry extra members (`requiredScopes`, `limit`, `expectedVersion`), which is why this object is open.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+      additionalProperties: true
   securitySchemes:
     WorkspaceAuth:
       type: http
@@ -4592,6 +4537,3 @@ components:
 externalDocs:
   description: Getting started guide and error reference
   url: https://vaquill.ai/docs/workspace-api
-x-refined-from:
-- vaquill-ai-workspace-openapi.json
-- vaquill-ai-workspace-openapi.yml

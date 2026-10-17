@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai Documents API
+  title: Vaquill Legal Workspace Documents API
+  description: 'Organization-scoped API for driving your legal workspace from your own backend: matters, documents, drafting, review, compare and matrices.'
   version: 1.0.0
-  description: 'Operations tagged Documents across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai/workspace
   description: Vaquill Legal Workspace API (production)
@@ -206,11 +206,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/documents/{documentId}:
     get:
       tags:
@@ -682,11 +677,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/documents/{documentId}/text:
     get:
       tags:
@@ -833,11 +823,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/documents/{documentId}/download:
     get:
       tags:
@@ -981,11 +966,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/matters/{matterId}/documents/{documentId}/summary:
     get:
       tags:
@@ -1145,96 +1125,142 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
 components:
   schemas:
-    Page_Document_:
+    SummarySection:
       properties:
-        data:
-          items:
-            $ref: '#/components/schemas/Document'
+        title:
+          type: string
+          title: Title
+          description: Heading for this part of the summary.
+          default: ''
+          examples:
+          - Master Services Agreement
+        content:
+          type: string
+          title: Content
+          description: The summary text under this heading.
+          default: ''
+          examples:
+          - UEsDBBQABgAIAAAAIQ...
+      additionalProperties: false
+      type: object
+      title: SummarySection
+      description: 'One heading of the summary.
+
+
+        `content` is loose on purpose. `document_summaries.sections` is JSONB
+
+        written by a service this API does not own, and the shape has changed once
+
+        already; a closed model here would answer 500 for whoever owns the older
+
+        rows, which is the same reasoning that keeps every publisher-controlled
+
+        vocabulary on this surface a plain `str` outbound.'
+    ValidationProblem:
+      type: object
+      title: ValidationProblem
+      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - errors
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
+          examples:
+          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
+        title:
+          type: string
+          description: A short human-readable summary.
+          examples:
+          - Insufficient scope
+        status:
+          type: integer
+          description: The HTTP status code, repeated.
+          examples:
+          - 403
+        detail:
+          type: string
+          description: What went wrong on this specific request. May be reworded at any time.
+          examples:
+          - This credential carries matters:read. This operation needs matters:write.
+        instance:
+          type: string
+          description: The path this problem occurred on.
+          examples:
+          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        requestId:
+          type: string
+          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
+          examples:
+          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        errors:
           type: array
-          title: Data
-          description: The rows in this window, in the collection's default order.
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-          description: Where this window sits in the full result set.
+          description: One entry per rejected field.
+          items:
+            type: object
+            required:
+            - location
+            - message
+            - type
+            properties:
+              location:
+                type: string
+                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
+              message:
+                type: string
+                description: Why it was rejected.
+              type:
+                type: string
+                description: The validation rule that failed.
+      additionalProperties: true
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
+          examples:
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
       additionalProperties: false
       type: object
       required:
-      - data
-      - pagination
-      title: Page[Document]
-    DocumentUpdateRequest:
-      properties:
-        folderId:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Folderid
-          description: '`fld_` identifier of the folder to file this document under. Must belong to your organization. Send null to unfile it. Filename and matter cannot be changed: both are part of the stored object''s identity.'
-          examples:
-          - fld_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-      additionalProperties: false
-      type: object
-      title: DocumentUpdateRequest
-      description: 'Move a document between folders. That is the whole of it.
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
 
 
-        The web app''s `PATCH /documents/{id}` also accepts `filename`, `matterId`
+        `total` is the count of rows matching the filter, not the count returned,
 
-        and `metadata`, and none of the three can be published here.
-
-
-        `filename` and `matterId` are both INSIDE the R2 object key.
-
-        `r2_storage._generate_file_key` composes
-
-        `orgs/{org}/matters/{matter}/docs/{doc}/{filename}`, and both
-
-        `r2_storage.download_document` and `adapters/document_content._object_key`
-
-        REGENERATE that key from the row rather than reading a stored path. So
-
-        changing either one makes the original permanently unreadable, with no error
-
-        at write time and no error until somebody asks for the file. The web app has
-
-        that defect today; publishing the fields here would inherit it, and a moved
-
-        document is a copy-then-delete job rather than a PATCH.
-
-
-        `metadata` is free-form JSONB whose keys the ingest pipeline owns:
-
-        `{"handwritten": ...}` is written by `upload_store._insert_placeholder` and
-
-        read back by the finalize task. Publishing it lets a customer overwrite a
-
-        key a worker depends on.'
-    OperationStatus:
-      type: string
-      enum:
-      - queued
-      - running
-      - succeeded
-      - failed
-      - cancelled
-      title: OperationStatus
-      description: 'The public five. There is no sixth, and there are no synonyms.
-
-
-        Internal vocabularies spell terminal success `completed`, `ready`,
-
-        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
-
-        queued `pending`, `queued` and `draft`. All of that is collapsed here by
-
-        `app.workspace_api.adapters.status_map`, which refuses to guess.'
+        so a caller can size a job before running it.'
     DocumentSummary:
       properties:
         documentId:
@@ -1301,6 +1327,86 @@ components:
       - createdAt
       title: DocumentSummary
       description: What was persisted the last time this document was summarized.
+    Page_Document_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Document'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[Document]
+    DocumentText:
+      properties:
+        documentId:
+          type: string
+          title: Documentid
+          description: '`doc_` identifier of the document this text came from.'
+          examples:
+          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        text:
+          type: string
+          title: Text
+          description: The document's full text, reassembled from the ingested chunks. This is exactly what retrieval, drafting and review saw, not a fresh extraction.
+          examples:
+          - Neither party shall be liable for indirect or consequential damages.
+        chunkCount:
+          type: integer
+          title: Chunkcount
+          description: How many chunks were reassembled. Compare against the document's `chunkCount` to tell a partial read from a complete one.
+          examples:
+          - 37
+        truncated:
+          type: boolean
+          title: Truncated
+          description: True when the text was cut at the published ceiling. Always check it before quoting the text as complete.
+          default: false
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - documentId
+      - text
+      - chunkCount
+      title: DocumentText
+      description: 'The reassembled text of a document.
+
+
+        Reassembled from the ingested chunks rather than re-extracted from the
+
+        original, so what a customer reads here is exactly what retrieval, drafting
+
+        and review saw. Re-extracting would be a second implementation that could
+
+        silently disagree with the one the product actually uses.'
+    OperationStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: OperationStatus
+      description: 'The public five. There is no sixth, and there are no synonyms.
+
+
+        Internal vocabularies spell terminal success `completed`, `ready`,
+
+        `extracted`, `succeeded` and `fresh`; terminal failure `failed` and `error`;
+
+        queued `pending`, `queued` and `draft`. All of that is collapsed here by
+
+        `app.workspace_api.adapters.status_map`, which refuses to guess.'
     Document:
       properties:
         id:
@@ -1431,140 +1537,53 @@ components:
         it has not been told about, so a new enum label fails loudly in CI rather
 
         than leaking a sixth value.'
-    Pagination:
+    DocumentUpdateRequest:
       properties:
-        limit:
-          type: integer
-          title: Limit
-          description: The `limit` that was applied to this request.
+        folderId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Folderid
+          description: '`fld_` identifier of the folder to file this document under. Must belong to your organization. Send null to unfile it. Filename and matter cannot be changed: both are part of the stored object''s identity.'
           examples:
-          - 50
-        offset:
-          type: integer
-          title: Offset
-          description: The `offset` that was applied to this request.
-          examples:
-          - 0
-        total:
-          type: integer
-          title: Total
-          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
-          examples:
-          - 128
-        hasMore:
-          type: boolean
-          title: Hasmore
-          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
-          examples:
-          - false
+          - fld_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
       additionalProperties: false
       type: object
-      required:
-      - limit
-      - offset
-      - total
-      - hasMore
-      title: Pagination
-      description: 'Where the caller is, and whether there is more.
+      title: DocumentUpdateRequest
+      description: 'Move a document between folders. That is the whole of it.
 
 
-        `total` is the count of rows matching the filter, not the count returned,
+        The web app''s `PATCH /documents/{id}` also accepts `filename`, `matterId`
 
-        so a caller can size a job before running it.'
-    ValidationProblem:
-      type: object
-      title: ValidationProblem
-      description: A problem document for a schema rejection. `errors` lists the fields that were refused. The value you submitted is deliberately not echoed, so a validation failure cannot copy your content into an error response or into either side's logs.
-      required:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      - errors
-      properties:
-        type:
-          type: string
-          format: uri
-          description: The stable identifier for this error, and the one field to branch on. Resolves to a page describing it.
-          examples:
-          - https://vaquill.ai/docs/workspace-api/errors/insufficient-scope
-        title:
-          type: string
-          description: A short human-readable summary.
-          examples:
-          - Insufficient scope
-        status:
-          type: integer
-          description: The HTTP status code, repeated.
-          examples:
-          - 403
-        detail:
-          type: string
-          description: What went wrong on this specific request. May be reworded at any time.
-          examples:
-          - This credential carries matters:read. This operation needs matters:write.
-        instance:
-          type: string
-          description: The path this problem occurred on.
-          examples:
-          - /workspace/v1/matters/mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        requestId:
-          type: string
-          description: The id of this request, identical to the `X-Request-ID` response header. Quote it when contacting support.
-          examples:
-          - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        errors:
-          type: array
-          description: One entry per rejected field.
-          items:
-            type: object
-            required:
-            - location
-            - message
-            - type
-            properties:
-              location:
-                type: string
-                description: Dotted path to the rejected field, for example `body.contentMarkdown`.
-              message:
-                type: string
-                description: Why it was rejected.
-              type:
-                type: string
-                description: The validation rule that failed.
-      additionalProperties: true
-    SummarySection:
-      properties:
-        title:
-          type: string
-          title: Title
-          description: Heading for this part of the summary.
-          default: ''
-          examples:
-          - Master Services Agreement
-        content:
-          type: string
-          title: Content
-          description: The summary text under this heading.
-          default: ''
-          examples:
-          - UEsDBBQABgAIAAAAIQ...
-      additionalProperties: false
-      type: object
-      title: SummarySection
-      description: 'One heading of the summary.
+        and `metadata`, and none of the three can be published here.
 
 
-        `content` is loose on purpose. `document_summaries.sections` is JSONB
+        `filename` and `matterId` are both INSIDE the R2 object key.
 
-        written by a service this API does not own, and the shape has changed once
+        `r2_storage._generate_file_key` composes
 
-        already; a closed model here would answer 500 for whoever owns the older
+        `orgs/{org}/matters/{matter}/docs/{doc}/{filename}`, and both
 
-        rows, which is the same reasoning that keeps every publisher-controlled
+        `r2_storage.download_document` and `adapters/document_content._object_key`
 
-        vocabulary on this surface a plain `str` outbound.'
+        REGENERATE that key from the row rather than reading a stored path. So
+
+        changing either one makes the original permanently unreadable, with no error
+
+        at write time and no error until somebody asks for the file. The web app has
+
+        that defect today; publishing the fields here would inherit it, and a moved
+
+        document is a copy-then-delete job rather than a PATCH.
+
+
+        `metadata` is free-form JSONB whose keys the ingest pipeline owns:
+
+        `{"handwritten": ...}` is written by `upload_store._insert_placeholder` and
+
+        read back by the finalize task. Publishing it lets a customer overwrite a
+
+        key a worker depends on.'
     Problem:
       type: object
       title: Problem
@@ -1608,50 +1627,6 @@ components:
           examples:
           - req_5f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
       additionalProperties: true
-    DocumentText:
-      properties:
-        documentId:
-          type: string
-          title: Documentid
-          description: '`doc_` identifier of the document this text came from.'
-          examples:
-          - doc_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        text:
-          type: string
-          title: Text
-          description: The document's full text, reassembled from the ingested chunks. This is exactly what retrieval, drafting and review saw, not a fresh extraction.
-          examples:
-          - Neither party shall be liable for indirect or consequential damages.
-        chunkCount:
-          type: integer
-          title: Chunkcount
-          description: How many chunks were reassembled. Compare against the document's `chunkCount` to tell a partial read from a complete one.
-          examples:
-          - 37
-        truncated:
-          type: boolean
-          title: Truncated
-          description: True when the text was cut at the published ceiling. Always check it before quoting the text as complete.
-          default: false
-          examples:
-          - false
-      additionalProperties: false
-      type: object
-      required:
-      - documentId
-      - text
-      - chunkCount
-      title: DocumentText
-      description: 'The reassembled text of a document.
-
-
-        Reassembled from the ingested chunks rather than re-extracted from the
-
-        original, so what a customer reads here is exactly what retrieval, drafting
-
-        and review saw. Re-extracting would be a second implementation that could
-
-        silently disagree with the one the product actually uses.'
   securitySchemes:
     WorkspaceAuth:
       type: http
@@ -1661,6 +1636,3 @@ components:
 externalDocs:
   description: Getting started guide and error reference
   url: https://vaquill.ai/docs/workspace-api
-x-refined-from:
-- vaquill-ai-workspace-openapi.json
-- vaquill-ai-workspace-openapi.yml

@@ -1,6 +1,7 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai India Pricing API
+  title: Vaquill India India Pricing API
+  description: 'Public API for Indian primary law: Central and State Acts, the instruments of the principal regulators, and their individual sections.'
   version: 1.0.0
   contact:
     name: Vaquill API Support
@@ -10,7 +11,6 @@ info:
     name: Proprietary
     url: https://www.vaquill.ai/terms
   termsOfService: https://www.vaquill.ai/terms
-  description: 'Operations tagged India Pricing across 2 of this provider''s published API definitions: vaquill-ai-india-openapi.json, vaquill-ai-india-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai
   description: Production
@@ -61,11 +61,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
 components:
   schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
     ApiCreditCostResponse:
       properties:
         endpoint:
@@ -128,41 +160,6 @@ components:
       - category
       title: ApiCreditCostResponse
       description: Single endpoint credit cost for the pricing matrix.
-    HTTPValidationError:
-      properties:
-        detail:
-          items:
-            $ref: '#/components/schemas/ValidationError'
-          type: array
-          title: Detail
-      type: object
-      title: HTTPValidationError
-    ValidationError:
-      properties:
-        loc:
-          items:
-            anyOf:
-            - type: string
-            - type: integer
-          type: array
-          title: Location
-        msg:
-          type: string
-          title: Message
-        type:
-          type: string
-          title: Error Type
-        input:
-          title: Input
-        ctx:
-          type: object
-          title: Context
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationError
     ApiCreditPricingResponse:
       properties:
         dollarPerCredit:
@@ -213,6 +210,3 @@ components:
       in: query
       name: api_key
       description: 'The same API key as a query parameter: `?api_key=vq_key_...`. Use only where you cannot set a header. A URL can end up in proxy and server logs, browser history and shared links, so prefer either header form, and rotate a key that has leaked.'
-x-refined-from:
-- vaquill-ai-india-openapi.json
-- vaquill-ai-india-openapi.yml

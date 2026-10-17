@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai Folders API
+  title: Vaquill Legal Workspace Folders API
+  description: 'Organization-scoped API for driving your legal workspace from your own backend: matters, documents, drafting, review, compare and matrices.'
   version: 1.0.0
-  description: 'Operations tagged Folders across 2 of this provider''s published API definitions: vaquill-ai-workspace-openapi.json, vaquill-ai-workspace-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai/workspace
   description: Vaquill Legal Workspace API (production)
@@ -309,11 +309,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
   /v1/folders/{folderId}:
     get:
       tags:
@@ -736,21 +731,20 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    servers:
-    - url: https://api.vaquill.ai/workspace
-      description: Vaquill Legal Workspace API (production)
-    - url: /workspace
-      description: Vaquill Legal Workspace API (relative to the mount)
 components:
   schemas:
-    FolderCreateRequest:
+    Folder:
       properties:
+        id:
+          type: string
+          title: Id
+          description: Public identifier, `fld_` followed by 32 hex characters.
+          examples:
+          - fld_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
         name:
           type: string
-          maxLength: 100
-          minLength: 1
           title: Name
-          description: Display name for the folder. Trimmed; whitespace alone is refused.
+          description: The folder's display name.
           examples:
           - Closing Documents
         parentId:
@@ -758,7 +752,7 @@ components:
           - type: string
           - type: 'null'
           title: Parentid
-          description: '`fld_` identifier of the folder to nest this one under. Must belong to your organization. A cycle is refused by the database.'
+          description: '`fld_` identifier of the containing folder. Absent when the folder sits at the root.'
           examples:
           - fld_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
         matterId:
@@ -766,62 +760,34 @@ components:
           - type: string
           - type: 'null'
           title: Matterid
-          description: '`mat_` identifier to scope this folder to one matter. Must belong to your organization. Omit for a workspace-level folder shared across drafts and chats.'
+          description: '`mat_` identifier when the folder is scoped to one matter. Absent means a workspace-level folder, visible across drafts and chats.'
           examples:
           - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+        createdAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Createdat
+          description: When the folder was created (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
+        updatedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Updatedat
+          description: When the folder was last modified (RFC 3339).
+          examples:
+          - '2026-08-19T14:32:10Z'
       additionalProperties: false
       type: object
       required:
+      - id
       - name
-      title: FolderCreateRequest
-      description: 'Everything a caller may set when creating a folder.
-
-
-        Both references are verified against the calling installation''s organization
-
-        before the row is written. Cycles are refused by the `folders_prevent_cycle`
-
-        trigger, which is a database-level guarantee this API does not duplicate.'
-    Pagination:
-      properties:
-        limit:
-          type: integer
-          title: Limit
-          description: The `limit` that was applied to this request.
-          examples:
-          - 50
-        offset:
-          type: integer
-          title: Offset
-          description: The `offset` that was applied to this request.
-          examples:
-          - 0
-        total:
-          type: integer
-          title: Total
-          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
-          examples:
-          - 128
-        hasMore:
-          type: boolean
-          title: Hasmore
-          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
-          examples:
-          - false
-      additionalProperties: false
-      type: object
-      required:
-      - limit
-      - offset
-      - total
-      - hasMore
-      title: Pagination
-      description: 'Where the caller is, and whether there is more.
-
-
-        `total` is the count of rows matching the filter, not the count returned,
-
-        so a caller can size a job before running it.'
+      title: Folder
+      description: A folder as this API publishes it.
     ValidationProblem:
       type: object
       title: ValidationProblem
@@ -885,18 +851,71 @@ components:
                 type: string
                 description: The validation rule that failed.
       additionalProperties: true
-    Folder:
+    Pagination:
       properties:
-        id:
-          type: string
-          title: Id
-          description: Public identifier, `fld_` followed by 32 hex characters.
+        limit:
+          type: integer
+          title: Limit
+          description: The `limit` that was applied to this request.
           examples:
-          - fld_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
+          - 50
+        offset:
+          type: integer
+          title: Offset
+          description: The `offset` that was applied to this request.
+          examples:
+          - 0
+        total:
+          type: integer
+          title: Total
+          description: Total rows matching the filter, not the number returned in `data`. Use it to size a job before running it.
+          examples:
+          - 128
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when rows remain beyond this window. Derived from `offset + len(data) < total`, so a full final page correctly reports `false` rather than sending you after an empty page.
+          examples:
+          - false
+      additionalProperties: false
+      type: object
+      required:
+      - limit
+      - offset
+      - total
+      - hasMore
+      title: Pagination
+      description: 'Where the caller is, and whether there is more.
+
+
+        `total` is the count of rows matching the filter, not the count returned,
+
+        so a caller can size a job before running it.'
+    Page_Folder_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Folder'
+          type: array
+          title: Data
+          description: The rows in this window, in the collection's default order.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          description: Where this window sits in the full result set.
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[Folder]
+    FolderCreateRequest:
+      properties:
         name:
           type: string
+          maxLength: 100
+          minLength: 1
           title: Name
-          description: The folder's display name.
+          description: Display name for the folder. Trimmed; whitespace alone is refused.
           examples:
           - Closing Documents
         parentId:
@@ -904,7 +923,7 @@ components:
           - type: string
           - type: 'null'
           title: Parentid
-          description: '`fld_` identifier of the containing folder. Absent when the folder sits at the root.'
+          description: '`fld_` identifier of the folder to nest this one under. Must belong to your organization. A cycle is refused by the database.'
           examples:
           - fld_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
         matterId:
@@ -912,34 +931,22 @@ components:
           - type: string
           - type: 'null'
           title: Matterid
-          description: '`mat_` identifier when the folder is scoped to one matter. Absent means a workspace-level folder, visible across drafts and chats.'
+          description: '`mat_` identifier to scope this folder to one matter. Must belong to your organization. Omit for a workspace-level folder shared across drafts and chats.'
           examples:
           - mat_9f2c8b1e4a7d43c9b6e0f1a2c3d4e5f6
-        createdAt:
-          anyOf:
-          - type: string
-            format: date-time
-          - type: 'null'
-          title: Createdat
-          description: When the folder was created (RFC 3339).
-          examples:
-          - '2026-08-19T14:32:10Z'
-        updatedAt:
-          anyOf:
-          - type: string
-            format: date-time
-          - type: 'null'
-          title: Updatedat
-          description: When the folder was last modified (RFC 3339).
-          examples:
-          - '2026-08-19T14:32:10Z'
       additionalProperties: false
       type: object
       required:
-      - id
       - name
-      title: Folder
-      description: A folder as this API publishes it.
+      title: FolderCreateRequest
+      description: 'Everything a caller may set when creating a folder.
+
+
+        Both references are verified against the calling installation''s organization
+
+        before the row is written. Cycles are refused by the `folders_prevent_cycle`
+
+        trigger, which is a database-level guarantee this API does not duplicate.'
     FolderUpdateRequest:
       properties:
         name:
@@ -986,23 +993,6 @@ components:
         reimplement the web app''s 100-step ancestor walk: a second Python copy would
 
         be weaker and would still lose a race with a concurrent move.'
-    Page_Folder_:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/Folder'
-          type: array
-          title: Data
-          description: The rows in this window, in the collection's default order.
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-          description: Where this window sits in the full result set.
-      additionalProperties: false
-      type: object
-      required:
-      - data
-      - pagination
-      title: Page[Folder]
     Problem:
       type: object
       title: Problem
@@ -1055,6 +1045,3 @@ components:
 externalDocs:
   description: Getting started guide and error reference
   url: https://vaquill.ai/docs/workspace-api
-x-refined-from:
-- vaquill-ai-workspace-openapi.json
-- vaquill-ai-workspace-openapi.yml

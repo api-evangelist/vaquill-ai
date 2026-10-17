@@ -1,6 +1,7 @@
 openapi: 3.2.0
 info:
-  title: Vaquill Ai Indian Acts and Legislation API
+  title: Vaquill India Indian Acts and Legislation API
+  description: 'Public API for Indian primary law: Central and State Acts, the instruments of the principal regulators, and their individual sections.'
   version: 1.0.0
   contact:
     name: Vaquill API Support
@@ -10,7 +11,6 @@ info:
     name: Proprietary
     url: https://www.vaquill.ai/terms
   termsOfService: https://www.vaquill.ai/terms
-  description: 'Operations tagged Indian Acts and Legislation across 2 of this provider''s published API definitions: vaquill-ai-india-openapi.json, vaquill-ai-india-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.vaquill.ai
   description: Production
@@ -187,9 +187,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiDetailError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/in/acts/filters:
     get:
       tags:
@@ -290,9 +287,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiDetailError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/in/acts/{act_id}/text:
     get:
       tags:
@@ -378,9 +372,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiDetailError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/in/acts/{act_id}/amendments:
     get:
       tags:
@@ -550,9 +541,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiDetailError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/in/acts/list:
     get:
       tags:
@@ -851,9 +839,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiDetailError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/in/acts/corresponding-provisions/{act_code}:
     get:
       tags:
@@ -994,9 +979,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiDetailError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/in/acts/coverage:
     get:
       tags:
@@ -1121,9 +1103,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiDetailError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/in/acts/resolve:
     get:
       tags:
@@ -1491,9 +1470,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiDetailError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/in/acts/{act_id}/structure:
     get:
       tags:
@@ -1622,9 +1598,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/in/acts/{act_id}/sections/{section_number}:
     get:
       tags:
@@ -1785,9 +1758,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/in/acts/{act_id}/sections/{section_number}/body:
     get:
       tags:
@@ -1939,9 +1909,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/in/acts/{act_id}/sections/{section_number}/history:
     get:
       tags:
@@ -2161,9 +2128,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiDetailError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/in/acts/{act_id}/status:
     get:
       tags:
@@ -2292,9 +2256,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiDetailError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/in/acts/{act_id}/sections/{section_number}/references:
     get:
       tags:
@@ -2434,9 +2395,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiDetailError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/in/acts/{act_id}/cited-by:
     get:
       tags:
@@ -2606,9 +2564,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiDetailError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/in/acts/{act_id}/subordinate:
     get:
       tags:
@@ -2769,9 +2724,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiDetailError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
   /api/v1/in/acts/{act_id}/definitions:
     get:
       tags:
@@ -2925,286 +2877,232 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiDetailError'
-    servers:
-    - url: https://api.vaquill.ai
-      description: Production
 components:
   schemas:
-    ApiFieldError:
+    Citation:
       properties:
-        loc:
-          items:
-            anyOf:
-            - type: string
-            - type: integer
-          type: array
-          title: Loc
-          description: 'Where the bad value is: `body`, `query` or `path`, then the parameter name exactly as you send it (camelCase), then list indexes. A bare `["body"]` means the body as a whole was not a JSON object.'
-          examples:
-          - - body
-            - corpusType
-        msg:
-          type: string
-          title: Msg
-          description: What is wrong with the value, in plain English.
-          examples:
-          - Input should be 'USC', 'CFR' or 'STATE'
-        type:
-          type: string
-          title: Type
-          description: Machine-readable error kind, e.g. `missing`, `literal_error`, `json_invalid`.
-          examples:
-          - literal_error
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ApiFieldError
-      description: One rejected field in a 422 response.
-    ActSearchResponse:
-      properties:
-        data:
-          $ref: '#/components/schemas/ActSearchData'
-        meta:
-          $ref: '#/components/schemas/ActSearchMeta'
-      type: object
-      required:
-      - data
-      - meta
-      title: ActSearchResponse
-    CategoryLegend:
-      properties:
-        value:
-          type: string
-          title: Value
-        meaning:
-          type: string
-          title: Meaning
-      type: object
-      required:
-      - value
-      - meaning
-      title: CategoryLegend
-    ActStructureResponse:
-      properties:
-        actId:
-          type: string
-          title: Actid
-        title:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Title
         citation:
           anyOf:
           - type: string
           - type: 'null'
           title: Citation
-        nodes:
-          items:
-            $ref: '#/components/schemas/StructureNode'
-          type: array
-          title: Nodes
-        sectionCount:
-          type: integer
-          title: Sectioncount
-        hasHierarchy:
-          type: boolean
-          title: Hashierarchy
-          description: False when the publisher gives this act no chapter or part divisions, in which case `nodes` is a flat section list. Most served acts carry no hierarchy, so a flat answer is the common case and not an error. `GET /acts/coverage` publishes how many do, as `depth.actsWithStructure`.
-        truncated:
-          type: boolean
-          title: Truncated
-          description: True when the act has more sections than one call returns.
-          default: false
-        resolvedFrom:
+        citationShort:
           anyOf:
-          - $ref: '#/components/schemas/IdentifierResolution'
+          - type: string
           - type: 'null'
-          description: How your act_id or section number was matched, when it did not match exactly as sent. Null when it did.
-        meta:
-          $ref: '#/components/schemas/Meta'
+          title: Citationshort
+        displayPath:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Displaypath
+        breadcrumb:
+          anyOf:
+          - items:
+              additionalProperties: true
+              type: object
+            type: array
+          - type: 'null'
+          title: Breadcrumb
+      type: object
+      title: Citation
+      description: 'How to cite the thing this response is about.
+
+
+        Built from the publisher''s own title, so where that title carries a defect
+
+        so does the citation: some titles end in a period, which reads as
+
+        `... Act., s. 3`, and some carry no year at all. Those are recorded defects
+
+        rather than reasons to withhold the field. `GET /acts/coverage` publishes
+
+        how many served acts carry a citation, as `depth.actsWithCitation`.'
+    AsOfAnswer:
+      properties:
+        requested:
+          type: string
+          title: Requested
+        inForceByDate:
+          type: integer
+          title: Inforcebydate
+        afterDate:
+          type: integer
+          title: Afterdate
+        undated:
+          type: integer
+          title: Undated
+        textReflectsEvents:
+          type: integer
+          title: Textreflectsevents
+          description: How many of these events the served text incorporates. Currently always 0.
+          default: 0
+        isBounded:
+          type: boolean
+          title: Isbounded
+          description: True means we hold no recorded event affecting this date, which is NOT the same as there having been none. Amendment capture is per-publisher and began long after the law did.
+        note:
+          type: string
+          title: Note
       type: object
       required:
-      - actId
-      - nodes
-      - sectionCount
-      - hasHierarchy
-      - meta
-      title: ActStructureResponse
-    SectionShape:
+      - requested
+      - inForceByDate
+      - afterDate
+      - undated
+      - isBounded
+      - note
+      title: AsOfAnswer
+      description: 'A dated question answered with a TIMELINE, never with reconstructed text.
+
+
+        We hold amendment EVENTS and no versioned text, so there is no honest way
+
+        to render this provision as it stood on a date. Returning current text
+
+        under a date parameter would be a wrong answer shaped like a right one.'
+    DefinedTerm:
       properties:
-        hasProviso:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Hasproviso
-        hasExplanation:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Hasexplanation
-        hasIllustration:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Hasillustration
-        hasNonObstante:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Hasnonobstante
-        hasSavingClause:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Hassavingclause
-        hasPenalty:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Haspenalty
-      type: object
-      title: SectionShape
-      description: Structural features found in the provision's own text.
-    ActSearchResult:
-      properties:
-        actId:
+        term:
           type: string
-          title: Actid
-        title:
-          type: string
-          title: Title
+          title: Term
         sectionNumber:
           anyOf:
           - type: string
           - type: 'null'
           title: Sectionnumber
-        sectionTitle:
+          description: Where the term is defined, when known.
+      type: object
+      required:
+      - term
+      title: DefinedTerm
+    CoverageData:
+      properties:
+        totals:
+          $ref: '#/components/schemas/CoverageTotals'
+        depth:
+          $ref: '#/components/schemas/CoverageDepth'
+        byCategory:
+          items:
+            $ref: '#/components/schemas/CoverageCount'
+          type: array
+          title: Bycategory
+        byJurisdiction:
+          items:
+            $ref: '#/components/schemas/JurisdictionCoverage'
+          type: array
+          title: Byjurisdiction
+        categoryLegend:
+          items:
+            $ref: '#/components/schemas/CategoryLegend'
+          type: array
+          title: Categorylegend
+          description: What each `category` value means. The vocabulary alone did not say.
+        byRegulator:
+          items:
+            $ref: '#/components/schemas/CoverageCount'
+          type: array
+          title: Byregulator
+        byStatus:
+          items:
+            $ref: '#/components/schemas/CoverageCount'
+          type: array
+          title: Bystatus
+        caveats:
+          additionalProperties: true
+          type: object
+          title: Caveats
+      type: object
+      required:
+      - totals
+      - depth
+      - byCategory
+      - byJurisdiction
+      - categoryLegend
+      - byRegulator
+      - byStatus
+      - caveats
+      title: CoverageData
+    StructureNode:
+      properties:
+        kind:
+          type: string
+          title: Kind
+          description: '`chapter`, `part` or `section`.'
+        identifier:
           anyOf:
           - type: string
           - type: 'null'
-          title: Sectiontitle
-        chapter:
+          title: Identifier
+        label:
           anyOf:
           - type: string
           - type: 'null'
-          title: Chapter
-        chapterTitle:
+          title: Label
+        title:
           anyOf:
           - type: string
           - type: 'null'
-          title: Chaptertitle
-        year:
+          title: Title
+        sectionCount:
           anyOf:
           - type: integer
           - type: 'null'
-          title: Year
-        category:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Category
-        state:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: State
-        department:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Department
-        jurisdiction:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Jurisdiction
-        actStatus:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Actstatus
-        provisionType:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Provisiontype
-        legalSubject:
+          title: Sectioncount
+        children:
           anyOf:
           - items:
-              type: string
+              $ref: '#/components/schemas/StructureNode'
             type: array
           - type: 'null'
-          title: Legalsubject
-        actsReferenced:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          title: Actsreferenced
-        content:
-          type: string
-          title: Content
-          description: Relevant text excerpt
-        longTitle:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Longtitle
-        enactmentDate:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Enactmentdate
-          description: Enactment date as `YYYY-MM-DD`, or null when the publisher's stored value is not a date we can state without guessing. See `enactmentDateRaw`.
-        enactmentDateRaw:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Enactmentdateraw
-          description: The publisher's own string, present only when it differs from `enactmentDate`. 21% of the corpus stores `23-Nov-2001`, and a small tail stores values that are not dates at all.
-        pdfUrl:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Pdfurl
-        textUrl:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Texturl
-        sourceUrl:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sourceurl
-        relevanceScore:
-          anyOf:
-          - type: number
-          - type: 'null'
-          title: Relevancescore
-          description: 'Ranking score for this result against the query, after hybrid fusion and cross-encoder reranking. Comparable WITHIN one response and not across responses: it is a rank artifact, not a probability, and not a statement about legal relevance.'
-          examples:
-          - 0.87
-        sourceUrlNote:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sourceurlnote
-          description: Why `sourceUrl` is absent, when it is. A named reason, because a bare null cannot be told apart from 'not applicable'.
-        citation:
-          $ref: '#/components/schemas/Citation'
-          description: How to cite this provision. Present on 99.90% of served acts.
+          title: Children
       type: object
       required:
-      - actId
-      - title
-      - content
-      title: ActSearchResult
-      description: A single legislation search result with full metadata.
+      - kind
+      title: StructureNode
+    ActFiltersData:
+      properties:
+        categories:
+          items:
+            $ref: '#/components/schemas/ActFilterValue'
+          type: array
+          title: Categories
+        states:
+          items:
+            $ref: '#/components/schemas/ActFilterValue'
+          type: array
+          title: States
+        departments:
+          items:
+            $ref: '#/components/schemas/ActFilterValue'
+          type: array
+          title: Departments
+        truncated:
+          items:
+            type: string
+          type: array
+          title: Truncated
+          description: 'Fields whose list below is INCOMPLETE. `department` holds 943 distinct values against a 256-value facet ceiling, so most of them are not shown. A value absent from a truncated list is NOT invalid, and search no longer rejects one: until 2026-09-06 it did, refusing filters on data the corpus holds.'
+      type: object
+      required:
+      - categories
+      - states
+      - departments
+      title: ActFiltersData
+    ActFilterValue:
+      properties:
+        value:
+          type: string
+          title: Value
+        count:
+          type: integer
+          title: Count
+          description: Sections in the corpus carrying this value
+      type: object
+      required:
+      - value
+      - count
+      title: ActFilterValue
     ActSectionBodyResponse:
       properties:
         actId:
@@ -3268,6 +3166,122 @@ components:
       - provenance
       - meta
       title: ActSectionBodyResponse
+    ActMeta:
+      properties:
+        processingTimeMs:
+          type: number
+          title: Processingtimems
+          description: Server-side time in milliseconds, excluding network transit. Not billed on.
+          default: 0.0
+          examples:
+          - 315.0
+        creditsConsumed:
+          type: number
+          title: Creditsconsumed
+          description: 'Credits ACTUALLY charged for this call. Read this rather than assuming the list price: refunded work bills 0.'
+          default: 0.0
+          examples:
+          - 3
+      type: object
+      title: ActMeta
+      description: 'What this call cost and how long it took.
+
+
+        🔴 Added 2026-09-06. Five of the six original routes returned NO statement
+
+        of what they billed: `/text` (3 credits), `/amendments` (5), `/list` (1),
+
+        `/filters` (0) and `/corresponding-provisions` (1). The house rule on the
+
+        US surface is that `creditsConsumed` is the CONTRACT and the list price is
+
+        not, and it matters most exactly where refunds happen -- `/text` refunds on
+
+        a missing act, `/corresponding-provisions` refunds when a mapping does not
+
+        exist yet. Without this field a caller cannot tell a refunded call from a
+
+        charged one, and has to reconcile against the ledger to find out.'
+    Retirement:
+      properties:
+        reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reason
+        duplicateOf:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Duplicateof
+        observedOn:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Observedon
+      type: object
+      title: Retirement
+    CitedByRow:
+      properties:
+        actId:
+          type: string
+          title: Actid
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+        citation:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Citation
+        sectionNumber:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectionnumber
+        sectionTitle:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectiontitle
+      type: object
+      required:
+      - actId
+      title: CitedByRow
+    ApiDetailError:
+      properties:
+        detail:
+          type: string
+          title: Detail
+          description: 'Human-readable reason, safe to surface to an end user. Branch on the HTTP status rather than on this string: the wording is not part of the contract and may be reworded, but 401 (bad key), 402 (out of credits), 403 (missing scope), 404 (no such resource) and 429 (rate limited) are stable.'
+          examples:
+          - Insufficient API credits.
+        errors:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/ApiFieldError'
+            type: array
+          - type: 'null'
+          title: Errors
+          description: 'Present on 422 only: every field that failed validation.'
+      type: object
+      required:
+      - detail
+      title: ApiDetailError
+      description: 'Error envelope the API actually returns.
+
+
+        Every error (400/401/402/403/404/405/422/429/5xx) carries a `detail`
+
+        string, e.g. `{"detail": "Insufficient API credits."}`, on every mount of
+
+        the API. A 422 adds `errors`, one entry per rejected field. Some 404s add
+
+        endpoint-specific diagnosis beside `detail` (the statutes section routes
+
+        add `actId`, `reason` and `didYouMean`); treat unknown keys as optional.'
     ActSection:
       properties:
         actId:
@@ -3472,6 +3486,208 @@ components:
       - citation
       - provenance
       title: ActSection
+    ReferencedAct:
+      properties:
+        title:
+          type: string
+          title: Title
+          description: The act's title as the publisher wrote it.
+        actId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Actid
+          description: Resolved id, when the title names an act we serve.
+        resolved:
+          type: boolean
+          title: Resolved
+          description: False when the publisher names an act we do not hold. A coverage fact, not a parse failure.
+      type: object
+      required:
+      - title
+      - resolved
+      title: ReferencedAct
+    ResolveResponse:
+      properties:
+        results:
+          items:
+            $ref: '#/components/schemas/ResolveItem'
+          type: array
+          title: Results
+        count:
+          type: integer
+          title: Count
+        resolvedCount:
+          type: integer
+          title: Resolvedcount
+        meta:
+          $ref: '#/components/schemas/Meta'
+      type: object
+      required:
+      - results
+      - count
+      - resolvedCount
+      - meta
+      title: ResolveResponse
+    ActReferencesResponse:
+      properties:
+        actId:
+          type: string
+          title: Actid
+        sectionNumber:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectionnumber
+        citation:
+          $ref: '#/components/schemas/Citation'
+        acts:
+          items:
+            $ref: '#/components/schemas/ReferencedAct'
+          type: array
+          title: Acts
+          description: Other enactments this provision names.
+        sections:
+          items:
+            $ref: '#/components/schemas/ReferencedSection'
+          type: array
+          title: Sections
+          description: Sections of this act it cross-refers to.
+        totalActs:
+          type: integer
+          title: Totalacts
+          description: Distinct enactments this provision names, before the cap on rows. `acts` is shorter than this when the provision names more than the cap; `truncated` says so.
+        totalSections:
+          type: integer
+          title: Totalsections
+          description: Distinct own-act sections cross-referred, before the cap on rows.
+        truncated:
+          type: boolean
+          title: Truncated
+          description: 'True when either list was cut to the row cap. This route is not paged: one provision''s own outbound edges are a short list, and the cap exists only so a malformed passage cannot return unbounded output.'
+        matchBasis:
+          type: string
+          title: Matchbasis
+        note:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Note
+        resolvedFrom:
+          anyOf:
+          - $ref: '#/components/schemas/IdentifierResolution'
+          - type: 'null'
+          description: How your act_id or section number was matched, when it did not match exactly as sent. Null when it did.
+        meta:
+          $ref: '#/components/schemas/Meta'
+      type: object
+      required:
+      - actId
+      - citation
+      - totalActs
+      - totalSections
+      - truncated
+      - matchBasis
+      - meta
+      title: ActReferencesResponse
+    CoverageTotals:
+      properties:
+        acts:
+          type: integer
+          title: Acts
+          description: Distinct served acts. Dated, see `measuredOn`.
+        actsRetired:
+          type: integer
+          title: Actsretired
+        sections:
+          type: integer
+          title: Sections
+          description: 'Distinct (act, section) pairs. NOT the passage count: a section spans several passages, so `passages` is the larger number.'
+        passages:
+          type: integer
+          title: Passages
+          description: Live, exact, counted at request time.
+        measuredOn:
+          type: string
+          title: Measuredon
+          description: The date the act-level counts in this block were last scanned.
+      type: object
+      required:
+      - acts
+      - actsRetired
+      - sections
+      - passages
+      - measuredOn
+      title: CoverageTotals
+    SubordinateRow:
+      properties:
+        actId:
+          type: string
+          title: Actid
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+        citation:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Citation
+        delegationType:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Delegationtype
+          description: '`rules`, `regulations`, `notification` or `order`.'
+        year:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Year
+        actStatus:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Actstatus
+      type: object
+      required:
+      - actId
+      title: SubordinateRow
+    CorrespondingProvisionsResponse:
+      properties:
+        oldAct:
+          type: string
+          title: Oldact
+        newAct:
+          type: string
+          title: Newact
+        effectiveDate:
+          type: string
+          title: Effectivedate
+        provisions:
+          items:
+            $ref: '#/components/schemas/CorrespondingProvisionItem'
+          type: array
+          title: Provisions
+        total:
+          type: integer
+          title: Total
+        coverage:
+          additionalProperties: true
+          type: object
+          title: Coverage
+          description: 'How much of the old code this mapping covers, where it came from, and how it was checked. `source` names the government publication the table is transcribed from, so a caller can go and read it. 🔴 It is still not a complete concordance: a section absent here is NOT thereby unchanged, and the correspondence is many-to-many in places. Read `numberedSectionsMapped` before treating an absent section as unmapped-because-unchanged.'
+        meta:
+          $ref: '#/components/schemas/ActMeta'
+      type: object
+      required:
+      - oldAct
+      - newAct
+      - effectiveDate
+      - provisions
+      - total
+      title: CorrespondingProvisionsResponse
     ActSectionResponse:
       properties:
         section:
@@ -3488,6 +3704,215 @@ components:
       - section
       - meta
       title: ActSectionResponse
+    ActSearchResponse:
+      properties:
+        data:
+          $ref: '#/components/schemas/ActSearchData'
+        meta:
+          $ref: '#/components/schemas/ActSearchMeta'
+      type: object
+      required:
+      - data
+      - meta
+      title: ActSearchResponse
+    ActListItem:
+      properties:
+        actId:
+          type: string
+          title: Actid
+        title:
+          type: string
+          title: Title
+        year:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Year
+        category:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Category
+        state:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: State
+        department:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Department
+        actNumber:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Actnumber
+        actStatus:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Actstatus
+        enactmentDate:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Enactmentdate
+          description: Enactment date as `YYYY-MM-DD`, or null. See `enactmentDateRaw`.
+        enactmentDateRaw:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Enactmentdateraw
+          description: The publisher's own string, when it differs from `enactmentDate`.
+        citation:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Citation
+          description: How to cite the act, as the publisher titles it. Present only on index-backed listings.
+        sectionCount:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Sectioncount
+          description: Sections we hold for this act, so a caller can size a fetch before making it. Present only on index-backed listings.
+      type: object
+      required:
+      - actId
+      - title
+      title: ActListItem
+      description: Lightweight act summary for browsing and discovery.
+    JurisdictionCoverage:
+      properties:
+        code:
+          type: string
+          title: Code
+        acts:
+          type: integer
+          title: Acts
+        sections:
+          type: integer
+          title: Sections
+        passages:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Passages
+          description: Live passage count where a facet reported one.
+      type: object
+      required:
+      - code
+      - acts
+      - sections
+      title: JurisdictionCoverage
+      description: 'Acts and sections held for one jurisdiction, in the unit a lawyer thinks in.
+
+
+        Passage counts answer "how big is the index"; act and section counts answer
+
+        "how much law do you hold". Only the second is a question anyone asks.'
+    ActAmendmentsResponse:
+      properties:
+        actId:
+          type: string
+          title: Actid
+        resolvedFrom:
+          anyOf:
+          - $ref: '#/components/schemas/IdentifierResolution'
+          - type: 'null'
+          description: Null when the act is exactly the `actId` you sent. Otherwise how your input was matched after copy damage (whitespace, quotes, a trailing period) was removed.
+        title:
+          type: string
+          title: Title
+        totalFootnotes:
+          type: integer
+          title: Totalfootnotes
+          description: Footnotes on THIS page, not in the act. Paging is by `page`/`pageSize`, so this equals `pageSize` on a full page.
+        footnotes:
+          items:
+            $ref: '#/components/schemas/FootnoteItem'
+          type: array
+          title: Footnotes
+        typeCounts:
+          additionalProperties:
+            type: integer
+          type: object
+          title: Typecounts
+        page:
+          type: integer
+          title: Page
+          default: 1
+        pageSize:
+          type: integer
+          title: Pagesize
+          default: 100
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when a further page of footnotes exists.
+          default: false
+        meta:
+          $ref: '#/components/schemas/ActMeta'
+      type: object
+      required:
+      - actId
+      - title
+      - totalFootnotes
+      - footnotes
+      - typeCounts
+      title: ActAmendmentsResponse
+    FootnoteItem:
+      properties:
+        sectionNumber:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectionnumber
+        sectionTitle:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectiontitle
+        footnoteId:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Footnoteid
+        footnoteText:
+          type: string
+          title: Footnotetext
+        footnoteType:
+          type: string
+          title: Footnotetype
+          description: substitution, insertion, omission, note, renumbering
+        byAct:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Byact
+        originalText:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Originaltext
+        effectiveDate:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Effectivedate
+          description: Date the amendment took effect, as `YYYY-MM-DD`, or null when the publisher's footnote does not state one we can read without guessing. See `effectiveDateRaw`.
+        effectiveDateRaw:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Effectivedateraw
+          description: The date exactly as the footnote gives it, present when it differs from `effectiveDate`. Footnotes carry prose ('1st April 2017') and day-first numerals ('24-10-2019').
+      type: object
+      required:
+      - footnoteText
+      - footnoteType
+      title: FootnoteItem
     CoverageCount:
       properties:
         value:
@@ -3511,207 +3936,114 @@ components:
         act many sections. Act-level figures live in `totals` and carry their own
 
         measurement date.'
-    Citation:
+    ActTextResponse:
       properties:
-        citation:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Citation
-        citationShort:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Citationshort
-        displayPath:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Displaypath
-        breadcrumb:
-          anyOf:
-          - items:
-              additionalProperties: true
-              type: object
-            type: array
-          - type: 'null'
-          title: Breadcrumb
-      type: object
-      title: Citation
-      description: 'How to cite the thing this response is about.
-
-
-        Built from the publisher''s own title, so where that title carries a defect
-
-        so does the citation: some titles end in a period, which reads as
-
-        `... Act., s. 3`, and some carry no year at all. Those are recorded defects
-
-        rather than reasons to withhold the field. `GET /acts/coverage` publishes
-
-        how many served acts carry a citation, as `depth.actsWithCitation`.'
-    IdentifierResolution:
-      properties:
-        input:
-          type: string
-          title: Input
-          description: The act identifier exactly as you sent it.
-          examples:
-          - ' IND_central_20062.'
         actId:
           type: string
           title: Actid
-          description: The act_id it matched. Send this next time.
-          examples:
-          - IND_central_20062
-        sectionInput:
+        resolvedFrom:
+          anyOf:
+          - $ref: '#/components/schemas/IdentifierResolution'
+          - type: 'null'
+          description: Null when the act is exactly the `actId` you sent. Otherwise how your input was matched after copy damage (whitespace, quotes, a trailing period) was removed.
+        title:
+          type: string
+          title: Title
+        year:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Year
+        category:
           anyOf:
           - type: string
           - type: 'null'
-          title: Sectioninput
-          description: The section number exactly as you sent it, on a section route.
-          examples:
-          - s. 498-A
-        sectionNumber:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sectionnumber
-          description: The section number as the publisher writes it. Send this next time.
-          examples:
-          - 498A
-        via:
-          items:
-            type: string
-          type: array
-          title: Via
-          description: 'What was done to your input, in order. `normalized_id`: the act_id carried surrounding whitespace, quotes, backticks, an invisible character, a trailing period or double percent-encoding, which were removed. `normalized_section`: the section number was written differently from the publisher (a `s.` / `Sec.` / `Section` prefix, a hyphen or space before an alphabetic suffix, a lowercase suffix, or a trailing sub-provision), and matched one stored number and only one.'
-          examples:
-          - - normalized_section
-        subProvision:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Subprovision
-          description: 'The sub-provision your section number carried, e.g. `(1)(a)` for `302(1)(a)`. The WHOLE section is served: sub-provisions are not addressed separately.'
-          examples:
-          - (1)
-      type: object
-      required:
-      - input
-      - actId
-      title: IdentifierResolution
-      description: 'How the act_id or section number you sent was matched, when not as sent.
-
-
-        Present only when the input did NOT match exactly. Absent (null) means the
-
-        response is about exactly the act_id and section number in your request.
-
-        Same idea, and the same field name, as `resolvedFrom` on the US surface.'
-    Provenance:
-      properties:
-        sourceUrl:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sourceurl
-          description: The publisher's own page for this document, when it resolves.
-        sourceUrlNote:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sourceurlnote
-          description: Why `sourceUrl` is absent, when it is. A named reason, because a bare null cannot be told apart from 'not applicable'.
+          title: Category
         textUrl:
-          anyOf:
-          - type: string
-          - type: 'null'
+          type: string
           title: Texturl
         pdfUrl:
           anyOf:
           - type: string
           - type: 'null'
           title: Pdfurl
-      type: object
-      title: Provenance
-    ResolveBatchRequest:
-      properties:
-        citations:
-          items:
-            type: string
-          type: array
-          minItems: 1
-          title: Citations
-          description: Citation strings, as a lawyer would type them.
-          examples:
-          - - u/s 302 IPC
-            - Section 138 of the Negotiable Instruments Act
-            - Art. 21 Constitution
-        state:
-          anyOf:
-          - type: string
-            enum:
-            - andaman-and-nicobar-islands
-            - andaman-nicobar
-            - andhra-pradesh
-            - arunachal-pradesh
-            - assam
-            - bihar
-            - central
-            - chandigarh
-            - chhattisgarh
-            - dadra-and-nagar-haveli-and-daman-and-diu
-            - dadra-nagar-haveli
-            - delhi
-            - goa
-            - gujarat
-            - haryana
-            - himachal-pradesh
-            - jammu-and-kashmir
-            - jammu-kashmir
-            - jharkhand
-            - karnataka
-            - kerala
-            - ladakh
-            - lakshadweep
-            - madhya-pradesh
-            - maharashtra
-            - manipur
-            - meghalaya
-            - mizoram
-            - nagaland
-            - odisha
-            - puducherry
-            - punjab
-            - rajasthan
-            - sikkim
-            - tamil-nadu
-            - telangana
-            - tripura
-            - uttar-pradesh
-            - uttarakhand
-            - west-bengal
-          - type: 'null'
-          title: State
-          description: Narrow to one jurisdiction. Required for a State-universal title.
-          examples:
-          - maharashtra
-        asAtDate:
+        htmlUrl:
           anyOf:
           - type: string
           - type: 'null'
-          format: date
-          title: Asatdate
-          description: 'The date the conduct or document belongs to, as YYYY-MM-DD. This is how a caller says which side of the 2023 recodification they mean: without it, a criminal section number resolves to BOTH the old code and its replacement, because both are live law.'
-          examples:
-          - '2019-05-01'
-      additionalProperties: false
+          title: Htmlurl
+        chunksCount:
+          type: integer
+          title: Chunkscount
+          default: 0
+        isSubordinate:
+          type: boolean
+          title: Issubordinate
+          description: 'True for subordinate legislation: notifications, rules, circulars, orders. False for principal acts.'
+          default: false
+        issuedDate:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Issueddate
+          description: Date the instrument was issued by the publisher, where known.
+        meta:
+          $ref: '#/components/schemas/ActMeta'
+        currencyStatus:
+          type: string
+          title: Currencystatus
+          description: 'How far the currency of this document can be vouched for. `repeal_tracked`: the publisher records a repeal flag for this document, so a repealed instrument is identifiable. `as_issued`: served as issued on `issuedDate`, and it MAY HAVE BEEN SUPERSEDED since. India Code publishes no supersession status for subordinate legislation, and a superseding instrument names its predecessor only in prose, so this API cannot tell you whether a notification is still in force. Treat `as_issued` documents as evidence of what was issued on a date, not as a statement of current law.'
+          default: unknown
       type: object
       required:
-      - citations
-      title: ResolveBatchRequest
-      description: Up to 50 citations, priced per citation.
+      - actId
+      - title
+      - textUrl
+      title: ActTextResponse
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ActListResponse:
+      properties:
+        results:
+          items:
+            $ref: '#/components/schemas/ActListItem'
+          type: array
+          title: Results
+        total:
+          type: integer
+          title: Total
+        page:
+          type: integer
+          title: Page
+        pageSize:
+          type: integer
+          title: Pagesize
+        hasMore:
+          type: boolean
+          title: Hasmore
+        meta:
+          $ref: '#/components/schemas/ActMeta'
+        note:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Note
+          description: Always set on this endpoint, naming the source that answered. On the normal path it carries the act index's BUILD DATE, because the listing is a snapshot and an act ingested after that date reaches search before it reaches here. If the index is unavailable the note is prefixed `DEGRADED:` and states the shortfall. A gap a caller can see is not the same as one they cannot.
+      type: object
+      required:
+      - results
+      - total
+      - page
+      - pageSize
+      - hasMore
+      title: ActListResponse
     ActSubordinateResponse:
       properties:
         actId:
@@ -3788,1082 +4120,6 @@ components:
       - matchBasis
       - meta
       title: ActSubordinateResponse
-    FootnoteItem:
-      properties:
-        sectionNumber:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sectionnumber
-        sectionTitle:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sectiontitle
-        footnoteId:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Footnoteid
-        footnoteText:
-          type: string
-          title: Footnotetext
-        footnoteType:
-          type: string
-          title: Footnotetype
-          description: substitution, insertion, omission, note, renumbering
-        byAct:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Byact
-        originalText:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Originaltext
-        effectiveDate:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Effectivedate
-          description: Date the amendment took effect, as `YYYY-MM-DD`, or null when the publisher's footnote does not state one we can read without guessing. See `effectiveDateRaw`.
-        effectiveDateRaw:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Effectivedateraw
-          description: The date exactly as the footnote gives it, present when it differs from `effectiveDate`. Footnotes carry prose ('1st April 2017') and day-first numerals ('24-10-2019').
-      type: object
-      required:
-      - footnoteText
-      - footnoteType
-      title: FootnoteItem
-    ActStatusResponse:
-      properties:
-        actId:
-          type: string
-          title: Actid
-        title:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Title
-        citation:
-          $ref: '#/components/schemas/Citation'
-        goodLawStatus:
-          type: string
-          title: Goodlawstatus
-          description: 'Our DERIVED verdict: `good_law`, `not_good_law` or `unknown`. Conservative by construction -- an unverified repeal claim maps to `unknown`, NEVER to `not_good_law`, because we do not check whether a repealing instrument was brought into force and at least one repeal on this record involves an Act that never commenced. One field to filter on; the three raw fields below remain if you want to judge it yourself.'
-          default: unknown
-          examples:
-          - good_law
-        goodLawReason:
-          type: string
-          title: Goodlawreason
-          description: Why the verdict above is what it is. Always present.
-          default: ''
-        publisherStatus:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Publisherstatus
-          description: '`act_status` exactly as the publisher records it. Their word, not our verdict.'
-        servedStatus:
-          type: string
-          title: Servedstatus
-          description: '`served` or `retired`. OUR word about whether this API answers for it.'
-        isSubordinate:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Issubordinate
-        delegationType:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Delegationtype
-        parentActName:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Parentactname
-        commencementInfo:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Commencementinfo
-        territorialExtent:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Territorialextent
-        enactmentDate:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Enactmentdate
-          description: 'The date the act was enacted, as `YYYY-MM-DD`, or null when the stored value is not a date we can state without guessing. 🔴 This is NOT the year in the act''s short title: ''The Biswa Bangla Biswabidyalay Act, 2017'' was enacted 2018-01-09, and on a subordinate instrument `year` is often the PARENT act''s year. Use `year` for the title year and this field for the date.'
-          examples:
-          - '2018-01-09'
-        enactmentDateRaw:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Enactmentdateraw
-          description: 'What the publisher stored, present only when it differs from `enactmentDate`. When `enactmentDate` is null this carries the reason it is null, by showing you the value: a bare year (''1963''), an era year (''15-Oct-1349'', from an act titled in the Fasli calendar), or a corrupt one (''0032-03-05'').'
-          examples:
-          - 9-Mar-2005
-        dateOfAssent:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Dateofassent
-          description: The date of assent as `YYYY-MM-DD`, or null when the stored value is not a date. Some records store an act NUMBER here ('15 of 1992'); those return null with the value in `dateOfAssentRaw`.
-          examples:
-          - '1952-09-01'
-        dateOfAssentRaw:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Dateofassentraw
-          description: What the publisher stored, when it differs from `dateOfAssent`.
-          examples:
-          - 15 of 1992
-        lastAmendedYear:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Lastamendedyear
-        repeals:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          title: Repeals
-          description: 'Acts this one repeals, as the publisher names them. The inverse of `repealClaim`, and subject to the same caveat: it is their record, and we do not verify commencement.'
-        supersededBy:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Supersededby
-          description: A later consolidation that replaced this version, where one is recorded.
-        subordinateCount:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Subordinatecount
-          description: Subordinate instruments the publisher records under this act.
-        repealClaim:
-          anyOf:
-          - $ref: '#/components/schemas/RepealClaim'
-          - type: 'null'
-        retirement:
-          anyOf:
-          - $ref: '#/components/schemas/Retirement'
-          - type: 'null'
-        currencyNote:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Currencynote
-        provenance:
-          $ref: '#/components/schemas/Provenance'
-        resolvedFrom:
-          anyOf:
-          - $ref: '#/components/schemas/IdentifierResolution'
-          - type: 'null'
-          description: How your act_id or section number was matched, when it did not match exactly as sent. Null when it did.
-        meta:
-          $ref: '#/components/schemas/Meta'
-      type: object
-      required:
-      - actId
-      - citation
-      - servedStatus
-      - provenance
-      - meta
-      title: ActStatusResponse
-    StructureNode:
-      properties:
-        kind:
-          type: string
-          title: Kind
-          description: '`chapter`, `part` or `section`.'
-        identifier:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Identifier
-        label:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Label
-        title:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Title
-        sectionCount:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Sectioncount
-        children:
-          anyOf:
-          - items:
-              $ref: '#/components/schemas/StructureNode'
-            type: array
-          - type: 'null'
-          title: Children
-      type: object
-      required:
-      - kind
-      title: StructureNode
-    CorrespondingProvisionItem:
-      properties:
-        oldAct:
-          type: string
-          title: Oldact
-        oldSection:
-          type: string
-          title: Oldsection
-        newAct:
-          type: string
-          title: Newact
-        newSection:
-          type: string
-          title: Newsection
-        subject:
-          type: string
-          title: Subject
-          description: The NEW provision's own heading, as printed in the publisher's correspondence table. It is not the repealed section's heading, and where the recodification changed the offence the two differ.
-        effectiveDate:
-          type: string
-          title: Effectivedate
-      type: object
-      required:
-      - oldAct
-      - oldSection
-      - newAct
-      - newSection
-      - subject
-      - effectiveDate
-      title: CorrespondingProvisionItem
-    CorrespondingProvisionsResponse:
-      properties:
-        oldAct:
-          type: string
-          title: Oldact
-        newAct:
-          type: string
-          title: Newact
-        effectiveDate:
-          type: string
-          title: Effectivedate
-        provisions:
-          items:
-            $ref: '#/components/schemas/CorrespondingProvisionItem'
-          type: array
-          title: Provisions
-        total:
-          type: integer
-          title: Total
-        coverage:
-          additionalProperties: true
-          type: object
-          title: Coverage
-          description: 'How much of the old code this mapping covers, where it came from, and how it was checked. `source` names the government publication the table is transcribed from, so a caller can go and read it. 🔴 It is still not a complete concordance: a section absent here is NOT thereby unchanged, and the correspondence is many-to-many in places. Read `numberedSectionsMapped` before treating an absent section as unmapped-because-unchanged.'
-        meta:
-          $ref: '#/components/schemas/ActMeta'
-      type: object
-      required:
-      - oldAct
-      - newAct
-      - effectiveDate
-      - provisions
-      - total
-      title: CorrespondingProvisionsResponse
-    ParsedPinpoint:
-      properties:
-        unit:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Unit
-        section:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Section
-        subProvisions:
-          items:
-            type: string
-          type: array
-          title: Subprovisions
-        actToken:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Acttoken
-        actNumber:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Actnumber
-        year:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Year
-        pinpoint:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Pinpoint
-          description: The provision as one canonical string, e.g. `302(1)(a)`.
-      type: object
-      title: ParsedPinpoint
-      description: What we read out of the citation, so a caller can see our reading.
-    ActFiltersResponse:
-      properties:
-        data:
-          $ref: '#/components/schemas/ActFiltersData'
-        meta:
-          $ref: '#/components/schemas/ActMeta'
-      type: object
-      required:
-      - data
-      title: ActFiltersResponse
-    ActCitedByResponse:
-      properties:
-        actId:
-          type: string
-          title: Actid
-        title:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Title
-        citation:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Citation
-        citers:
-          items:
-            $ref: '#/components/schemas/CitedByRow'
-          type: array
-          title: Citers
-        total:
-          type: integer
-          title: Total
-          description: Distinct citing PROVISIONS across all pages, not rows on this page (that is `returned`) and not matching passages. One provision can be stored as many passages, so this is always the smaller of the two.
-        totalIsExact:
-          type: boolean
-          title: Totalisexact
-          description: False when the corpus scan behind `total` hit its ceiling, which makes `total` a floor rather than a count. The ceiling sits above the largest citing set in the corpus, so this is true today.
-        returned:
-          type: integer
-          title: Returned
-          description: Rows in `citers` on THIS page.
-        page:
-          type: integer
-          title: Page
-          description: 1-based page this response answers.
-        pageSize:
-          type: integer
-          title: Pagesize
-          description: Rows per page requested.
-        hasMore:
-          type: boolean
-          title: Hasmore
-          description: True when a further page of citing provisions exists.
-        truncated:
-          type: boolean
-          title: Truncated
-          description: 'DEPRECATED, kept so an existing client does not break. True when `hasMore` is true or `totalIsExact` is false. Read those two instead: this one field cannot tell ''there is a page 2'' apart from ''we stopped counting''.'
-        matchBasis:
-          type: string
-          title: Matchbasis
-          description: '`publisher_title`: edges are matched on the act''s title as the publisher wrote it, so treat the result as a floor.'
-        note:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Note
-        resolvedFrom:
-          anyOf:
-          - $ref: '#/components/schemas/IdentifierResolution'
-          - type: 'null'
-          description: How your act_id or section number was matched, when it did not match exactly as sent. Null when it did.
-        meta:
-          $ref: '#/components/schemas/Meta'
-      type: object
-      required:
-      - actId
-      - total
-      - totalIsExact
-      - returned
-      - page
-      - pageSize
-      - hasMore
-      - truncated
-      - matchBasis
-      - meta
-      title: ActCitedByResponse
-    ActMeta:
-      properties:
-        processingTimeMs:
-          type: number
-          title: Processingtimems
-          description: Server-side time in milliseconds, excluding network transit. Not billed on.
-          default: 0.0
-          examples:
-          - 315.0
-        creditsConsumed:
-          type: number
-          title: Creditsconsumed
-          description: 'Credits ACTUALLY charged for this call. Read this rather than assuming the list price: refunded work bills 0.'
-          default: 0.0
-          examples:
-          - 3
-      type: object
-      title: ActMeta
-      description: 'What this call cost and how long it took.
-
-
-        🔴 Added 2026-09-06. Five of the six original routes returned NO statement
-
-        of what they billed: `/text` (3 credits), `/amendments` (5), `/list` (1),
-
-        `/filters` (0) and `/corresponding-provisions` (1). The house rule on the
-
-        US surface is that `creditsConsumed` is the CONTRACT and the list price is
-
-        not, and it matters most exactly where refunds happen -- `/text` refunds on
-
-        a missing act, `/corresponding-provisions` refunds when a mapping does not
-
-        exist yet. Without this field a caller cannot tell a refunded call from a
-
-        charged one, and has to reconcile against the ledger to find out.'
-    RepealClaim:
-      properties:
-        repealedBy:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Repealedby
-        repealedByYear:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Repealedbyyear
-        source:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Source
-        sourceHandle:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sourcehandle
-        commencementVerified:
-          type: boolean
-          title: Commencementverified
-          description: 'Whether we checked that the repealing instrument was brought into force. Always false: we do not verify this, and at least one repeal on record involves an Act that never commenced.'
-          default: false
-        note:
-          type: string
-          title: Note
-      type: object
-      required:
-      - note
-      title: RepealClaim
-      description: 'The publisher''s claim about repeal, with our caveat attached.
-
-
-        Never flattened into a verdict. India Code lists the Industrial Disputes
-
-        Act, 1947 as repealed by Act 37 of 2020, the Industrial Relations Code,
-
-        which has never been brought into force. Serving that as flatly "repealed"
-
-        would be wrong.'
-    ParentAct:
-      properties:
-        name:
-          type: string
-          title: Name
-          description: The parent act's title, as the publisher records it.
-        actId:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Actid
-          description: Resolved parent, when its title matches an act we serve. Null otherwise.
-        matchBasis:
-          type: string
-          title: Matchbasis
-          description: How the link was made. `parent_act_name` means an exact title match, so treat an unresolved parent as a spelling miss or a coverage gap rather than as the instrument having no parent.
-          default: parent_act_name
-        resolved:
-          type: boolean
-          title: Resolved
-          description: False when the publisher names a parent we do not hold.
-      type: object
-      required:
-      - name
-      - resolved
-      title: ParentAct
-      description: 'The act a subordinate instrument was made under, and how to fetch it.
-
-
-        🔴 Resolved by TITLE, not by `parent_act_id`. The stored `parent_act_id`
-
-        values are India Code''s own opaque ids and none of them is an `act_id` in
-
-        this corpus, so the obvious join resolves nothing. The link is made by
-
-        matching `parent_act_name` against a served act title, which misses where
-
-        the publisher spelled the title differently, and `matchBasis` says so on
-
-        every response rather than letting a caller assume a hard link.'
-    CoverageResponse:
-      properties:
-        data:
-          $ref: '#/components/schemas/CoverageData'
-        meta:
-          $ref: '#/components/schemas/Meta'
-      type: object
-      required:
-      - data
-      - meta
-      title: CoverageResponse
-    CoverageDepth:
-      properties:
-        actsWithText:
-          type: integer
-          title: Actswithtext
-        actsWithAmendmentEvents:
-          type: integer
-          title: Actswithamendmentevents
-        actsWithRepealClaim:
-          type: integer
-          title: Actswithrepealclaim
-        actsWithStructure:
-          type: integer
-          title: Actswithstructure
-        actsWithCitation:
-          type: integer
-          title: Actswithcitation
-        actsWithSourceUrl:
-          type: integer
-          title: Actswithsourceurl
-        actsClaimingAmendmentsWithoutEvents:
-          type: integer
-          title: Actsclaimingamendmentswithoutevents
-          description: Acts whose stored amendment count is non-zero while no parseable amendment record exists. They return an empty event list, and this number is published so that emptiness is legible as a known gap rather than as an assertion that nothing ever changed.
-      type: object
-      required:
-      - actsWithText
-      - actsWithAmendmentEvents
-      - actsWithRepealClaim
-      - actsWithStructure
-      - actsWithCitation
-      - actsWithSourceUrl
-      - actsClaimingAmendmentsWithoutEvents
-      title: CoverageDepth
-      description: 'The corpus against the four questions worth asking of it.
-
-
-        Text held, structure held, amendments recorded and repeals recorded are
-
-        INDEPENDENT columns. A single "we have it" number would hide which of them
-
-        is true for a given act.'
-    ValidationError:
-      properties:
-        loc:
-          items:
-            anyOf:
-            - type: string
-            - type: integer
-          type: array
-          title: Location
-        msg:
-          type: string
-          title: Message
-        type:
-          type: string
-          title: Error Type
-        input:
-          title: Input
-        ctx:
-          type: object
-          title: Context
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationError
-    SubordinateRow:
-      properties:
-        actId:
-          type: string
-          title: Actid
-        title:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Title
-        citation:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Citation
-        delegationType:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Delegationtype
-          description: '`rules`, `regulations`, `notification` or `order`.'
-        year:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Year
-        actStatus:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Actstatus
-      type: object
-      required:
-      - actId
-      title: SubordinateRow
-    CoverageTotals:
-      properties:
-        acts:
-          type: integer
-          title: Acts
-          description: Distinct served acts. Dated, see `measuredOn`.
-        actsRetired:
-          type: integer
-          title: Actsretired
-        sections:
-          type: integer
-          title: Sections
-          description: 'Distinct (act, section) pairs. NOT the passage count: a section spans several passages, so `passages` is the larger number.'
-        passages:
-          type: integer
-          title: Passages
-          description: Live, exact, counted at request time.
-        measuredOn:
-          type: string
-          title: Measuredon
-          description: The date the act-level counts in this block were last scanned.
-      type: object
-      required:
-      - acts
-      - actsRetired
-      - sections
-      - passages
-      - measuredOn
-      title: CoverageTotals
-    AsOfAnswer:
-      properties:
-        requested:
-          type: string
-          title: Requested
-        inForceByDate:
-          type: integer
-          title: Inforcebydate
-        afterDate:
-          type: integer
-          title: Afterdate
-        undated:
-          type: integer
-          title: Undated
-        textReflectsEvents:
-          type: integer
-          title: Textreflectsevents
-          description: How many of these events the served text incorporates. Currently always 0.
-          default: 0
-        isBounded:
-          type: boolean
-          title: Isbounded
-          description: True means we hold no recorded event affecting this date, which is NOT the same as there having been none. Amendment capture is per-publisher and began long after the law did.
-        note:
-          type: string
-          title: Note
-      type: object
-      required:
-      - requested
-      - inForceByDate
-      - afterDate
-      - undated
-      - isBounded
-      - note
-      title: AsOfAnswer
-      description: 'A dated question answered with a TIMELINE, never with reconstructed text.
-
-
-        We hold amendment EVENTS and no versioned text, so there is no honest way
-
-        to render this provision as it stood on a date. Returning current text
-
-        under a date parameter would be a wrong answer shaped like a right one.'
-    ActSearchData:
-      properties:
-        results:
-          items:
-            $ref: '#/components/schemas/ActSearchResult'
-          type: array
-          title: Results
-        totalReturned:
-          type: integer
-          title: Totalreturned
-      type: object
-      required:
-      - results
-      - totalReturned
-      title: ActSearchData
-    ActFilterValue:
-      properties:
-        value:
-          type: string
-          title: Value
-        count:
-          type: integer
-          title: Count
-          description: Sections in the corpus carrying this value
-      type: object
-      required:
-      - value
-      - count
-      title: ActFilterValue
-    ResolveCandidate:
-      properties:
-        actId:
-          type: string
-          title: Actid
-        citation:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Citation
-        title:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Title
-        sectionNumber:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sectionnumber
-        sectionTitle:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sectiontitle
-        year:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Year
-        actStatus:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Actstatus
-        category:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Category
-        state:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: State
-        note:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Note
-          description: Why this candidate is in the list, when that needs saying.
-      type: object
-      required:
-      - actId
-      title: ResolveCandidate
-    HTTPValidationError:
-      properties:
-        detail:
-          items:
-            $ref: '#/components/schemas/ValidationError'
-          type: array
-          title: Detail
-      type: object
-      title: HTTPValidationError
-    ReferencedSection:
-      properties:
-        sectionNumber:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sectionnumber
-        sectionTitle:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sectiontitle
-      type: object
-      title: ReferencedSection
-    ActReferencesResponse:
-      properties:
-        actId:
-          type: string
-          title: Actid
-        sectionNumber:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sectionnumber
-        citation:
-          $ref: '#/components/schemas/Citation'
-        acts:
-          items:
-            $ref: '#/components/schemas/ReferencedAct'
-          type: array
-          title: Acts
-          description: Other enactments this provision names.
-        sections:
-          items:
-            $ref: '#/components/schemas/ReferencedSection'
-          type: array
-          title: Sections
-          description: Sections of this act it cross-refers to.
-        totalActs:
-          type: integer
-          title: Totalacts
-          description: Distinct enactments this provision names, before the cap on rows. `acts` is shorter than this when the provision names more than the cap; `truncated` says so.
-        totalSections:
-          type: integer
-          title: Totalsections
-          description: Distinct own-act sections cross-referred, before the cap on rows.
-        truncated:
-          type: boolean
-          title: Truncated
-          description: 'True when either list was cut to the row cap. This route is not paged: one provision''s own outbound edges are a short list, and the cap exists only so a malformed passage cannot return unbounded output.'
-        matchBasis:
-          type: string
-          title: Matchbasis
-        note:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Note
-        resolvedFrom:
-          anyOf:
-          - $ref: '#/components/schemas/IdentifierResolution'
-          - type: 'null'
-          description: How your act_id or section number was matched, when it did not match exactly as sent. Null when it did.
-        meta:
-          $ref: '#/components/schemas/Meta'
-      type: object
-      required:
-      - actId
-      - citation
-      - totalActs
-      - totalSections
-      - truncated
-      - matchBasis
-      - meta
-      title: ActReferencesResponse
-    ActListItem:
-      properties:
-        actId:
-          type: string
-          title: Actid
-        title:
-          type: string
-          title: Title
-        year:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Year
-        category:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Category
-        state:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: State
-        department:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Department
-        actNumber:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Actnumber
-        actStatus:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Actstatus
-        enactmentDate:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Enactmentdate
-          description: Enactment date as `YYYY-MM-DD`, or null. See `enactmentDateRaw`.
-        enactmentDateRaw:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Enactmentdateraw
-          description: The publisher's own string, when it differs from `enactmentDate`.
-        citation:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Citation
-          description: How to cite the act, as the publisher titles it. Present only on index-backed listings.
-        sectionCount:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Sectioncount
-          description: Sections we hold for this act, so a caller can size a fetch before making it. Present only on index-backed listings.
-      type: object
-      required:
-      - actId
-      - title
-      title: ActListItem
-      description: Lightweight act summary for browsing and discovery.
-    Meta:
-      properties:
-        processingTimeMs:
-          type: number
-          title: Processingtimems
-          description: Server-side time for this request in milliseconds, excluding network transit. Not billed on.
-          default: 0.0
-          examples:
-          - 142.7
-        creditsConsumed:
-          type: number
-          title: Creditsconsumed
-          description: 'Credits actually charged. Read this rather than assuming the list price: refunded work bills 0.'
-          default: 0.0
-          examples:
-          - 2
-      type: object
-      title: Meta
-    ActAmendmentsResponse:
-      properties:
-        actId:
-          type: string
-          title: Actid
-        resolvedFrom:
-          anyOf:
-          - $ref: '#/components/schemas/IdentifierResolution'
-          - type: 'null'
-          description: Null when the act is exactly the `actId` you sent. Otherwise how your input was matched after copy damage (whitespace, quotes, a trailing period) was removed.
-        title:
-          type: string
-          title: Title
-        totalFootnotes:
-          type: integer
-          title: Totalfootnotes
-          description: Footnotes on THIS page, not in the act. Paging is by `page`/`pageSize`, so this equals `pageSize` on a full page.
-        footnotes:
-          items:
-            $ref: '#/components/schemas/FootnoteItem'
-          type: array
-          title: Footnotes
-        typeCounts:
-          additionalProperties:
-            type: integer
-          type: object
-          title: Typecounts
-        page:
-          type: integer
-          title: Page
-          default: 1
-        pageSize:
-          type: integer
-          title: Pagesize
-          default: 100
-        hasMore:
-          type: boolean
-          title: Hasmore
-          description: True when a further page of footnotes exists.
-          default: false
-        meta:
-          $ref: '#/components/schemas/ActMeta'
-      type: object
-      required:
-      - actId
-      - title
-      - totalFootnotes
-      - footnotes
-      - typeCounts
-      title: ActAmendmentsResponse
-    Retirement:
-      properties:
-        reason:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Reason
-        duplicateOf:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Duplicateof
-        observedOn:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Observedon
-      type: object
-      title: Retirement
-    ReferencedAct:
-      properties:
-        title:
-          type: string
-          title: Title
-          description: The act's title as the publisher wrote it.
-        actId:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Actid
-          description: Resolved id, when the title names an act we serve.
-        resolved:
-          type: boolean
-          title: Resolved
-          description: False when the publisher names an act we do not hold. A coverage fact, not a parse failure.
-      type: object
-      required:
-      - title
-      - resolved
-      title: ReferencedAct
     ActSearchRequest:
       properties:
         query:
@@ -5158,21 +4414,62 @@ components:
       - query
       title: ActSearchRequest
       description: Search Indian legislation by semantic query.
-    CitedByRow:
+    CategoryLegend:
+      properties:
+        value:
+          type: string
+          title: Value
+        meaning:
+          type: string
+          title: Meaning
+      type: object
+      required:
+      - value
+      - meaning
+      title: CategoryLegend
+    SectionShape:
+      properties:
+        hasProviso:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Hasproviso
+        hasExplanation:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Hasexplanation
+        hasIllustration:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Hasillustration
+        hasNonObstante:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Hasnonobstante
+        hasSavingClause:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Hassavingclause
+        hasPenalty:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Haspenalty
+      type: object
+      title: SectionShape
+      description: Structural features found in the provision's own text.
+    ActSearchResult:
       properties:
         actId:
           type: string
           title: Actid
         title:
-          anyOf:
-          - type: string
-          - type: 'null'
+          type: string
           title: Title
-        citation:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Citation
         sectionNumber:
           anyOf:
           - type: string
@@ -5183,79 +4480,312 @@ components:
           - type: string
           - type: 'null'
           title: Sectiontitle
-      type: object
-      required:
-      - actId
-      title: CitedByRow
-    HistoryCoverage:
-      properties:
-        publisherClaimsAmendments:
-          type: boolean
-          title: Publisherclaimsamendments
-        structuredEventsHeld:
-          type: integer
-          title: Structuredeventsheld
-        eventsWithDate:
-          type: integer
-          title: Eventswithdate
-        note:
+        chapter:
           anyOf:
           - type: string
           - type: 'null'
-          title: Note
+          title: Chapter
+        chapterTitle:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Chaptertitle
+        year:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Year
+        category:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Category
+        state:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: State
+        department:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Department
+        jurisdiction:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Jurisdiction
+        actStatus:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Actstatus
+        provisionType:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Provisiontype
+        legalSubject:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Legalsubject
+        actsReferenced:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Actsreferenced
+        content:
+          type: string
+          title: Content
+          description: Relevant text excerpt
+        longTitle:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Longtitle
+        enactmentDate:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Enactmentdate
+          description: Enactment date as `YYYY-MM-DD`, or null when the publisher's stored value is not a date we can state without guessing. See `enactmentDateRaw`.
+        enactmentDateRaw:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Enactmentdateraw
+          description: The publisher's own string, present only when it differs from `enactmentDate`. 21% of the corpus stores `23-Nov-2001`, and a small tail stores values that are not dates at all.
+        pdfUrl:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Pdfurl
+        textUrl:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Texturl
+        sourceUrl:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourceurl
+        relevanceScore:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Relevancescore
+          description: 'Ranking score for this result against the query, after hybrid fusion and cross-encoder reranking. Comparable WITHIN one response and not across responses: it is a rank artifact, not a probability, and not a statement about legal relevance.'
+          examples:
+          - 0.87
+        sourceUrlNote:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourceurlnote
+          description: Why `sourceUrl` is absent, when it is. A named reason, because a bare null cannot be told apart from 'not applicable'.
+        citation:
+          $ref: '#/components/schemas/Citation'
+          description: How to cite this provision. Present on 99.90% of served acts.
       type: object
       required:
-      - publisherClaimsAmendments
-      - structuredEventsHeld
-      - eventsWithDate
-      title: HistoryCoverage
-    CoverageData:
+      - actId
+      - title
+      - content
+      title: ActSearchResult
+      description: A single legislation search result with full metadata.
+    ParsedPinpoint:
       properties:
-        totals:
-          $ref: '#/components/schemas/CoverageTotals'
-        depth:
-          $ref: '#/components/schemas/CoverageDepth'
-        byCategory:
+        unit:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Unit
+        section:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Section
+        subProvisions:
           items:
-            $ref: '#/components/schemas/CoverageCount'
+            type: string
           type: array
-          title: Bycategory
-        byJurisdiction:
-          items:
-            $ref: '#/components/schemas/JurisdictionCoverage'
-          type: array
-          title: Byjurisdiction
-        categoryLegend:
-          items:
-            $ref: '#/components/schemas/CategoryLegend'
-          type: array
-          title: Categorylegend
-          description: What each `category` value means. The vocabulary alone did not say.
-        byRegulator:
-          items:
-            $ref: '#/components/schemas/CoverageCount'
-          type: array
-          title: Byregulator
-        byStatus:
-          items:
-            $ref: '#/components/schemas/CoverageCount'
-          type: array
-          title: Bystatus
-        caveats:
-          additionalProperties: true
-          type: object
-          title: Caveats
+          title: Subprovisions
+        actToken:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Acttoken
+        actNumber:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Actnumber
+        year:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Year
+        pinpoint:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Pinpoint
+          description: The provision as one canonical string, e.g. `302(1)(a)`.
+      type: object
+      title: ParsedPinpoint
+      description: What we read out of the citation, so a caller can see our reading.
+    ActStatusResponse:
+      properties:
+        actId:
+          type: string
+          title: Actid
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+        citation:
+          $ref: '#/components/schemas/Citation'
+        goodLawStatus:
+          type: string
+          title: Goodlawstatus
+          description: 'Our DERIVED verdict: `good_law`, `not_good_law` or `unknown`. Conservative by construction -- an unverified repeal claim maps to `unknown`, NEVER to `not_good_law`, because we do not check whether a repealing instrument was brought into force and at least one repeal on this record involves an Act that never commenced. One field to filter on; the three raw fields below remain if you want to judge it yourself.'
+          default: unknown
+          examples:
+          - good_law
+        goodLawReason:
+          type: string
+          title: Goodlawreason
+          description: Why the verdict above is what it is. Always present.
+          default: ''
+        publisherStatus:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Publisherstatus
+          description: '`act_status` exactly as the publisher records it. Their word, not our verdict.'
+        servedStatus:
+          type: string
+          title: Servedstatus
+          description: '`served` or `retired`. OUR word about whether this API answers for it.'
+        isSubordinate:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Issubordinate
+        delegationType:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Delegationtype
+        parentActName:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Parentactname
+        commencementInfo:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Commencementinfo
+        territorialExtent:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Territorialextent
+        enactmentDate:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Enactmentdate
+          description: 'The date the act was enacted, as `YYYY-MM-DD`, or null when the stored value is not a date we can state without guessing. 🔴 This is NOT the year in the act''s short title: ''The Biswa Bangla Biswabidyalay Act, 2017'' was enacted 2018-01-09, and on a subordinate instrument `year` is often the PARENT act''s year. Use `year` for the title year and this field for the date.'
+          examples:
+          - '2018-01-09'
+        enactmentDateRaw:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Enactmentdateraw
+          description: 'What the publisher stored, present only when it differs from `enactmentDate`. When `enactmentDate` is null this carries the reason it is null, by showing you the value: a bare year (''1963''), an era year (''15-Oct-1349'', from an act titled in the Fasli calendar), or a corrupt one (''0032-03-05'').'
+          examples:
+          - 9-Mar-2005
+        dateOfAssent:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Dateofassent
+          description: The date of assent as `YYYY-MM-DD`, or null when the stored value is not a date. Some records store an act NUMBER here ('15 of 1992'); those return null with the value in `dateOfAssentRaw`.
+          examples:
+          - '1952-09-01'
+        dateOfAssentRaw:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Dateofassentraw
+          description: What the publisher stored, when it differs from `dateOfAssent`.
+          examples:
+          - 15 of 1992
+        lastAmendedYear:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Lastamendedyear
+        repeals:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Repeals
+          description: 'Acts this one repeals, as the publisher names them. The inverse of `repealClaim`, and subject to the same caveat: it is their record, and we do not verify commencement.'
+        supersededBy:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Supersededby
+          description: A later consolidation that replaced this version, where one is recorded.
+        subordinateCount:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Subordinatecount
+          description: Subordinate instruments the publisher records under this act.
+        repealClaim:
+          anyOf:
+          - $ref: '#/components/schemas/RepealClaim'
+          - type: 'null'
+        retirement:
+          anyOf:
+          - $ref: '#/components/schemas/Retirement'
+          - type: 'null'
+        currencyNote:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Currencynote
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        resolvedFrom:
+          anyOf:
+          - $ref: '#/components/schemas/IdentifierResolution'
+          - type: 'null'
+          description: How your act_id or section number was matched, when it did not match exactly as sent. Null when it did.
+        meta:
+          $ref: '#/components/schemas/Meta'
       type: object
       required:
-      - totals
-      - depth
-      - byCategory
-      - byJurisdiction
-      - categoryLegend
-      - byRegulator
-      - byStatus
-      - caveats
-      title: CoverageData
+      - actId
+      - citation
+      - servedStatus
+      - provenance
+      - meta
+      title: ActStatusResponse
     ActDefinitionsResponse:
       properties:
         actId:
@@ -5324,258 +4854,229 @@ components:
       - totalDefinitionSections
       - meta
       title: ActDefinitionsResponse
-    ActTextResponse:
+    ResolveCandidate:
       properties:
         actId:
           type: string
           title: Actid
-        resolvedFrom:
+        citation:
           anyOf:
-          - $ref: '#/components/schemas/IdentifierResolution'
+          - type: string
           - type: 'null'
-          description: Null when the act is exactly the `actId` you sent. Otherwise how your input was matched after copy damage (whitespace, quotes, a trailing period) was removed.
+          title: Citation
         title:
-          type: string
+          anyOf:
+          - type: string
+          - type: 'null'
           title: Title
+        sectionNumber:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectionnumber
+        sectionTitle:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectiontitle
         year:
           anyOf:
           - type: integer
           - type: 'null'
           title: Year
+        actStatus:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Actstatus
         category:
           anyOf:
           - type: string
           - type: 'null'
           title: Category
-        textUrl:
-          type: string
-          title: Texturl
-        pdfUrl:
+        state:
           anyOf:
           - type: string
           - type: 'null'
-          title: Pdfurl
-        htmlUrl:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Htmlurl
-        chunksCount:
-          type: integer
-          title: Chunkscount
-          default: 0
-        isSubordinate:
-          type: boolean
-          title: Issubordinate
-          description: 'True for subordinate legislation: notifications, rules, circulars, orders. False for principal acts.'
-          default: false
-        issuedDate:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Issueddate
-          description: Date the instrument was issued by the publisher, where known.
-        meta:
-          $ref: '#/components/schemas/ActMeta'
-        currencyStatus:
-          type: string
-          title: Currencystatus
-          description: 'How far the currency of this document can be vouched for. `repeal_tracked`: the publisher records a repeal flag for this document, so a repealed instrument is identifiable. `as_issued`: served as issued on `issuedDate`, and it MAY HAVE BEEN SUPERSEDED since. India Code publishes no supersession status for subordinate legislation, and a superseding instrument names its predecessor only in prose, so this API cannot tell you whether a notification is still in force. Treat `as_issued` documents as evidence of what was issued on a date, not as a statement of current law.'
-          default: unknown
-      type: object
-      required:
-      - actId
-      - title
-      - textUrl
-      title: ActTextResponse
-    ApiDetailError:
-      properties:
-        detail:
-          type: string
-          title: Detail
-          description: 'Human-readable reason, safe to surface to an end user. Branch on the HTTP status rather than on this string: the wording is not part of the contract and may be reworded, but 401 (bad key), 402 (out of credits), 403 (missing scope), 404 (no such resource) and 429 (rate limited) are stable.'
-          examples:
-          - Insufficient API credits.
-        errors:
-          anyOf:
-          - items:
-              $ref: '#/components/schemas/ApiFieldError'
-            type: array
-          - type: 'null'
-          title: Errors
-          description: 'Present on 422 only: every field that failed validation.'
-      type: object
-      required:
-      - detail
-      title: ApiDetailError
-      description: 'Error envelope the API actually returns.
-
-
-        Every error (400/401/402/403/404/405/422/429/5xx) carries a `detail`
-
-        string, e.g. `{"detail": "Insufficient API credits."}`, on every mount of
-
-        the API. A 422 adds `errors`, one entry per rejected field. Some 404s add
-
-        endpoint-specific diagnosis beside `detail` (the statutes section routes
-
-        add `actId`, `reason` and `didYouMean`); treat unknown keys as optional.'
-    ResolveResponse:
-      properties:
-        results:
-          items:
-            $ref: '#/components/schemas/ResolveItem'
-          type: array
-          title: Results
-        count:
-          type: integer
-          title: Count
-        resolvedCount:
-          type: integer
-          title: Resolvedcount
-        meta:
-          $ref: '#/components/schemas/Meta'
-      type: object
-      required:
-      - results
-      - count
-      - resolvedCount
-      - meta
-      title: ResolveResponse
-    ResolveItem:
-      properties:
-        input:
-          type: string
-          title: Input
-        status:
-          type: string
-          title: Status
-          description: '`resolved` (exactly one provision), `ambiguous` (several, all returned), `not_found` (parsed cleanly, matched nothing), or `malformed` (could not be parsed, and NOT charged).'
-          examples:
-          - ambiguous
-        candidates:
-          items:
-            $ref: '#/components/schemas/ResolveCandidate'
-          type: array
-          title: Candidates
-        reason:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Reason
-          description: Why the status is what it is. Always present unless resolved.
-        parsed:
-          $ref: '#/components/schemas/ParsedPinpoint'
-        duplicatesCollapsed:
-          type: integer
-          title: Duplicatescollapsed
-          description: 'Near-identical copies of an act folded into one candidate. The corpus holds several copies of some enactments, which is a known ingest defect: published rather than hidden, so a single candidate does not conceal that three other records sat behind it.'
-          default: 0
-      type: object
-      required:
-      - input
-      - status
-      - parsed
-      title: ResolveItem
-    ActListResponse:
-      properties:
-        results:
-          items:
-            $ref: '#/components/schemas/ActListItem'
-          type: array
-          title: Results
-        total:
-          type: integer
-          title: Total
-        page:
-          type: integer
-          title: Page
-        pageSize:
-          type: integer
-          title: Pagesize
-        hasMore:
-          type: boolean
-          title: Hasmore
-        meta:
-          $ref: '#/components/schemas/ActMeta'
+          title: State
         note:
           anyOf:
           - type: string
           - type: 'null'
           title: Note
-          description: Always set on this endpoint, naming the source that answered. On the normal path it carries the act index's BUILD DATE, because the listing is a snapshot and an act ingested after that date reaches search before it reaches here. If the index is unavailable the note is prefixed `DEGRADED:` and states the shortfall. A gap a caller can see is not the same as one they cannot.
+          description: Why this candidate is in the list, when that needs saying.
       type: object
       required:
-      - results
-      - total
-      - page
-      - pageSize
-      - hasMore
-      title: ActListResponse
-    ActSearchMeta:
+      - actId
+      title: ResolveCandidate
+    ActFiltersResponse:
       properties:
-        processingTimeMs:
-          type: integer
-          title: Processingtimems
-        creditsConsumed:
-          type: number
-          title: Creditsconsumed
-        creditsRemaining:
-          type: number
-          title: Creditsremaining
-        page:
-          type: integer
-          title: Page
-        pageSize:
-          type: integer
-          title: Pagesize
+        data:
+          $ref: '#/components/schemas/ActFiltersData'
+        meta:
+          $ref: '#/components/schemas/ActMeta'
+      type: object
+      required:
+      - data
+      title: ActFiltersResponse
+    IdentifierResolution:
+      properties:
+        input:
+          type: string
+          title: Input
+          description: The act identifier exactly as you sent it.
+          examples:
+          - ' IND_central_20062.'
+        actId:
+          type: string
+          title: Actid
+          description: The act_id it matched. Send this next time.
+          examples:
+          - IND_central_20062
+        sectionInput:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectioninput
+          description: The section number exactly as you sent it, on a section route.
+          examples:
+          - s. 498-A
+        sectionNumber:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectionnumber
+          description: The section number as the publisher writes it. Send this next time.
+          examples:
+          - 498A
+        via:
+          items:
+            type: string
+          type: array
+          title: Via
+          description: 'What was done to your input, in order. `normalized_id`: the act_id carried surrounding whitespace, quotes, backticks, an invisible character, a trailing period or double percent-encoding, which were removed. `normalized_section`: the section number was written differently from the publisher (a `s.` / `Sec.` / `Section` prefix, a hyphen or space before an alphabetic suffix, a lowercase suffix, or a trailing sub-provision), and matched one stored number and only one.'
+          examples:
+          - - normalized_section
+        subProvision:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Subprovision
+          description: 'The sub-provision your section number carried, e.g. `(1)(a)` for `302(1)(a)`. The WHOLE section is served: sub-provisions are not addressed separately.'
+          examples:
+          - (1)
+      type: object
+      required:
+      - input
+      - actId
+      title: IdentifierResolution
+      description: 'How the act_id or section number you sent was matched, when not as sent.
+
+
+        Present only when the input did NOT match exactly. Absent (null) means the
+
+        response is about exactly the act_id and section number in your request.
+
+        Same idea, and the same field name, as `resolvedFrom` on the US surface.'
+    ActCitedByResponse:
+      properties:
+        actId:
+          type: string
+          title: Actid
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+        citation:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Citation
+        citers:
+          items:
+            $ref: '#/components/schemas/CitedByRow'
+          type: array
+          title: Citers
         total:
           type: integer
           title: Total
-          description: 'Passages in the corpus matching the filters. This is the size of the haystack, not the number of results you can page through: a single section spans several passages, and relevance gating plus act+section dedup run after retrieval. Treat it as an upper bound and a signal to narrow your filters, not as a result count.'
-        totalPages:
+          description: Distinct citing PROVISIONS across all pages, not rows on this page (that is `returned`) and not matching passages. One provision can be stored as many passages, so this is always the smaller of the two.
+        totalIsExact:
+          type: boolean
+          title: Totalisexact
+          description: False when the corpus scan behind `total` hit its ceiling, which makes `total` a floor rather than a count. The ceiling sits above the largest citing set in the corpus, so this is true today.
+        returned:
           type: integer
-          title: Totalpages
-          description: Pages actually reachable, derived from the result window rather than from `total`.
+          title: Returned
+          description: Rows in `citers` on THIS page.
+        page:
+          type: integer
+          title: Page
+          description: 1-based page this response answers.
+        pageSize:
+          type: integer
+          title: Pagesize
+          description: Rows per page requested.
+        hasMore:
+          type: boolean
+          title: Hasmore
+          description: True when a further page of citing provisions exists.
+        truncated:
+          type: boolean
+          title: Truncated
+          description: 'DEPRECATED, kept so an existing client does not break. True when `hasMore` is true or `totalIsExact` is false. Read those two instead: this one field cannot tell ''there is a page 2'' apart from ''we stopped counting''.'
+        matchBasis:
+          type: string
+          title: Matchbasis
+          description: '`publisher_title`: edges are matched on the act''s title as the publisher wrote it, so treat the result as a floor.'
+        note:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Note
+        resolvedFrom:
+          anyOf:
+          - $ref: '#/components/schemas/IdentifierResolution'
+          - type: 'null'
+          description: How your act_id or section number was matched, when it did not match exactly as sent. Null when it did.
+        meta:
+          $ref: '#/components/schemas/Meta'
       type: object
       required:
-      - processingTimeMs
-      - creditsConsumed
-      - creditsRemaining
+      - actId
+      - total
+      - totalIsExact
+      - returned
       - page
       - pageSize
-      - total
-      - totalPages
-      title: ActSearchMeta
-    JurisdictionCoverage:
+      - hasMore
+      - truncated
+      - matchBasis
+      - meta
+      title: ActCitedByResponse
+    HistoryCoverage:
       properties:
-        code:
-          type: string
-          title: Code
-        acts:
+        publisherClaimsAmendments:
+          type: boolean
+          title: Publisherclaimsamendments
+        structuredEventsHeld:
           type: integer
-          title: Acts
-        sections:
+          title: Structuredeventsheld
+        eventsWithDate:
           type: integer
-          title: Sections
-        passages:
+          title: Eventswithdate
+        note:
           anyOf:
-          - type: integer
+          - type: string
           - type: 'null'
-          title: Passages
-          description: Live passage count where a facet reported one.
+          title: Note
       type: object
       required:
-      - code
-      - acts
-      - sections
-      title: JurisdictionCoverage
-      description: 'Acts and sections held for one jurisdiction, in the unit a lawyer thinks in.
-
-
-        Passage counts answer "how big is the index"; act and section counts answer
-
-        "how much law do you hold". Only the second is a question anyone asks.'
+      - publisherClaimsAmendments
+      - structuredEventsHeld
+      - eventsWithDate
+      title: HistoryCoverage
     AmendmentEvent:
       properties:
         effectId:
@@ -5643,6 +5144,143 @@ components:
       - effectiveDateSource
       - appliedStatus
       title: AmendmentEvent
+    CoverageResponse:
+      properties:
+        data:
+          $ref: '#/components/schemas/CoverageData'
+        meta:
+          $ref: '#/components/schemas/Meta'
+      type: object
+      required:
+      - data
+      - meta
+      title: CoverageResponse
+    ApiFieldError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Loc
+          description: 'Where the bad value is: `body`, `query` or `path`, then the parameter name exactly as you send it (camelCase), then list indexes. A bare `["body"]` means the body as a whole was not a JSON object.'
+          examples:
+          - - body
+            - corpusType
+        msg:
+          type: string
+          title: Msg
+          description: What is wrong with the value, in plain English.
+          examples:
+          - Input should be 'USC', 'CFR' or 'STATE'
+        type:
+          type: string
+          title: Type
+          description: Machine-readable error kind, e.g. `missing`, `literal_error`, `json_invalid`.
+          examples:
+          - literal_error
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ApiFieldError
+      description: One rejected field in a 422 response.
+    ReferencedSection:
+      properties:
+        sectionNumber:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectionnumber
+        sectionTitle:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sectiontitle
+      type: object
+      title: ReferencedSection
+    ActSearchMeta:
+      properties:
+        processingTimeMs:
+          type: integer
+          title: Processingtimems
+        creditsConsumed:
+          type: number
+          title: Creditsconsumed
+        creditsRemaining:
+          type: number
+          title: Creditsremaining
+        page:
+          type: integer
+          title: Page
+        pageSize:
+          type: integer
+          title: Pagesize
+        total:
+          type: integer
+          title: Total
+          description: 'Passages in the corpus matching the filters. This is the size of the haystack, not the number of results you can page through: a single section spans several passages, and relevance gating plus act+section dedup run after retrieval. Treat it as an upper bound and a signal to narrow your filters, not as a result count.'
+        totalPages:
+          type: integer
+          title: Totalpages
+          description: Pages actually reachable, derived from the result window rather than from `total`.
+      type: object
+      required:
+      - processingTimeMs
+      - creditsConsumed
+      - creditsRemaining
+      - page
+      - pageSize
+      - total
+      - totalPages
+      title: ActSearchMeta
+    CorrespondingProvisionItem:
+      properties:
+        oldAct:
+          type: string
+          title: Oldact
+        oldSection:
+          type: string
+          title: Oldsection
+        newAct:
+          type: string
+          title: Newact
+        newSection:
+          type: string
+          title: Newsection
+        subject:
+          type: string
+          title: Subject
+          description: The NEW provision's own heading, as printed in the publisher's correspondence table. It is not the repealed section's heading, and where the recodification changed the offence the two differ.
+        effectiveDate:
+          type: string
+          title: Effectivedate
+      type: object
+      required:
+      - oldAct
+      - oldSection
+      - newAct
+      - newSection
+      - subject
+      - effectiveDate
+      title: CorrespondingProvisionItem
+    ActSearchData:
+      properties:
+        results:
+          items:
+            $ref: '#/components/schemas/ActSearchResult'
+          type: array
+          title: Results
+        totalReturned:
+          type: integer
+          title: Totalreturned
+      type: object
+      required:
+      - results
+      - totalReturned
+      title: ActSearchData
     ActSectionHistoryResponse:
       properties:
         actId:
@@ -5696,50 +5334,361 @@ components:
       - coverage
       - meta
       title: ActSectionHistoryResponse
-    ActFiltersData:
+    RepealClaim:
       properties:
-        categories:
-          items:
-            $ref: '#/components/schemas/ActFilterValue'
-          type: array
-          title: Categories
-        states:
-          items:
-            $ref: '#/components/schemas/ActFilterValue'
-          type: array
-          title: States
-        departments:
-          items:
-            $ref: '#/components/schemas/ActFilterValue'
-          type: array
-          title: Departments
-        truncated:
-          items:
-            type: string
-          type: array
-          title: Truncated
-          description: 'Fields whose list below is INCOMPLETE. `department` holds 943 distinct values against a 256-value facet ceiling, so most of them are not shown. A value absent from a truncated list is NOT invalid, and search no longer rejects one: until 2026-09-06 it did, refusing filters on data the corpus holds.'
-      type: object
-      required:
-      - categories
-      - states
-      - departments
-      title: ActFiltersData
-    DefinedTerm:
-      properties:
-        term:
-          type: string
-          title: Term
-        sectionNumber:
+        repealedBy:
           anyOf:
           - type: string
           - type: 'null'
-          title: Sectionnumber
-          description: Where the term is defined, when known.
+          title: Repealedby
+        repealedByYear:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Repealedbyyear
+        source:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Source
+        sourceHandle:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourcehandle
+        commencementVerified:
+          type: boolean
+          title: Commencementverified
+          description: 'Whether we checked that the repealing instrument was brought into force. Always false: we do not verify this, and at least one repeal on record involves an Act that never commenced.'
+          default: false
+        note:
+          type: string
+          title: Note
       type: object
       required:
-      - term
-      title: DefinedTerm
+      - note
+      title: RepealClaim
+      description: 'The publisher''s claim about repeal, with our caveat attached.
+
+
+        Never flattened into a verdict. India Code lists the Industrial Disputes
+
+        Act, 1947 as repealed by Act 37 of 2020, the Industrial Relations Code,
+
+        which has never been brought into force. Serving that as flatly "repealed"
+
+        would be wrong.'
+    ActStructureResponse:
+      properties:
+        actId:
+          type: string
+          title: Actid
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+        citation:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Citation
+        nodes:
+          items:
+            $ref: '#/components/schemas/StructureNode'
+          type: array
+          title: Nodes
+        sectionCount:
+          type: integer
+          title: Sectioncount
+        hasHierarchy:
+          type: boolean
+          title: Hashierarchy
+          description: False when the publisher gives this act no chapter or part divisions, in which case `nodes` is a flat section list. Most served acts carry no hierarchy, so a flat answer is the common case and not an error. `GET /acts/coverage` publishes how many do, as `depth.actsWithStructure`.
+        truncated:
+          type: boolean
+          title: Truncated
+          description: True when the act has more sections than one call returns.
+          default: false
+        resolvedFrom:
+          anyOf:
+          - $ref: '#/components/schemas/IdentifierResolution'
+          - type: 'null'
+          description: How your act_id or section number was matched, when it did not match exactly as sent. Null when it did.
+        meta:
+          $ref: '#/components/schemas/Meta'
+      type: object
+      required:
+      - actId
+      - nodes
+      - sectionCount
+      - hasHierarchy
+      - meta
+      title: ActStructureResponse
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    CoverageDepth:
+      properties:
+        actsWithText:
+          type: integer
+          title: Actswithtext
+        actsWithAmendmentEvents:
+          type: integer
+          title: Actswithamendmentevents
+        actsWithRepealClaim:
+          type: integer
+          title: Actswithrepealclaim
+        actsWithStructure:
+          type: integer
+          title: Actswithstructure
+        actsWithCitation:
+          type: integer
+          title: Actswithcitation
+        actsWithSourceUrl:
+          type: integer
+          title: Actswithsourceurl
+        actsClaimingAmendmentsWithoutEvents:
+          type: integer
+          title: Actsclaimingamendmentswithoutevents
+          description: Acts whose stored amendment count is non-zero while no parseable amendment record exists. They return an empty event list, and this number is published so that emptiness is legible as a known gap rather than as an assertion that nothing ever changed.
+      type: object
+      required:
+      - actsWithText
+      - actsWithAmendmentEvents
+      - actsWithRepealClaim
+      - actsWithStructure
+      - actsWithCitation
+      - actsWithSourceUrl
+      - actsClaimingAmendmentsWithoutEvents
+      title: CoverageDepth
+      description: 'The corpus against the four questions worth asking of it.
+
+
+        Text held, structure held, amendments recorded and repeals recorded are
+
+        INDEPENDENT columns. A single "we have it" number would hide which of them
+
+        is true for a given act.'
+    ParentAct:
+      properties:
+        name:
+          type: string
+          title: Name
+          description: The parent act's title, as the publisher records it.
+        actId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Actid
+          description: Resolved parent, when its title matches an act we serve. Null otherwise.
+        matchBasis:
+          type: string
+          title: Matchbasis
+          description: How the link was made. `parent_act_name` means an exact title match, so treat an unresolved parent as a spelling miss or a coverage gap rather than as the instrument having no parent.
+          default: parent_act_name
+        resolved:
+          type: boolean
+          title: Resolved
+          description: False when the publisher names a parent we do not hold.
+      type: object
+      required:
+      - name
+      - resolved
+      title: ParentAct
+      description: 'The act a subordinate instrument was made under, and how to fetch it.
+
+
+        🔴 Resolved by TITLE, not by `parent_act_id`. The stored `parent_act_id`
+
+        values are India Code''s own opaque ids and none of them is an `act_id` in
+
+        this corpus, so the obvious join resolves nothing. The link is made by
+
+        matching `parent_act_name` against a served act title, which misses where
+
+        the publisher spelled the title differently, and `matchBasis` says so on
+
+        every response rather than letting a caller assume a hard link.'
+    Provenance:
+      properties:
+        sourceUrl:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourceurl
+          description: The publisher's own page for this document, when it resolves.
+        sourceUrlNote:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourceurlnote
+          description: Why `sourceUrl` is absent, when it is. A named reason, because a bare null cannot be told apart from 'not applicable'.
+        textUrl:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Texturl
+        pdfUrl:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Pdfurl
+      type: object
+      title: Provenance
+    ResolveBatchRequest:
+      properties:
+        citations:
+          items:
+            type: string
+          type: array
+          minItems: 1
+          title: Citations
+          description: Citation strings, as a lawyer would type them.
+          examples:
+          - - u/s 302 IPC
+            - Section 138 of the Negotiable Instruments Act
+            - Art. 21 Constitution
+        state:
+          anyOf:
+          - type: string
+            enum:
+            - andaman-and-nicobar-islands
+            - andaman-nicobar
+            - andhra-pradesh
+            - arunachal-pradesh
+            - assam
+            - bihar
+            - central
+            - chandigarh
+            - chhattisgarh
+            - dadra-and-nagar-haveli-and-daman-and-diu
+            - dadra-nagar-haveli
+            - delhi
+            - goa
+            - gujarat
+            - haryana
+            - himachal-pradesh
+            - jammu-and-kashmir
+            - jammu-kashmir
+            - jharkhand
+            - karnataka
+            - kerala
+            - ladakh
+            - lakshadweep
+            - madhya-pradesh
+            - maharashtra
+            - manipur
+            - meghalaya
+            - mizoram
+            - nagaland
+            - odisha
+            - puducherry
+            - punjab
+            - rajasthan
+            - sikkim
+            - tamil-nadu
+            - telangana
+            - tripura
+            - uttar-pradesh
+            - uttarakhand
+            - west-bengal
+          - type: 'null'
+          title: State
+          description: Narrow to one jurisdiction. Required for a State-universal title.
+          examples:
+          - maharashtra
+        asAtDate:
+          anyOf:
+          - type: string
+          - type: 'null'
+          format: date
+          title: Asatdate
+          description: 'The date the conduct or document belongs to, as YYYY-MM-DD. This is how a caller says which side of the 2023 recodification they mean: without it, a criminal section number resolves to BOTH the old code and its replacement, because both are live law.'
+          examples:
+          - '2019-05-01'
+      additionalProperties: false
+      type: object
+      required:
+      - citations
+      title: ResolveBatchRequest
+      description: Up to 50 citations, priced per citation.
+    ResolveItem:
+      properties:
+        input:
+          type: string
+          title: Input
+        status:
+          type: string
+          title: Status
+          description: '`resolved` (exactly one provision), `ambiguous` (several, all returned), `not_found` (parsed cleanly, matched nothing), or `malformed` (could not be parsed, and NOT charged).'
+          examples:
+          - ambiguous
+        candidates:
+          items:
+            $ref: '#/components/schemas/ResolveCandidate'
+          type: array
+          title: Candidates
+        reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reason
+          description: Why the status is what it is. Always present unless resolved.
+        parsed:
+          $ref: '#/components/schemas/ParsedPinpoint'
+        duplicatesCollapsed:
+          type: integer
+          title: Duplicatescollapsed
+          description: 'Near-identical copies of an act folded into one candidate. The corpus holds several copies of some enactments, which is a known ingest defect: published rather than hidden, so a single candidate does not conceal that three other records sat behind it.'
+          default: 0
+      type: object
+      required:
+      - input
+      - status
+      - parsed
+      title: ResolveItem
+    Meta:
+      properties:
+        processingTimeMs:
+          type: number
+          title: Processingtimems
+          description: Server-side time for this request in milliseconds, excluding network transit. Not billed on.
+          default: 0.0
+          examples:
+          - 142.7
+        creditsConsumed:
+          type: number
+          title: Creditsconsumed
+          description: 'Credits actually charged. Read this rather than assuming the list price: refunded work bills 0.'
+          default: 0.0
+          examples:
+          - 2
+      type: object
+      title: Meta
   securitySchemes:
     ApiKeyAuth:
       type: http
@@ -5756,6 +5705,3 @@ components:
       in: query
       name: api_key
       description: 'The same API key as a query parameter: `?api_key=vq_key_...`. Use only where you cannot set a header. A URL can end up in proxy and server logs, browser history and shared links, so prefer either header form, and rotate a key that has leaked.'
-x-refined-from:
-- vaquill-ai-india-openapi.json
-- vaquill-ai-india-openapi.yml
