@@ -1,4 +1,4 @@
-# Vaquill
+# Vaquill AI
 
 <!-- API-EVANGELIST-PROVENANCE:BEGIN -->
 > ### About this repository
@@ -64,5 +64,205 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Vaquill is a company surfaced via the API Evangelist harvest backlog (source: monid-connectors) and added to the network as a stub for full-pipeline profiling.
-- https://www.vaquill.ai
+Vaquill AI is US primary law data infrastructure: a credit-metered Legal Data API over the US Code, the CFR, every state and territory statutory code, regulations, constitutions, court rules, session laws, agency guidance and executive orders (5M+ sections, 54 jurisdictions), a sibling India API over central and state legislation, a Legal Workspace API for driving matters, documents, drafting, review and compliance checks from your own backend, and a hosted MCP server (OAuth or API key) with a local uvx package and a Claude Code plugin. Three OpenAPI 3.1 documents are published on api.vaquill.ai, and the Open US Law corpus is released on GitHub under CC BY-NC 4.0.
+
+**Areas:** Legal · Statutes · Regulations · Legal Research · Law · Compliance · Legal Tech · Government Data · MCP · India · Contracts
+
+## Vaquill AI on APIs.io
+
+Everything profiled for Vaquill AI is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/vaquill-ai/](https://apis.io/providers/vaquill-ai/)** — or go straight to one of the APIs or properties below.
+
+### APIs (26)
+
+- [Vaquill AI Board Watches API](https://apis.io/apis/vaquill-ai/vaquill-ai-board-watches-api/) — Law-change alerts. Subscribe to a **board** (a tracked corpus source, identified by `corpusType` plus an optional `state`) and get a webhook or email…
+- [Vaquill AI Chronology API](https://apis.io/apis/vaquill-ai/vaquill-ai-chronology-api/) — The dated events across a matter's documents, as one timeline, with duplicate and date-conflict flags.
+- [Vaquill AI Clients API](https://apis.io/apis/vaquill-ai/vaquill-ai-clients-api/) — The people and companies matters are filed under. Synchronous CRUD.
+- [Vaquill AI Comparisons API](https://apis.io/apis/vaquill-ai/vaquill-ai-comparisons-api/) — Diffing two documents in a matter into structural changes, with a substantive-versus-cosmetic judgment and a downloadable redline.
+- [Vaquill AI Compliance API](https://apis.io/apis/vaquill-ai/vaquill-ai-compliance-api/) — Checking one document against one regulation's requirement checklist: a verdict per requirement with the article it comes from, the gaps, and what to do…
+- [Vaquill AI Credits API](https://apis.io/apis/vaquill-ai/vaquill-ai-credits-api/) — Your own credit balance: what is spendable right now, where it came from, and what is about to expire. Free and never charged, so it is safe to poll for…
+- [Vaquill AI Documents API](https://apis.io/apis/vaquill-ai/vaquill-ai-documents-api/) — Files in a matter: their metadata, their ingested text, and the original bytes. A document is only usable by retrieval, drafting and review once its status…
+- [Vaquill AI Drafting API](https://apis.io/apis/vaquill-ai/vaquill-ai-drafting-api/) — Generating, revising and exporting draft documents. Bodies come out as sections and go in as markdown; the editor's own format is never on the wire.…
+- [Vaquill AI Facts API](https://apis.io/apis/vaquill-ai/vaquill-ai-facts-api/) — The cross-document fact ledger for a matter: what every document in it asserts, coalesced and cited back to its source passages.
+- [Vaquill AI Folders API](https://apis.io/apis/vaquill-ai/vaquill-ai-folders-api/) — Organization inside and across matters. The same folders the web app shows, so one created here appears in the customer's browser.
+- [Vaquill AI India Credits API](https://apis.io/apis/vaquill-ai/vaquill-ai-india-credits-api/) — The India Credits API from Vaquill AI — 1 operation(s) for india credits.
+- [Vaquill AI India Pricing API](https://apis.io/apis/vaquill-ai/vaquill-ai-india-pricing-api/) — The India Pricing API from Vaquill AI — 1 operation(s) for india pricing.
+- [Vaquill AI Indian Acts and Legislation API](https://apis.io/apis/vaquill-ai/vaquill-ai-indian-acts-and-legislation-api/) — The Indian Acts and Legislation API from Vaquill AI — 17 operation(s) for indian acts and legislation.
+- [Vaquill AI Matrices API](https://apis.io/apis/vaquill-ai/vaquill-ai-matrices-api/) — Spreadsheet-style extraction across many documents: rows are documents, columns are questions, cells are answers with verified citations. Building a grid is…
+- [Vaquill AI Matter summary API](https://apis.io/apis/vaquill-ai/vaquill-ai-matter-summary-api/) — A citation-backed summary of everything filed to a matter, generated on demand and readable claim by claim.
+- [Vaquill AI Matters API](https://apis.io/apis/vaquill-ai/vaquill-ai-matters-api/) — The unit of work everything else hangs off. A matter scopes documents, drafts, reviews, comparisons and matrices, and it is what a credential's access is…
+- [Vaquill AI NDA triage API](https://apis.io/apis/vaquill-ai/vaquill-ai-nda-triage-api/) — Screening one inbound NDA against ten standard criteria and, where you name one, your own NDA playbook. Answers `green`, `yellow` or `red` with the…
+- [Vaquill AI Operations API](https://apis.io/apis/vaquill-ai/vaquill-ai-operations-api/) — The one job envelope. Every long-running call answers `202` with an operation, and polling this resource is the only way to learn it finished: there are no…
+- [Vaquill AI Playbooks API](https://apis.io/apis/vaquill-ai/vaquill-ai-playbooks-api/) — The organization's negotiating positions, per contract type, and the starter templates to build them from. A playbook is the input a contract review is…
+- [Vaquill AI Pricing API](https://apis.io/apis/vaquill-ai/vaquill-ai-pricing-api/) — Credit pricing and conversion rates. No authentication required. 1 credit = $0.01 USD.
+- [Vaquill AI Research API](https://apis.io/apis/vaquill-ai/vaquill-ai-research-api/) — Asking legal questions and getting grounded, cited answers. This API does NOT stream: an ask answers `202` and you poll the operation, then read the answer…
+- [Vaquill AI Reviews API](https://apis.io/apis/vaquill-ai/vaquill-ai-reviews-api/) — Reviewing one contract against a playbook: clause analysis, redlines, flags, liability exposure and a reported sign-off gate. Export applies the redlines as…
+- [Vaquill AI Uploads API](https://apis.io/apis/vaquill-ai/vaquill-ai-uploads-api/) — Getting files in. One presigned multipart flow at every size, with the bytes going straight to storage and never through this API. Initiate, PUT each part,…
+- [Vaquill AI US Session Laws API](https://apis.io/apis/vaquill-ai/vaquill-ai-us-session-laws-api/) — State session laws: the acts of each legislature as they were enacted, chapter by chapter, before they are folded into a code. A session law is what the…
+- [Vaquill AI US Statutes API](https://apis.io/apis/vaquill-ai/vaquill-ai-us-statutes-api/) — Search and retrieve US primary law. Covers the United States Code and the Statutes at Large, the Code of Federal Regulations and its annual editions, state…
+- [Vaquill AI Workflows API](https://apis.io/apis/vaquill-ai/vaquill-ai-workflows-api/) — Multi-step analyses from a fixed catalogue. Read a definition to learn what documents and inputs it takes, launch a run inside a matter, then download the…
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Vaquill Ai Webhooks](https://apis.io/asyncapis/vaquill-ai/vaquill-ai-webhooks/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [Vaquill MCP Server](https://apis.io/servers/vaquill-ai/vaquill-mcp-server/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Vaquill Ai Agentic Access](https://apis.io/agentic-access/vaquill-ai/vaquill-ai-agentic-access/)
+
+#### JSON Schema (18)
+
+The data models the API reads and writes.
+
+- [ActCitedByResponse](https://apis.io/schemas/vaquill-ai/vaquill-ai-act-cited-by-response/)
+- [ActSearchRequest](https://apis.io/schemas/vaquill-ai/vaquill-ai-act-search-request/)
+- [ActStatusResponse](https://apis.io/schemas/vaquill-ai/vaquill-ai-act-status-response/)
+- [ActSubordinateResponse](https://apis.io/schemas/vaquill-ai/vaquill-ai-act-subordinate-response/)
+- [ActTextResponse](https://apis.io/schemas/vaquill-ai/vaquill-ai-act-text-response/)
+- [AskRequest](https://apis.io/schemas/vaquill-ai/vaquill-ai-ask-request/)
+- [ComplianceCheck](https://apis.io/schemas/vaquill-ai/vaquill-ai-compliance-check/)
+- [CreateWatchRequest](https://apis.io/schemas/vaquill-ai/vaquill-ai-create-watch-request/)
+- [ExternalCreditBalanceResponse](https://apis.io/schemas/vaquill-ai/vaquill-ai-external-credit-balance-response/)
+- [Matter](https://apis.io/schemas/vaquill-ai/vaquill-ai-matter/)
+- [NdaTriage](https://apis.io/schemas/vaquill-ai/vaquill-ai-nda-triage/)
+- [Review](https://apis.io/schemas/vaquill-ai/vaquill-ai-review/)
+- [ReviewCreateRequest](https://apis.io/schemas/vaquill-ai/vaquill-ai-review-create-request/)
+- [SessionLawBodyResponse](https://apis.io/schemas/vaquill-ai/vaquill-ai-session-law-body-response/)
+- [SessionLawResponse](https://apis.io/schemas/vaquill-ai/vaquill-ai-session-law-response/)
+- [StatuteBodyResponse](https://apis.io/schemas/vaquill-ai/vaquill-ai-statute-body-response/)
+- [StatuteCountRequest](https://apis.io/schemas/vaquill-ai/vaquill-ai-statute-count-request/)
+- [StatuteSearchRequest](https://apis.io/schemas/vaquill-ai/vaquill-ai-statute-search-request/)
+
+#### JSON-LD (1)
+
+Linked-data contexts for the provider's vocabulary.
+
+- [Vaquill Ai Context](https://apis.io/jsonld/vaquill-ai/vaquill-ai-context/)
+
+#### Overlays (3)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Vaquill Ai India Overlay](https://apis.io/overlays/vaquill-ai/vaquill-ai-india-overlay/)
+- [Vaquill Ai Openapi Overlay](https://apis.io/overlays/vaquill-ai/vaquill-ai-openapi-overlay/)
+- [Vaquill Ai Workspace Overlay](https://apis.io/overlays/vaquill-ai/vaquill-ai-workspace-overlay/)
+
+#### Governance rules (1)
+
+Spectral rulesets for the provider's contracts.
+
+- [Vaquill AI API Rules](https://apis.io/rules/vaquill-ai/vaquill-ai-rules/)
+
+#### Security (4)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Vaquill Ai Authentication](https://apis.io/security/vaquill-ai/vaquill-ai-authentication/)
+- [Vaquill Ai Domain Security](https://apis.io/security/vaquill-ai/vaquill-ai-domain-security/)
+- [Vaquill Ai Trust Center](https://apis.io/security/vaquill-ai/vaquill-ai-trust-center/)
+- [Vaquill Ai Vulnerability Disclosure](https://apis.io/security/vaquill-ai/vaquill-ai-vulnerability-disclosure/)
+
+#### OAuth scopes (1)
+
+The permissions the API asks for.
+
+- [Vaquill Ai Scopes](https://apis.io/scopes/vaquill-ai/vaquill-ai-scopes/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Vaquill Ai Plans Pricing](https://apis.io/plans/vaquill-ai/vaquill-ai-plans-pricing/)
+
+#### Rate limits (2)
+
+Published request limits.
+
+- [Vaquill Ai Rate Limits](https://apis.io/rate-limits/vaquill-ai/vaquill-ai-rate-limits/)
+- [Vaquill Ai Workspace Rate Limits](https://apis.io/rate-limits/vaquill-ai/vaquill-ai-workspace-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://www.vaquill.ai)
+- [Documentation](https://www.vaquill.ai/docs/introduction)
+- [Getting started](https://www.vaquill.ai/docs/api-guide/quickstart)
+- [API reference](https://www.vaquill.ai/docs/api-reference/us-statutes/search-us-statutes-constitutions-court-rules-and-executive-actions)
+- [Pricing](https://www.vaquill.ai/pricing)
+- [Sign up](https://app.vaquill.ai/auth/signup)
+- [Support](https://www.vaquill.ai/support)
+- [Changelog](https://www.vaquill.ai/docs/api-guide/changelog)
+- [Blog](https://www.vaquill.ai/blog)
+- [Security](https://www.vaquill.ai/security)
+- [Terms of service](https://www.vaquill.ai/terms)
+- [Privacy policy](https://www.vaquill.ai/privacy)
+- [GitHub](https://github.com/Vaquill-AI)
+
+## API Evangelist rating
+
+**Kin Score 71.6** — exemplar · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 80.0 |
+| Contract quality | 74.3 |
+| Contract governance | 22.0 |
+| Operational transparency | 68.4 |
+| Developer ergonomics | 73.2 |
+| Access clarity | 73.7 |
+
+**Agent readiness 67.0** — agent-native
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | verified |
+| MCP Server | documented (partial credit) |
+| Auth Clarity | served (partial credit) |
+| Idempotency | verified |
+| Error Semantics | verified |
+| OpenAPI Examples | verified |
+| Rate Limit Signal | verified |
+| Event Surface Described | yes |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | yes |
+| Agentic Commerce | — |
+| Pagination Ratio | paginated |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 45.1** — Government & Public Sector
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/vaquill-ai/](https://apis.io/providers/vaquill-ai/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Vaquill AI: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/vaquill-ai/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
